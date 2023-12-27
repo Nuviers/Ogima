@@ -64,6 +64,10 @@ public class MidiaUtils {
     private GiphyDialogFragment gdl;
     private FragmentManager fragmentManager;
     public boolean layoutCircular = false;
+    public static final String TEXT = "text";
+    public static final String VIDEO = "video";
+    public static final String IMAGE = "image";
+    public static final String GIF = "gif";
 
     public interface UriRecuperadaCallback {
         void onRecuperado(Uri uriRecuperada);

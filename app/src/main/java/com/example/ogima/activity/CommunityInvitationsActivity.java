@@ -288,7 +288,7 @@ public class CommunityInvitationsActivity extends AppCompatActivity implements A
             @Override
             public void onComunidadeRecuperada(Comunidade dadosComunidade) {
                 conviteDiffDAO.adicionarConvite(conviteAlvo);
-                idsComunidades.add(idComunidade);
+                conviteDiffDAO.adicionarIdAoSet(idsComunidades, idComunidade);
                 adapterInvitations.updateConviteList(listaConvites, new AdapterCommunityInvitations.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -371,9 +371,12 @@ public class CommunityInvitationsActivity extends AppCompatActivity implements A
                                 && !conviteMore.getIdComunidade().isEmpty()) {
                             List<Convite> newConvite = new ArrayList<>();
                             long key = conviteMore.getTimestampinteracao();
-                            if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                newConvite.add(conviteMore);
-                                lastTimestamp = key;
+                            if (lastTimestamp != -1 && key != -1) {
+                                if(key != lastTimestamp || listaConvites.size() > 0 &&
+                                        !conviteMore.getIdComunidade().equals(listaConvites.get(listaConvites.size() - 1).getIdComunidade())){
+                                    newConvite.add(conviteMore);
+                                    lastTimestamp = key;
+                                }
                             }
                             // Remove a última chave usada
                             if (newConvite.size() > PAGE_SIZE) {
@@ -404,6 +407,7 @@ public class CommunityInvitationsActivity extends AppCompatActivity implements A
                 @Override
                 public void onComunidadeRecuperada(Comunidade dadosComunidade) {
                     conviteDiffDAO.carregarMaisConvite(newConvite, idsComunidades);
+                    conviteDiffDAO.adicionarIdAoSet(idsComunidades, dadosComunidade.getIdComunidade());
                     adapterInvitations.updateConviteList(listaConvites, new AdapterCommunityInvitations.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {

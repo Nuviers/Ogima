@@ -92,6 +92,16 @@ public class ComunidadeDiffDAO {
         }
     }
 
+    public void adicionarIdAoSet(Set<String> idsComunidades, String idAlvo){
+        if (idsComunidades != null && idsComunidades.size() > 0
+                && idsComunidades.contains(idAlvo)) {
+            return;
+        }
+        if (idsComunidades != null) {
+            idsComunidades.add(idAlvo);
+        }
+    }
+
     public void limparListaComunidades() {
         listaComunidade.clear();
         adapter.notifyDataSetChanged();

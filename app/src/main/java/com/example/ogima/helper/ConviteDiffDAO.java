@@ -54,6 +54,17 @@ public class ConviteDiffDAO {
         }
     }
 
+    public void adicionarIdAoSet(Set<String> idsConvites, String idAlvo){
+        if (idsConvites != null && idsConvites.size() > 0
+                && idsConvites.contains(idAlvo)) {
+            return;
+        }
+        if (idsConvites != null) {
+            idsConvites.add(idAlvo);
+        }
+    }
+
+
     public void limparListaConvites() {
         listaConvite.clear();
         adapter.notifyDataSetChanged();

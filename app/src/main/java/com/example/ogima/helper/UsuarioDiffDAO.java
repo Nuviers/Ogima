@@ -130,6 +130,16 @@ public class UsuarioDiffDAO {
         }
     }
 
+    public void adicionarIdAoSet(Set<String> idsUsers, String idAlvo) {
+        if (idsUsers != null && idsUsers.size() > 0
+                && idsUsers.contains(idAlvo)) {
+            return;
+        }
+        if (idsUsers != null) {
+            idsUsers.add(idAlvo);
+        }
+    }
+
     public void limparListaUsuarios() {
         listaUsuario.clear();
         adapter.notifyDataSetChanged();

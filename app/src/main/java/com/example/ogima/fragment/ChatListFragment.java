@@ -15,30 +15,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
 import android.widget.TextView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.CommunityActivity;
-import com.example.ogima.activity.CommunityParticipantsActivity;
 import com.example.ogima.adapter.AdapterChatList;
-import com.example.ogima.adapter.AdapterCommunityInvitations;
-import com.example.ogima.adapter.AdapterCommunityParticipants;
-import com.example.ogima.adapter.AdapterFriends;
 import com.example.ogima.helper.ChatDiffDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
+import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
-import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Chat;
-import com.example.ogima.model.Convite;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
-import com.google.android.exoplayer2.C;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,6 +39,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,7 +69,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
     private List<Chat> listaFiltrada = new ArrayList<>();
     private String lastName = null;
     private boolean pesquisaAtivada = false;
-    private long lastTimestamp = -1;
+    private String lastId = null;
     private boolean atualizandoLista = false;
     private Handler searchHandler = new Handler();
     private int queryDelayMillis = 500;
@@ -93,6 +86,9 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
     private AdapterChatList adapterChatList;
     private boolean trocarQueryInicial = false;
     private ChildEventListener childEventListenerChat, childEventListenerFiltro;
+    private Chat chatComparator;
+    private int contadorRemocaoListener = 0;
+    private FirebaseUtils firebaseUtils;
 
     @Override
     public void onStop() {
@@ -133,23 +129,6 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
         outState.putInt("current_position", mCurrentPosition);
     }
 
-    @Override
-    public void onPosicaoAnterior(int posicaoAnterior) {
-        if (posicaoAnterior != -1) {
-            mCurrentPosition = posicaoAnterior;
-        }
-    }
-
-    @Override
-    public void onRemocao(Chat chatAlvo, int posicao) {
-
-    }
-
-    @Override
-    public void onExecutarAnimacao() {
-        requireActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-    }
-
     private interface RecuperaUser {
         void onRecuperado(Usuario usuarioAtual);
 
@@ -168,6 +147,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
 
     public ChatListFragment() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        chatComparator = new Chat();
     }
 
     @Override
@@ -175,11 +155,13 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
         inicializarComponentes(view);
+        ToastCustomizado.toastCustomizadoCurto("CREATE", requireContext());
         configInicial();
         return view;
     }
 
     private void configInicial() {
+        firebaseUtils = new FirebaseUtils();
         txtViewTitle.setText(FormatarContadorUtils.abreviarTexto("Chats", 20));
         if (idUsuario == null || idUsuario.isEmpty()) {
             ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), requireContext());
@@ -316,14 +298,14 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
             trocarQueryInicial = false;
             return;
         }
-        if (trocarQueryInicial && lastTimestamp != -1) {
+        if (trocarQueryInicial && lastId != null && !lastId.isEmpty()) {
             queryInicial = firebaseRef.child("detalhesChat")
-                    .child(idUsuario).orderByChild("timestampLastMsg")
-                    .startAt(lastTimestamp + 1)
+                    .child(idUsuario).orderByChild("idUsuario")
+                    .startAt(lastId + 1)
                     .limitToFirst(1);
         } else {
             queryInicial = firebaseRef.child("detalhesChat")
-                    .child(idUsuario).orderByChild("timestampLastMsg").limitToFirst(1);
+                    .child(idUsuario).orderByChild("idUsuario").limitToFirst(1);
         }
         exibirProgress();
         queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -336,7 +318,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                                 && chat.getIdUsuario() != null
                                 && !chat.getIdUsuario().isEmpty()) {
                             adicionarChat(chat);
-                            lastTimestamp = chat.getTimestampLastMsg();
+                            lastId = chat.getIdUsuario();
                         }
                     }
                 } else {
@@ -349,7 +331,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                lastTimestamp = -1;
+                lastId = null;
                 ToastCustomizado.toastCustomizado(String.format("%s %s%s", "Ocorreu um erro ao recuperar as suas conversas", "Code:", error.getCode()), requireContext());
                 requireActivity().onBackPressed();
             }
@@ -431,7 +413,10 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
             @Override
             public void onRecuperado(Usuario dadosUser) {
                 chatDiffDAO.adicionarChat(chatAlvo);
-                idsUsuarios.add(chatAlvo.getIdUsuario());
+                chatDiffDAO.adicionarIdAoSet(idsUsuarios, dadosUser.getIdUsuario());
+                if (listaChat != null && listaChat.size() > 0) {
+                    Collections.sort(listaChat, chatComparator);
+                }
                 adapterChatList.updateChatList(listaChat, new AdapterChatList.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -468,6 +453,10 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
             public void onDetalheChatRecuperado(Chat chatAtual) {
                 chatAtual.setIndisponivel(dadosUser.isIndisponivel());
                 chatDAOFiltrado.adicionarChat(chatAtual);
+                chatDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
+                if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                    Collections.sort(listaFiltrada, chatComparator);
+                }
                 adapterChatList.updateChatList(listaFiltrada, new AdapterChatList.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -488,7 +477,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
             public void onError(String mensagem) {
                 ocultarProgress();
                 setLoading(false);
-                ToastCustomizado.toastCustomizado("Ocorreu um erro ao realizar pesquisa.", requireContext());
+                ToastCustomizado.toastCustomizado("Ocorreu um erro ao realizar a pesquisa.", requireContext());
             }
         });
     }
@@ -591,10 +580,11 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 });
             }
         } else {
+            ToastCustomizado.toastCustomizadoCurto("Query: " + lastId, requireContext());
             queryLoadMore = firebaseRef.child("detalhesChat")
                     .child(idUsuario)
-                    .orderByChild("timestampLastMsg")
-                    .startAt(lastTimestamp)
+                    .orderByChild("idUsuario")
+                    .startAt(lastId)
                     .limitToFirst(PAGE_SIZE);
             childEventListenerChat = queryLoadMore.addChildEventListener(new ChildEventListener() {
                 @Override
@@ -604,17 +594,22 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                         if (chatMore != null
                                 && chatMore.getIdUsuario() != null
                                 && !chatMore.getIdUsuario().isEmpty()) {
+                            ToastCustomizado.toastCustomizadoCurto("Add: " + lastId, requireContext());
                             List<Chat> newChat = new ArrayList<>();
-                            long key = chatMore.getTimestampLastMsg();
-                            if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                newChat.add(chatMore);
-                                lastTimestamp = key;
+                            String key = chatMore.getIdUsuario();
+                            if (lastId != null && key != null) {
+                                if (!key.equals(lastId) || listaChat.size() > 0 &&
+                                        !chatMore.getIdUsuario()
+                                                .equals(listaChat.get(listaChat.size() - 1).getIdUsuario())) {
+                                    newChat.add(chatMore);
+                                    lastId = key;
+                                }
                             }
                             // Remove a última chave usada
                             if (newChat.size() > PAGE_SIZE) {
                                 newChat.remove(0);
                             }
-                            if (lastTimestamp != -1) {
+                            if (lastId != null) {
                                 adicionarMaisDados(newChat, chatMore.getIdUsuario(), queryLoadMore);
                             }
                         }
@@ -625,12 +620,188 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
 
                 @Override
                 public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    if (snapshot.getValue() != null) {
+                        Chat chatAtualizado = snapshot.getValue(Chat.class);
+                        if (chatAtualizado == null || chatAtualizado.getIdUsuario() == null) {
+                            return;
+                        }
 
+                        if (idsFiltrados != null && idsFiltrados.size() > 0
+                                && idsFiltrados.contains(chatAtualizado.getIdUsuario())) {
+                            if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                int posicao = adapterChatList.findPositionInList(chatAtualizado.getIdUsuario());
+                                if (posicao != -1) {
+                                    Chat chatAnterior = listaFiltrada.get(posicao);
+                                    if (chatAnterior.getTotalMsgNaoLida() != chatAtualizado.getTotalMsgNaoLida()) {
+                                        ToastCustomizado.toastCustomizadoCurto("MsgNaoLida", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "totalMsgNaoLida");
+                                    }
+                                    if (chatAnterior.getTotalMsg() != chatAtualizado.getTotalMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TotalMsg", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "totalMsg");
+                                    }
+                                    if (!chatAnterior.getTipoMidiaLastMsg().equals(chatAtualizado.getTipoMidiaLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("TipoMidia", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "tipoMidiaLastMsg");
+                                    }
+
+                                    if (!chatAnterior.getConteudoLastMsg().equals(chatAtualizado.getConteudoLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("ConteudoMsg", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "conteudoLastMsg");
+                                    }
+
+                                    if (chatAnterior.getTimestampLastMsg() != chatAtualizado.getTimestampLastMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TimestampLastMsg", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "timestampLastMsg");
+                                    }
+
+                                    if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                        Collections.sort(listaFiltrada, chatComparator);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (idsUsuarios != null && idsUsuarios.size() > 0
+                                && idsUsuarios.contains(chatAtualizado.getIdUsuario())) {
+                            if (listaChat != null && listaChat.size() > 0) {
+                                int posicao = adapterChatList.findPositionInList(chatAtualizado.getIdUsuario());
+                                if (posicao != -1) {
+                                    Chat chatAnterior = listaChat.get(posicao);
+                                    if (chatAnterior.getTotalMsgNaoLida() != chatAtualizado.getTotalMsgNaoLida()) {
+                                        ToastCustomizado.toastCustomizadoCurto("MsgNaoLida", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "totalMsgNaoLida");
+                                    }
+                                    if (chatAnterior.getTotalMsg() != chatAtualizado.getTotalMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TotalMsg", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "totalMsg");
+                                    }
+                                    if (!chatAnterior.getTipoMidiaLastMsg().equals(chatAtualizado.getTipoMidiaLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("TipoMidia", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "tipoMidiaLastMsg");
+                                    }
+
+                                    if (!chatAnterior.getConteudoLastMsg().equals(chatAtualizado.getConteudoLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("ConteudoMsg", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "conteudoLastMsg");
+                                    }
+
+                                    if (chatAnterior.getTimestampLastMsg() != chatAtualizado.getTimestampLastMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TimestampLastMsg", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "timestampLastMsg");
+                                    }
+
+                                    if (listaChat != null && listaChat.size() > 0) {
+                                        Collections.sort(listaChat, chatComparator);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (isPesquisaAtivada() && listaFiltrada != null) {
+                            adapterChatList.updateChatList(listaFiltrada, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+                                    ToastCustomizado.toastCustomizadoCurto("Filtrado: " + listaFiltrada.size(), requireContext());
+                                }
+                            });
+                        } else if (!isPesquisaAtivada() && listaChat != null) {
+                            adapterChatList.updateChatList(listaChat, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+
+                                }
+                            });
+                        }
+                    }
                 }
 
                 @Override
                 public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Chat chatRemovido = snapshot.getValue(Chat.class);
+                        if (chatRemovido == null) {
+                            return;
+                        }
 
+                        if (idsFiltrados != null && idsFiltrados.size() > 0
+                                && idsFiltrados.contains(chatRemovido.getIdUsuario())) {
+                            if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                chatDAOFiltrado.removerChat(chatRemovido);
+                            }
+                            if (listaDadosUser != null && listaDadosUser.size() > 0) {
+                                listaDadosUser.remove(chatRemovido.getIdUsuario());
+                                int posicao = adapterChatList.findPositionInList(chatRemovido.getIdUsuario());
+                                if (posicao != -1) {
+                                    adapterChatList.notifyItemChanged(posicao);
+                                }
+                            }
+
+                            if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                Collections.sort(listaFiltrada, chatComparator);
+                            }
+
+                            if (referenceFiltroHashMap != null && referenceFiltroHashMap.size() > 0
+                                    && listenerFiltroHashMap != null && listenerFiltroHashMap.size() > 0) {
+                                referenceFiltroHashMap.remove(chatRemovido.getIdUsuario());
+                                listenerFiltroHashMap.remove(chatRemovido.getIdUsuario());
+                                if (idsListeners != null && idsListeners.size() > 0) {
+                                    idsListeners.remove(chatRemovido.getIdUsuario());
+                                }
+                                if (idsFiltrados != null && idsFiltrados.size() > 0) {
+                                    idsFiltrados.remove(chatRemovido.getIdUsuario());
+                                }
+                                ToastCustomizado.toastCustomizadoCurto("Removido", requireContext());
+                            }
+                        }
+
+                        if (idsUsuarios != null && idsUsuarios.size() > 0
+                                && idsUsuarios.contains(chatRemovido.getIdUsuario())) {
+                            if (listaChat != null && listaChat.size() > 0) {
+                                chatDiffDAO.removerChat(chatRemovido);
+                            }
+                            if (listaDadosUser != null && listaDadosUser.size() > 0) {
+                                listaDadosUser.remove(chatRemovido.getIdUsuario());
+                                int posicao = adapterChatList.findPositionInList(chatRemovido.getIdUsuario());
+                                if (posicao != -1) {
+                                    adapterChatList.notifyItemChanged(posicao);
+                                }
+                            }
+
+                            if (listaChat != null && listaChat.size() > 0) {
+                                Collections.sort(listaChat, chatComparator);
+                            }
+
+                            if (referenceHashMap != null && referenceHashMap.size() > 0
+                                    && listenerHashMap != null && listenerHashMap.size() > 0) {
+                                referenceHashMap.remove(chatRemovido.getIdUsuario());
+                                listenerHashMap.remove(chatRemovido.getIdUsuario());
+                                if (idsListeners != null && idsListeners.size() > 0) {
+                                    idsListeners.remove(chatRemovido.getIdUsuario());
+                                }
+                                if (idsUsuarios != null && idsUsuarios.size() > 0) {
+                                    idsUsuarios.remove(chatRemovido.getIdUsuario());
+                                }
+                                ToastCustomizado.toastCustomizadoCurto("Removido", requireContext());
+                            }
+                        }
+
+                        if (isPesquisaAtivada() && listaFiltrada != null) {
+                            adapterChatList.updateChatList(listaFiltrada, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+
+                                }
+                            });
+                        } else if (!isPesquisaAtivada() && listaChat != null) {
+                            adapterChatList.updateChatList(listaChat, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+
+                                }
+                            });
+                        }
+                    }
                 }
 
                 @Override
@@ -641,7 +812,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     ocultarProgress();
-                    lastTimestamp = -1;
+                    lastId = null;
                 }
             });
         }
@@ -649,13 +820,15 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
 
     private void adicionarMaisDados(List<Chat> newChat, String idUser, Query queryAlvo) {
         if (newChat != null && newChat.size() >= 1) {
-            if(idsUsuarios != null){
-                idsUsuarios.add(idUser);
-            }
             recuperaDadosUser(idUser, new RecuperaUser() {
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
+                    ToastCustomizado.toastCustomizadoCurto("New last: " + dadosUser.getNomeUsuario(), requireContext());
                     chatDiffDAO.carregarMaisChat(newChat, idsUsuarios);
+                    chatDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
+                    if (listaChat != null && listaChat.size() > 0) {
+                        Collections.sort(listaChat, chatComparator);
+                    }
                     adapterChatList.updateChatList(listaChat, new AdapterChatList.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
@@ -683,47 +856,227 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
 
     private void adicionarMaisDadosFiltrados(List<Chat> newChat, Usuario dadosUser) {
         if (newChat != null && newChat.size() >= 1) {
-            if (idsFiltrados != null) {
-                idsFiltrados.add(dadosUser.getIdUsuario());
-            }
             chatDAOFiltrado.carregarMaisChat(newChat, idsFiltrados);
+            chatDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
+            if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                Collections.sort(listaFiltrada, chatComparator);
+            }
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
-            adapterChatList.updateChatList(listaFiltrada, new AdapterChatList.ListaAtualizadaCallback() {
+            if (idsUsuarios != null && idsUsuarios.size() > 0
+                    && idsUsuarios.contains(dadosUser.getIdUsuario())) {
+                ocultarProgress();
+                adicionarDadoDoUsuario(dadosUser, null, null);
+                setLoading(false);
+                return;
+            }
+
+            queryLoadMoreChat = firebaseRef.child("detalhesChat")
+                    .child(idUsuario).child(dadosUser.getIdUsuario());
+            childEventListenerFiltro = queryLoadMoreChat.addChildEventListener(new ChildEventListener() {
                 @Override
-                public void onAtualizado() {
-                    queryLoadMoreChat = firebaseRef.child("detalhesChat")
-                            .child(idUsuario).child(dadosUser.getIdUsuario());
-                    childEventListenerFiltro = queryLoadMoreChat.addChildEventListener(new ChildEventListener() {
-                        @Override
-                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                            if (snapshot.getValue() != null) {
-                                ocultarProgress();
-                                adicionarDadoDoUsuario(dadosUser, queryLoadMoreChat, childEventListenerFiltro);
-                                setLoading(false);
+                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    if (snapshot.getValue() != null) {
+                        ocultarProgress();
+                        adicionarDadoDoUsuario(dadosUser, queryLoadMoreChat, childEventListenerFiltro);
+                        setLoading(false);
+                    }
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    if (snapshot.getValue() != null) {
+                        Chat chatAtualizado = snapshot.getValue(Chat.class);
+                        if (chatAtualizado == null || chatAtualizado.getIdUsuario() == null) {
+                            return;
+                        }
+
+                        if (idsFiltrados != null && idsFiltrados.size() > 0
+                                && idsFiltrados.contains(chatAtualizado.getIdUsuario())) {
+                            if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                int posicao = adapterChatList.findPositionInList(chatAtualizado.getIdUsuario());
+                                if (posicao != -1) {
+                                    Chat chatAnterior = listaFiltrada.get(posicao);
+                                    if (chatAnterior.getTotalMsgNaoLida() != chatAtualizado.getTotalMsgNaoLida()) {
+                                        ToastCustomizado.toastCustomizadoCurto("MsgNaoLida", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "totalMsgNaoLida");
+                                    }
+                                    if (chatAnterior.getTotalMsg() != chatAtualizado.getTotalMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TotalMsg", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "totalMsg");
+                                    }
+                                    if (!chatAnterior.getTipoMidiaLastMsg().equals(chatAtualizado.getTipoMidiaLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("TipoMidia", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "tipoMidiaLastMsg");
+                                    }
+
+                                    if (!chatAnterior.getConteudoLastMsg().equals(chatAtualizado.getConteudoLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("ConteudoMsg", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "conteudoLastMsg");
+                                    }
+
+                                    if (chatAnterior.getTimestampLastMsg() != chatAtualizado.getTimestampLastMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TimestampLastMsg", requireContext());
+                                        chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, "timestampLastMsg");
+                                    }
+
+                                    if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                        Collections.sort(listaFiltrada, chatComparator);
+                                    }
+                                }
                             }
                         }
 
-                        @Override
-                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                        if (idsUsuarios != null && idsUsuarios.size() > 0
+                                && idsUsuarios.contains(chatAtualizado.getIdUsuario())) {
+                            if (listaChat != null && listaChat.size() > 0) {
+                                int posicao = adapterChatList.findPositionInList(chatAtualizado.getIdUsuario());
+                                if (posicao != -1) {
+                                    Chat chatAnterior = listaChat.get(posicao);
+                                    if (chatAnterior.getTotalMsgNaoLida() != chatAtualizado.getTotalMsgNaoLida()) {
+                                        ToastCustomizado.toastCustomizadoCurto("MsgNaoLida", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "totalMsgNaoLida");
+                                    }
+                                    if (chatAnterior.getTotalMsg() != chatAtualizado.getTotalMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TotalMsg", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "totalMsg");
+                                    }
+                                    if (!chatAnterior.getTipoMidiaLastMsg().equals(chatAtualizado.getTipoMidiaLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("TipoMidia", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "tipoMidiaLastMsg");
+                                    }
 
+                                    if (!chatAnterior.getConteudoLastMsg().equals(chatAtualizado.getConteudoLastMsg())) {
+                                        ToastCustomizado.toastCustomizadoCurto("ConteudoMsg", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "conteudoLastMsg");
+                                    }
+
+                                    if (chatAnterior.getTimestampLastMsg() != chatAtualizado.getTimestampLastMsg()) {
+                                        ToastCustomizado.toastCustomizadoCurto("TimestampLastMsg", requireContext());
+                                        chatDiffDAO.atualizarChatPorPayload(chatAtualizado, "timestampLastMsg");
+                                    }
+
+                                    if (listaChat != null && listaChat.size() > 0) {
+                                        Collections.sort(listaChat, chatComparator);
+                                    }
+                                }
+                            }
                         }
 
-                        @Override
-                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                        if (isPesquisaAtivada() && listaFiltrada != null) {
+                            adapterChatList.updateChatList(listaFiltrada, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+                                    ToastCustomizado.toastCustomizadoCurto("Filtrado: " + listaFiltrada.size(), requireContext());
+                                }
+                            });
+                        } else if (!isPesquisaAtivada() && listaChat != null) {
+                            adapterChatList.updateChatList(listaChat, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
 
+                                }
+                            });
+                        }
+                    }
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Chat chatRemovido = snapshot.getValue(Chat.class);
+                        if (chatRemovido == null) {
+                            return;
                         }
 
-                        @Override
-                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                        if (idsFiltrados != null && idsFiltrados.size() > 0
+                                && idsFiltrados.contains(chatRemovido.getIdUsuario())) {
+                            if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                chatDAOFiltrado.removerChat(chatRemovido);
+                            }
+                            if (listaDadosUser != null && listaDadosUser.size() > 0) {
+                                listaDadosUser.remove(chatRemovido.getIdUsuario());
+                                int posicao = adapterChatList.findPositionInList(chatRemovido.getIdUsuario());
+                                if (posicao != -1) {
+                                    adapterChatList.notifyItemChanged(posicao);
+                                }
+                            }
 
+                            if (listaFiltrada != null && listaFiltrada.size() > 0) {
+                                Collections.sort(listaFiltrada, chatComparator);
+                            }
+
+                            if (referenceFiltroHashMap != null && referenceFiltroHashMap.size() > 0
+                                    && listenerFiltroHashMap != null && listenerFiltroHashMap.size() > 0) {
+                                referenceFiltroHashMap.remove(chatRemovido.getIdUsuario());
+                                listenerFiltroHashMap.remove(chatRemovido.getIdUsuario());
+                                if (idsListeners != null && idsListeners.size() > 0) {
+                                    idsListeners.remove(chatRemovido.getIdUsuario());
+                                }
+                                if (idsFiltrados != null && idsFiltrados.size() > 0) {
+                                    idsFiltrados.remove(chatRemovido.getIdUsuario());
+                                }
+                                ToastCustomizado.toastCustomizadoCurto("Removido", requireContext());
+                            }
                         }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            ocultarProgress();
+                        if (idsUsuarios != null && idsUsuarios.size() > 0
+                                && idsUsuarios.contains(chatRemovido.getIdUsuario())) {
+                            if (listaChat != null && listaChat.size() > 0) {
+                                chatDiffDAO.removerChat(chatRemovido);
+                            }
+                            if (listaDadosUser != null && listaDadosUser.size() > 0) {
+                                listaDadosUser.remove(chatRemovido.getIdUsuario());
+                                int posicao = adapterChatList.findPositionInList(chatRemovido.getIdUsuario());
+                                if (posicao != -1) {
+                                    adapterChatList.notifyItemChanged(posicao);
+                                }
+                            }
+
+                            if (listaChat != null && listaChat.size() > 0) {
+                                Collections.sort(listaChat, chatComparator);
+                            }
+
+                            if (referenceHashMap != null && referenceHashMap.size() > 0
+                                    && listenerHashMap != null && listenerHashMap.size() > 0) {
+                                referenceHashMap.remove(chatRemovido.getIdUsuario());
+                                listenerHashMap.remove(chatRemovido.getIdUsuario());
+                                if (idsListeners != null && idsListeners.size() > 0) {
+                                    idsListeners.remove(chatRemovido.getIdUsuario());
+                                }
+                                if (idsUsuarios != null && idsUsuarios.size() > 0) {
+                                    idsUsuarios.remove(chatRemovido.getIdUsuario());
+                                }
+                                ToastCustomizado.toastCustomizadoCurto("Removido", requireContext());
+                            }
                         }
-                    });
+
+                        if (isPesquisaAtivada() && listaFiltrada != null) {
+                            adapterChatList.updateChatList(listaFiltrada, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+
+                                }
+                            });
+                        } else if (!isPesquisaAtivada() && listaChat != null) {
+                            adapterChatList.updateChatList(listaChat, new AdapterChatList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+
+                                }
+                            });
+                        }
+                    }
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    ocultarProgress();
                 }
             });
         } else {
@@ -793,14 +1146,13 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 && idsFiltrados.contains(idUser)) {
             return;
         }
-        if (idsFiltrados != null) {
-            idsFiltrados.add(idUser);
-        }
         referenceFiltroHashMap.put(idUser, queryAlvo);
         listenerFiltroHashMap.put(idUser, childEventListenerAlvo);
     }
 
     private void limparPeloDestroyView() {
+        firebaseUtils.removerQueryChildListener(queryLoadMore, childEventListenerChat);
+        firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childEventListenerFiltro);
         removeValueEventListener();
         removeValueEventListenerFiltro();
         if (chatDiffDAO != null) {
@@ -868,9 +1220,13 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
                 }
+                contadorRemocaoListener++;
+                if (contadorRemocaoListener == referenceHashMap.size()) {
+                    referenceHashMap.clear();
+                    listenerHashMap.clear();
+                    ToastCustomizado.toastCustomizadoCurto("LIMPO", requireContext());
+                }
             }
-            referenceHashMap.clear();
-            listenerHashMap.clear();
         }
     }
 
@@ -933,6 +1289,23 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
 
     private void setLoading(boolean loading) {
         isLoading = loading;
+    }
+
+    @Override
+    public void onPosicaoAnterior(int posicaoAnterior) {
+        if (posicaoAnterior != -1) {
+            mCurrentPosition = posicaoAnterior;
+        }
+    }
+
+    @Override
+    public void onRemocao(Chat chatAlvo, int posicao) {
+
+    }
+
+    @Override
+    public void onExecutarAnimacao() {
+        requireActivity().overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
     }
 
     private void inicializarComponentes(View view) {

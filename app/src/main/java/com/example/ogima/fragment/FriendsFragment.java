@@ -374,7 +374,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
             @Override
             public void onRecuperado(Usuario dadosUser) {
                 usuarioDiffDAO.adicionarUsuario(dadosUser);
-                idsUsuarios.add(dadosUser.getIdUsuario());
+                usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, dadosUser.getIdUsuario());
                 adapterFriends.updateUsersList(listaUsuarios, new AdapterFriends.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -539,7 +539,7 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
         }
         lastName = dadosUser.getNomeUsuarioPesquisa();
         usuarioDAOFiltrado.adicionarUsuario(dadosUser);
-        idsFiltrados.add(dadosUser.getIdUsuario());
+        usuarioDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
         adapterFriends.updateUsersList(listaFiltrada, new AdapterFriends.ListaAtualizadaCallback() {
             @Override
             public void onAtualizado() {
@@ -665,9 +665,12 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
                                     && !usuarioChildren.getIdUsuario().isEmpty()) {
                                 List<Usuario> newUsuario = new ArrayList<>();
                                 long key = usuarioChildren.getTimestampinteracao();
-                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                    newUsuario.add(usuarioChildren);
-                                    lastTimestamp = key;
+                                if (lastTimestamp != -1 && key != -1) {
+                                    if(key != lastTimestamp || listaUsuarios.size() > 0 &&
+                                            !usuarioChildren.getIdUsuario().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())){
+                                        newUsuario.add(usuarioChildren);
+                                        lastTimestamp = key;
+                                    }
                                 }
                                 // Remove a última chave usada
                                 if (newUsuario.size() > PAGE_SIZE) {
@@ -692,13 +695,11 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
 
     private void adicionarMaisDados(List<Usuario> newUsuario, String idUser) {
         if (newUsuario != null && newUsuario.size() >= 1) {
-            if (idsUsuarios != null) {
-                idsUsuarios.add(idUser);
-            }
             recuperaDadosUser(idUser, new RecuperaUser() {
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
                     usuarioDiffDAO.carregarMaisUsuario(newUsuario, idsUsuarios);
+                    usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
                     //*Usuario usuarioComparator = new Usuario(true, false);
                     //*Collections.sort(listaViewers, usuarioComparator);
                     adapterFriends.updateUsersList(listaUsuarios, new AdapterFriends.ListaAtualizadaCallback() {
@@ -723,10 +724,8 @@ public class FriendsFragment extends Fragment implements AdapterFriends.Animacao
 
     private void adicionarMaisDadosFiltrados(List<Usuario> newUsuario, Usuario dadosUser) {
         if (newUsuario != null && newUsuario.size() >= 1) {
-            if (idsFiltrados != null) {
-                idsFiltrados.add(dadosUser.getIdUsuario());
-            }
             usuarioDAOFiltrado.carregarMaisUsuario(newUsuario, idsFiltrados);
+            usuarioDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
             adapterFriends.updateUsersList(listaFiltrada, new AdapterFriends.ListaAtualizadaCallback() {

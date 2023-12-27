@@ -337,7 +337,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
             return;
         }
         usuarioDAOFiltrado.adicionarUsuario(dadosUser);
-        idsFiltrados.add(dadosUser.getIdUsuario());
+        usuarioDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
         adapterFindPeoples.updateUsersList(listaFiltrada);
         adicionarDadoDoUsuario(dadosUser);
         setLoading(false);
@@ -452,6 +452,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private void adicionarMaisDadosFiltrados(List<Usuario> newUsuario, Usuario dadosUser) {
         if (newUsuario != null && newUsuario.size() >= 1) {
             usuarioDAOFiltrado.carregarMaisUsuario(newUsuario, idsFiltrados);
+            usuarioDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
             adapterFindPeoples.updateUsersList(listaFiltrada);

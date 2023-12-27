@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relativeLayoutPreview"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <include
+        android:id="@+id/inc_user_photo"
+        layout="@layout/inc_user_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
+
+    <include
+        android:id="@+id/inc_user_name"
+        layout="@layout/inc_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_32sdp"
+        android:layout_toEndOf="@+id/inc_user_photo"
+        android:layout_toRightOf="@id/inc_user_photo" />
+
+    <TextView
+        android:id="@+id/txtViewDescChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_user_name"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_toEndOf="@+id/inc_user_photo"
+        android:layout_toRightOf="@id/inc_user_photo"
+        android:fontFamily="@font/adamina"
+        android:text=""
+        android:textColor="#403E3E"
+        android:textSize="@dimen/_14ssp" />
+
+    <Button
+        android:id="@+id/btnViewTodasMsgs"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_25sdp"
+        android:layout_below="@+id/txtViewDescChat"
+        android:background="@drawable/estilo_button_google"
+        android:backgroundTint="#2A83EF"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_14ssp"
+        android:layout_marginRight="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_toStartOf="@+id/btnViewMsgsPerdidas"
+        android:layout_toLeftOf="@+id/btnViewMsgsPerdidas" />
+
+    <Button
+        android:id="@+id/btnViewMsgsPerdidas"
+        android:layout_width="@dimen/_50sdp"
+        android:layout_height="@dimen/_25sdp"
+        android:layout_below="@+id/txtViewDescChat"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginRight="@dimen/_20sdp"
+        android:layout_marginEnd="@dimen/_20sdp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/estilo_button_google"
+        android:backgroundTint="@color/unread_messages_color"
+        android:gravity="center|center_horizontal|center_vertical"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_14ssp"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/txtViewHoraLastMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:fontFamily="@font/adamina"
+        android:textColor="#676767"
+        android:textSize="@dimen/_12ssp"
+        android:textStyle="bold"
+        android:gravity="right|end"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_toEndOf="@+id/inc_user_photo"
+        android:layout_toRightOf="@id/inc_user_photo"
+        android:layout_below="@id/btnViewTodasMsgs"/>
+</RelativeLayout>

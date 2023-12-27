@@ -374,7 +374,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                 @Override
                 public void onComunidadeRecuperada(Comunidade dadosComunidade) {
                     comunidadeDiffDAO.adicionarComunidade(dadosComunidade);
-                    idsComunidades.add(dadosComunidade.getIdComunidade());
+                    comunidadeDiffDAO.adicionarIdAoSet(idsComunidades, dadosComunidade.getIdComunidade());
                     adapterCommunity.updateComunidadeList(listaComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
@@ -399,7 +399,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
             });
         } else {
             comunidadeDiffDAO.adicionarComunidade(comunidadeAlvo);
-            idsComunidades.add(comunidadeAlvo.getIdComunidade());
+            comunidadeDiffDAO.adicionarIdAoSet(idsComunidades, comunidadeAlvo.getIdComunidade());
             adapterCommunity.updateComunidadeList(listaComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
                 @Override
                 public void onAtualizado() {
@@ -549,7 +549,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
         }
         lastName = dadosComunidade.getNomeComunidadePesquisa();
         comunidadeDiffDAOFiltrado.adicionarComunidade(dadosComunidade);
-        idsFiltrados.add(dadosComunidade.getIdComunidade());
+        comunidadeDiffDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosComunidade.getIdComunidade());
         adapterCommunity.updateComunidadeList(listaFiltrada, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
             @Override
             public void onAtualizado() {
@@ -683,9 +683,12 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                                     && !comunidadeMore.getIdComunidade().isEmpty()) {
                                 List<Comunidade> newComunidade = new ArrayList<>();
                                 long key = comunidadeMore.getTimestampinteracao();
-                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                    newComunidade.add(comunidadeMore);
-                                    lastTimestamp = key;
+                                if (lastTimestamp != -1 && key != -1) {
+                                    if (key != lastTimestamp || listaComunidades.size() > 0 &&
+                                            !comunidadeMore.getIdComunidade().equals(listaComunidades.get(listaComunidades.size() - 1).getIdComunidade())) {
+                                        newComunidade.add(comunidadeMore);
+                                        lastTimestamp = key;
+                                    }
                                 }
                                 // Remove a última chave usada
                                 if (newComunidade.size() > PAGE_SIZE) {
@@ -720,6 +723,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
             if (tipoComunidade.equals(CommunityUtils.MY_COMMUNITIES)) {
                 //Já está com o objeto comunidade completo.
                 comunidadeDiffDAO.carregarMaisComunidade(newComunidade, idsComunidades);
+                comunidadeDiffDAO.adicionarIdAoSet(idsComunidades, idComunidade);
                 adapterCommunity.updateComunidadeList(listaComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -733,6 +737,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                     @Override
                     public void onComunidadeRecuperada(Comunidade dadosComunidade) {
                         comunidadeDiffDAO.carregarMaisComunidade(newComunidade, idsComunidades);
+                        comunidadeDiffDAO.adicionarIdAoSet(idsComunidades, dadosComunidade.getIdComunidade());
                         adapterCommunity.updateComunidadeList(listaComunidades, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
                             @Override
                             public void onAtualizado() {
@@ -762,6 +767,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     private void adicionarMaisDadosFiltrados(List<Comunidade> newComunidade, Comunidade dadosComunidade) {
         if (newComunidade != null && newComunidade.size() >= 1) {
             comunidadeDiffDAOFiltrado.carregarMaisComunidade(newComunidade, idsFiltrados);
+            comunidadeDiffDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosComunidade.getIdComunidade());
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
             adapterCommunity.updateComunidadeList(listaFiltrada, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
@@ -946,7 +952,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
             @Override
             public void onComunidadeRecuperada(Comunidade dadosComunidade) {
                 comunidadeDiffDAOFiltrado.adicionarComunidade(dadosComunidade);
-                idsFiltrados.add(dadosComunidade.getIdComunidade());
+                comunidadeDiffDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosComunidade.getIdComunidade());
                 adapterCommunity.updateComunidadeList(listaFiltrada, new AdapterPreviewCommunity.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -994,9 +1000,12 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
                                 && !comunidadeMore.getIdComunidade().isEmpty()) {
                             List<Comunidade> newComunidade = new ArrayList<>();
                             long key = comunidadeMore.getTimestampinteracao();
-                            if (lastTimeTopico != -1 && key != -1 && key != lastTimeTopico) {
-                                newComunidade.add(comunidadeMore);
-                                lastTimeTopico = key;
+                            if (lastTimeTopico != -1 && key != -1) {
+                                if(key != lastTimeTopico || listaFiltrada.size() > 0 &&
+                                        !comunidadeMore.getIdComunidade().equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdComunidade())){
+                                    newComunidade.add(comunidadeMore);
+                                    lastTimeTopico = key;
+                                }
                             }
                             // Remove a última chave usada
                             if (newComunidade.size() > PAGE_SIZE) {
@@ -1024,6 +1033,7 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     private void adicionarMaisDadosPorTopico(List<Comunidade> newComunidade, String idComunidade) {
         if (newComunidade != null && newComunidade.size() >= 1) {
             comunidadeDiffDAOFiltrado.carregarMaisComunidade(newComunidade, idsFiltrados);
+            comunidadeDiffDAOFiltrado.adicionarIdAoSet(idsFiltrados, idComunidade);
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
             FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {

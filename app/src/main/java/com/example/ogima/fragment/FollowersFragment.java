@@ -360,7 +360,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
             public void onRecuperado(Usuario dadosUser) {
                 //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
                 usuarioDiffDAO.adicionarUsuario(dadosUser);
-                idsUsuarios.add(dadosUser.getIdUsuario());
+                usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, dadosUser.getIdUsuario());
                 adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -590,7 +590,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                                         @Override
                                         public void onSemVinculo() {
                                             String key = usuarioPesquisa.getNomeUsuarioPesquisa();
-                                            if(lastName != null && !lastName.isEmpty() && key != null && !key.equals(lastName)){
+                                            if (lastName != null && !lastName.isEmpty() && key != null && !key.equals(lastName)) {
                                                 lastName = key;
                                             }
                                         }
@@ -630,9 +630,12 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                                     && !usuarioChildren.getIdUsuario().isEmpty()) {
                                 List<Usuario> newUsuario = new ArrayList<>();
                                 long key = usuarioChildren.getTimestampinteracao();
-                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                    newUsuario.add(usuarioChildren);
-                                    lastTimestamp = key;
+                                if (lastTimestamp != -1 && key != -1) {
+                                    if (key != lastTimestamp || listaUsuarios.size() > 0 &&
+                                            !usuarioChildren.getIdUsuario().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())) {
+                                        newUsuario.add(usuarioChildren);
+                                        lastTimestamp = key;
+                                    }
                                 }
                                 // Remove a última chave usada
                                 if (newUsuario.size() > PAGE_SIZE) {
@@ -663,6 +666,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
                     usuarioDiffDAO.carregarMaisUsuario(newUsuario, idsUsuarios);
+                    usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
                     //*Usuario usuarioComparator = new Usuario(true, false);
                     //*Collections.sort(listaViewers, usuarioComparator);
                     adapterFoll.updateUsersList(listaUsuarios, new AdapterFoll.ListaAtualizadaCallback() {
@@ -690,6 +694,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
     private void adicionarMaisDadosFiltrados(List<Usuario> newUsuario, Usuario dadosUser) {
         if (newUsuario != null && newUsuario.size() >= 1) {
             usuarioDAOFiltrado.carregarMaisUsuario(newUsuario, idsFiltrados);
+            usuarioDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
             //*Usuario usuarioComparator = new Usuario(true, false);
             //*Collections.sort(listaViewers, usuarioComparator);
             adapterFoll.updateUsersList(listaFiltrada, new AdapterFoll.ListaAtualizadaCallback() {
@@ -708,7 +713,7 @@ public class FollowersFragment extends Fragment implements AdapterFoll.AnimacaoI
         }
         lastName = dadosUser.getNomeUsuarioPesquisa();
         usuarioDAOFiltrado.adicionarUsuario(dadosUser);
-        idsFiltrados.add(dadosUser.getIdUsuario());
+        usuarioDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
         adapterFoll.updateUsersList(listaFiltrada, new AdapterFoll.ListaAtualizadaCallback() {
             @Override
             public void onAtualizado() {

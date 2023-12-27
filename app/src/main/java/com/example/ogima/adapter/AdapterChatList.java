@@ -3,9 +3,13 @@ package com.example.ogima.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -14,10 +18,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.parser.ColorParser;
 import com.example.ogima.R;
 import com.example.ogima.helper.ChatDiffCallback;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.MidiaUtils;
+import com.example.ogima.helper.TimestampUtils;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Chat;
@@ -27,6 +34,9 @@ import com.github.ybq.android.spinkit.SpinKitView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import q.rorbin.badgeview.Badge;
+import q.rorbin.badgeview.QBadgeView;
 
 public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -71,51 +81,128 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_preview_community, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_chat_list, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        if (holder instanceof ViewHolder) {
-            ViewHolder holderPrincipal = (ViewHolder) holder;
-            Chat chat = listaChats.get(position);
-            String idUser = listaChats.get(position).getIdUsuario();
-            Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
-            if (dadoUser != null) {
-                if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
-                        && !chat.isIndisponivel()) {
-                    holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
-                    GlideCustomizado.loadUrlComListener(context,
-                            dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
-                            android.R.color.transparent,
-                            GlideCustomizado.CIRCLE_CROP,
-                            false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
-                                @Override
-                                public void onCarregado() {
-                                    holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
-                                }
+    }
 
-                                @Override
-                                public void onError(String message) {
-                                    holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
-                                }
-                            });
-                } else {
-                    UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position, @NonNull List<Object> payloads) {
+
+        ViewHolder holderPrincipal = (ViewHolder) holder;
+        Chat chat = listaChats.get(position);
+        String idUser = listaChats.get(position).getIdUsuario();
+        Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
+
+        if (!payloads.isEmpty()) {
+            for (Object payload : payloads) {
+                if (payload instanceof Bundle) {
+                    Bundle bundle = (Bundle) payload;
+                    if (bundle.containsKey("totalMsgNaoLida")) {
+                        long totalMsgNaoLida = bundle.getLong("totalMsgNaoLida");
+                        chat.setTotalMsgNaoLida(totalMsgNaoLida);
+                    } else if (bundle.containsKey("totalMsg")) {
+                        long totalMsg = bundle.getLong("totalMsg");
+                        chat.setTotalMsg(totalMsg);
+                    } else if (bundle.containsKey("tipoMidiaLastMsg")) {
+                        String tipoMidiaLastMsg = bundle.getString("tipoMidiaLastMsg");
+                        chat.setTipoMidiaLastMsg(tipoMidiaLastMsg);
+                    } else if (bundle.containsKey("timestampLastMsg")) {
+                        long timestampLastMsg = bundle.getLong("timestampLastMsg");
+                        chat.setTimestampLastMsg(timestampLastMsg);
+                    } else if (bundle.containsKey("conteudoLastMsg")) {
+                        String conteudoLastMsg = bundle.getString("conteudoLastMsg");
+                        chat.setConteudoLastMsg(conteudoLastMsg);
+                    }
                 }
-                String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
-                nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_NAME_LENGHT);
-                holderPrincipal.txtViewIncName.setText(nomeConfigurado);
+            }
+        }
 
-                holderPrincipal.relativeLayoutPreview.setOnClickListener(new View.OnClickListener() {
+        //Falta criar um tipo de FormatarContadorUtils
+        //para números para exibir um + quando tiver atingido o limite de caracteres numéricos.
+        if (dadoUser != null) {
+            if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
+                    && !chat.isIndisponivel()) {
+                holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
+                GlideCustomizado.loadUrlComListener(context,
+                        dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
+                        android.R.color.transparent,
+                        GlideCustomizado.CIRCLE_CROP,
+                        false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
+                            @Override
+                            public void onCarregado() {
+                                holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                holderPrincipal.spinKitLoadPhoto.setVisibility(View.GONE);
+                            }
+                        });
+            } else {
+                UsuarioUtils.exibirFotoPadrao(context, holderPrincipal.imgViewIncPhoto, UsuarioUtils.FIELD_PHOTO, true);
+            }
+            String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(dadoUser);
+            nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_NAME_LENGHT);
+            holderPrincipal.txtViewIncName.setText(nomeConfigurado);
+
+            if (chat.getTipoMidiaLastMsg() != null
+                    && !chat.getTipoMidiaLastMsg().isEmpty()
+                    && chat.getConteudoLastMsg() != null
+                    && !chat.getTipoMidiaLastMsg().isEmpty()) {
+                String tipoMidia = chat.getTipoMidiaLastMsg();
+                String conteudo = "";
+                if (tipoMidia.equals(MidiaUtils.TEXT)) {
+                    holderPrincipal.txtViewDescChat.setTextColor(Color.BLACK);
+                    conteudo = chat.getConteudoLastMsg();
+                } else {
+                    holderPrincipal.txtViewDescChat.setTextColor(Color.BLUE);
+                    conteudo = String.format("%s %s %s", "Mídia", "-", chat.getTipoMidiaLastMsg());
+                }
+
+                holderPrincipal.txtViewDescChat.setText(FormatarContadorUtils.abreviarTexto(conteudo, 28));
+            }
+
+            long totalMsg = 0;
+            if (chat.getTotalMsg() > 0) {
+                totalMsg = chat.getTotalMsg();
+            }
+
+            holderPrincipal.btnViewTodasMsgs.setText(FormatarContadorUtils.abreviarTexto(String.valueOf(totalMsg), 8));
+
+            if (chat.getTotalMsgNaoLida() > 0) {
+                holderPrincipal.btnViewMsgsPerdidas.setVisibility(View.VISIBLE);
+                holderPrincipal.btnViewMsgsPerdidas.setText(FormatarContadorUtils.abreviarTexto(String.valueOf(chat.getTotalMsgNaoLida()), 8));
+            } else {
+                holderPrincipal.btnViewMsgsPerdidas.setVisibility(View.INVISIBLE);
+            }
+
+            if (chat.getTimestampLastMsg() != -1) {
+                TimestampUtils.RecuperarHoraDoTimestamp(context, true, chat.getTimestampLastMsg(), new TimestampUtils.RecuperarHoraTimestampCallback() {
                     @Override
-                    public void onClick(View v) {
-                        visitarPerfil(dadoUser, position);
+                    public void onConcluido(String horaMinuto) {
+                        holderPrincipal.txtViewHoraLastMsg.setText(horaMinuto);
+                    }
+
+                    @Override
+                    public void onError(String message) {
                     }
                 });
             }
+
+            holderPrincipal.relativeLayoutPreview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    visitarPerfil(dadoUser, position);
+                }
+            });
         }
+
+        super.onBindViewHolder(holder, position, payloads);
     }
 
     @Override
@@ -152,24 +239,43 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView imgViewIncPhoto;
-        private TextView txtViewIncName, txtViewIncDesc;
+        private TextView txtViewIncName, txtViewDescChat, txtViewHoraLastMsg;
         private SpinKitView spinKitLoadPhoto;
         private RelativeLayout relativeLayoutPreview;
+        private Button btnViewTodasMsgs, btnViewMsgsPerdidas;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             imgViewIncPhoto = itemView.findViewById(R.id.imgViewIncPhoto);
             txtViewIncName = itemView.findViewById(R.id.txtViewIncName);
-            txtViewIncDesc = itemView.findViewById(R.id.txtViewIncDesc);
+            txtViewDescChat = itemView.findViewById(R.id.txtViewDescChat);
+            txtViewHoraLastMsg = itemView.findViewById(R.id.txtViewHoraLastMsg);
             spinKitLoadPhoto = itemView.findViewById(R.id.spinKitLoadPhotoUser);
             relativeLayoutPreview = itemView.findViewById(R.id.relativeLayoutPreview);
+            btnViewTodasMsgs = itemView.findViewById(R.id.btnViewTodasMsgs);
+            btnViewMsgsPerdidas = itemView.findViewById(R.id.btnViewMsgsPerdidas);
 
             imgViewIncPhoto.setBackgroundTintList(ColorStateList.valueOf(hexCircle));
         }
+
+        private void atualizarMsgNaoLida(long dado) {
+            btnViewMsgsPerdidas.setText(FormatarContadorUtils.formatarNumeroAbreviado(Math.toIntExact(dado)));
+        }
+
+        private void atualizarMsg(long dado) {
+            btnViewTodasMsgs.setText(FormatarContadorUtils.formatarNumeroAbreviado(Math.toIntExact(dado)));
+        }
+
+        private void atualizarTipoMidiaLastMsg(String dado) {
+            if (dado.isEmpty()) {
+
+                return;
+            }
+        }
     }
 
-    private void visitarPerfil(Usuario usuarioAlvo, int posicao){
+    private void visitarPerfil(Usuario usuarioAlvo, int posicao) {
         String idDonoPerfil = usuarioAlvo.getIdUsuario();
         if (idDonoPerfil != null
                 && !idDonoPerfil.isEmpty()

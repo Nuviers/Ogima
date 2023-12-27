@@ -396,7 +396,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
             @Override
             public void onRecuperado(Usuario dadosUser) {
                 usuarioDiffDAO.adicionarUsuario(dadosUser);
-                idsUsuarios.add(dadosUser.getIdUsuario());
+                usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, dadosUser.getIdUsuario());
                 adapterSelection.updateUsersList(listaUsuarios, new AdapterUsersSelectionCommunity.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
@@ -512,11 +512,14 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                             if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
                                 List<Usuario> newParticipante = new ArrayList<>();
                                 long key = participanteChildren.getTimestampinteracao();
-                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                    Usuario usuarioNew = new Usuario();
-                                    usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
-                                    newParticipante.add(usuarioNew);
-                                    lastTimestamp = key;
+                                if (lastTimestamp != -1 && key != -1) {
+                                    if(key != lastTimestamp || listaUsuarios.size() > 0 &&
+                                            !participanteChildren.getIdParticipante().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())){
+                                        Usuario usuarioNew = new Usuario();
+                                        usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
+                                        newParticipante.add(usuarioNew);
+                                        lastTimestamp = key;
+                                    }
                                 }
                                 // Remove a última chave usada
                                 if (newParticipante.size() > PAGE_SIZE) {
@@ -530,11 +533,14 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                                     //Somente exibir usuários que não são adms.
                                     List<Usuario> newParticipante = new ArrayList<>();
                                     long key = participanteChildren.getTimestampinteracao();
-                                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                        Usuario usuarioNew = new Usuario();
-                                        usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
-                                        newParticipante.add(usuarioNew);
-                                        lastTimestamp = key;
+                                    if (lastTimestamp != -1 && key != -1) {
+                                        if(key != lastTimestamp || listaUsuarios.size() > 0 &&
+                                                !participanteChildren.getIdParticipante().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())){
+                                            Usuario usuarioNew = new Usuario();
+                                            usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
+                                            newParticipante.add(usuarioNew);
+                                            lastTimestamp = key;
+                                        }
                                     }
                                     // Remove a última chave usada
                                     if (newParticipante.size() > PAGE_SIZE) {
@@ -554,11 +560,14 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                                     //Somente exibir usuários que são adms.
                                     List<Usuario> newParticipante = new ArrayList<>();
                                     long key = participanteChildren.getTimestampinteracao();
-                                    if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                        Usuario usuarioNew = new Usuario();
-                                        usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
-                                        newParticipante.add(usuarioNew);
-                                        lastTimestamp = key;
+                                    if (lastTimestamp != -1 && key != -1) {
+                                        if(key != lastTimestamp || listaUsuarios.size() > 0 &&
+                                                !participanteChildren.getIdParticipante().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())){
+                                            Usuario usuarioNew = new Usuario();
+                                            usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
+                                            newParticipante.add(usuarioNew);
+                                            lastTimestamp = key;
+                                        }
                                     }
                                     // Remove a última chave usada
                                     if (newParticipante.size() > PAGE_SIZE) {
@@ -576,11 +585,14 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                             } else if (fundador || !participanteChildren.isAdministrator()) {
                                 List<Usuario> newParticipante = new ArrayList<>();
                                 long key = participanteChildren.getTimestampinteracao();
-                                if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
-                                    Usuario usuarioNew = new Usuario();
-                                    usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
-                                    newParticipante.add(usuarioNew);
-                                    lastTimestamp = key;
+                                if (lastTimestamp != -1 && key != -1) {
+                                    if(key != lastTimestamp || listaUsuarios.size() > 0 &&
+                                            !participanteChildren.getIdParticipante().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())){
+                                        Usuario usuarioNew = new Usuario();
+                                        usuarioNew.setIdUsuario(participanteChildren.getIdParticipante());
+                                        newParticipante.add(usuarioNew);
+                                        lastTimestamp = key;
+                                    }
                                 }
                                 // Remove a última chave usada
                                 if (newParticipante.size() > PAGE_SIZE) {
@@ -616,6 +628,7 @@ public class ManageCommunityUsersActivity extends AppCompatActivity implements A
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
                     usuarioDiffDAO.carregarMaisUsuario(newParticipante, idsUsuarios);
+                    usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
                     //*Usuario usuarioComparator = new Usuario(true, false);
                     //*Collections.sort(listaViewers, usuarioComparator);
                     adapterSelection.updateUsersList(listaUsuarios, new AdapterUsersSelectionCommunity.ListaAtualizadaCallback() {
