@@ -343,16 +343,18 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
         queryInicialFiltro = firebaseRef.child("usuarios")
                 .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff");
-        queryInicialFiltro.addListenerForSingleValueEvent(new ValueEventListener() {
+        listenerFiltragem = queryInicialFiltro.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (counter != searchCounter) {
-                    limparFiltragem(false);
+                    ocultarProgress();
+                    firebaseUtils.removerQueryValueListener(queryInicialFiltro, listenerFiltragem);
                     return;
                 }
 
                 if (listaFiltrada != null && listaFiltrada.size() >= 1) {
                     ocultarProgress();
+                    firebaseUtils.removerQueryValueListener(queryInicialFiltro, listenerFiltragem);
                     return;
                 }
 
@@ -396,6 +398,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 } else {
                     ocultarProgress();
                 }
+                firebaseUtils.removerQueryValueListener(queryInicialFiltro, listenerFiltragem);
             }
 
             @Override
@@ -524,18 +527,6 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                                                                 newChat.remove(0);
                                                             }
                                                             if (lastName != null && !lastName.isEmpty()) {
-
-                                                                if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
-                                                                        && idsFiltrados.contains(chatAtual.getIdUsuario())) {
-                                                                    //é verificado se a lista é > 1 para não atrapalhar a lógica
-                                                                    //já que com startAt ele sempre irá pegar novamente o primeiro dado
-                                                                    //recuperado. Com essas verificações é garantido que todos elementos
-                                                                    //da lista tenham o listener adicionado somente uma vez.
-                                                                    ocultarProgress();
-                                                                    setLoading(false);
-                                                                    return;
-                                                                }
-
                                                                 adicionarMaisDadosFiltrados(newChat, usuarioPesquisa);
                                                             }
                                                         }
@@ -611,17 +602,12 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                                 && !chatMore.getIdUsuario().isEmpty()) {
                             if (listaChat != null && listaChat.size() > 1 && idsUsuarios != null && idsUsuarios.size() > 0
                                     && idsUsuarios.contains(chatMore.getIdUsuario())) {
-                                //é verificado se a lista é > 1 para não atrapalhar a lógica
-                                //já que com startAt ele sempre irá pegar novamente o primeiro dado
-                                //recuperado. Com essas verificações é garantido que todos elementos
-                                //da lista tenham o listener adicionado somente uma vez.
-                                ToastCustomizado.toastCustomizadoCurto("Já existe: " + chatMore.getIdUsuario(), requireContext());
+                                //*ToastCustomizado.toastCustomizadoCurto("Já existe: " + chatMore.getIdUsuario(), requireContext());
                                 ocultarProgress();
-                                firebaseUtils.removerQueryChildListener(queryLoadMore, childEventListenerChat);
                                 setLoading(false);
                                 return;
                             }
-                            ToastCustomizado.toastCustomizadoCurto("ADICIONADO " + chatMore.getIdUsuario(), requireContext());
+                            //*ToastCustomizado.toastCustomizadoCurto("ADICIONADO " + chatMore.getIdUsuario(), requireContext());
                             List<Chat> newChat = new ArrayList<>();
                             String key = chatMore.getIdUsuario();
                             if (lastId != null && key != null) {
@@ -718,9 +704,14 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
             //*Collections.sort(listaViewers, usuarioComparator);
             if (idsUsuarios != null && idsUsuarios.size() > 0
                     && idsUsuarios.contains(dadosUser.getIdUsuario())) {
-                ocultarProgress();
-                adicionarDadoDoUsuario(dadosUser, null, null);
-                setLoading(false);
+                adapterChatList.updateChatList(listaFiltrada, new AdapterChatList.ListaAtualizadaCallback() {
+                    @Override
+                    public void onAtualizado() {
+                        ocultarProgress();
+                        adicionarDadoDoUsuario(dadosUser, null, null);
+                        setLoading(false);
+                    }
+                });
                 return;
             }
 
@@ -744,10 +735,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                                 chatAtualizado.getIdUsuario() == null || chatAtualizado.getIdUsuario().isEmpty()) {
                             return;
                         }
-                        if (idsUsuarios != null && idsUsuarios.size() > 0
-                                && !idsUsuarios.contains(chatAtualizado.getIdUsuario())) {
-                            logicaAtualizacao(snapshot);
-                        }
+                        logicaAtualizacao(snapshot);
                     }
                 }
 
@@ -909,6 +897,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 ChildEventListener listener = listenerHashMap.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
+                    //**ToastCustomizado.toastCustomizadoCurto("Clear", requireContext());
                 }
                 contadorRemocaoListener++;
                 if (contadorRemocaoListener == referenceHashMap.size()) {
