@@ -69,7 +69,8 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
     private List<Chat> listaFiltrada = new ArrayList<>();
     private String lastName = null;
     private boolean pesquisaAtivada = false;
-    private String lastId = null;
+    //private String lastId = null;
+    private long lastTimestamp = -1;
     private boolean atualizandoLista = false;
     private Handler searchHandler = new Handler();
     private int queryDelayMillis = 500;
@@ -89,6 +90,10 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
     private Chat chatComparator;
     private int contadorRemocaoListener = 0;
     private FirebaseUtils firebaseUtils;
+    private ChildEventListener childListenerInicio;
+    private int travar = 0;
+    private ChildEventListener childEventListenerNewData;
+    private Query newDataRef;
 
     @Override
     public void onStop() {
@@ -298,40 +303,67 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
             trocarQueryInicial = false;
             return;
         }
-        if (trocarQueryInicial && lastId != null && !lastId.isEmpty()) {
+        if (trocarQueryInicial && lastTimestamp != -1) {
             queryInicial = firebaseRef.child("detalhesChat")
-                    .child(idUsuario).orderByChild("idUsuario")
-                    .startAt(lastId + 1)
+                    .child(idUsuario).orderByChild("timestampLastMsg")
+                    .startAt(lastTimestamp + 1)
                     .limitToFirst(1);
         } else {
             queryInicial = firebaseRef.child("detalhesChat")
-                    .child(idUsuario).orderByChild("idUsuario").limitToFirst(1);
+                    .child(idUsuario).orderByChild("timestampLastMsg").limitToFirst(1);
         }
         exibirProgress();
-        queryInicial.addListenerForSingleValueEvent(new ValueEventListener() {
+        childListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                        Chat chat = snapshot1.getValue(Chat.class);
-                        if (chat != null
-                                && chat.getIdUsuario() != null
-                                && !chat.getIdUsuario().isEmpty()) {
-                            adicionarChat(chat);
-                            lastId = chat.getIdUsuario();
+                    Chat chat = snapshot.getValue(Chat.class);
+                    if (chat != null
+                            && chat.getIdUsuario() != null
+                            && !chat.getIdUsuario().isEmpty()) {
+                        if (travar == 0) {
+                            lastTimestamp = chat.getTimestampLastMsg();
+                        } else {
+                            if (idsListeners != null && idsListeners.size() > 0) {
+                                idsListeners.remove(chat.getIdUsuario());
+                            }
+                            if (listenerHashMap != null && referenceHashMap != null) {
+                                Query userRef = referenceHashMap.get(chat.getIdUsuario());
+                                ChildEventListener listener = listenerHashMap.get(chat.getIdUsuario());
+                                if (userRef != null && listener != null) {
+                                    userRef.removeEventListener(listener);
+                                }
+                            }
                         }
+                        adicionarChat(chat);
                     }
                 } else {
                     ocultarProgress();
                     //Exibir um textview com essa mensagem.
                     String msgSemConversas = "Você não possui conversas no momento.";
                 }
-                queryInicial.removeEventListener(this);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                if (travar != 0) {
+                    logicaAtualizacao(snapshot);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                lastId = null;
+                lastTimestamp = -1;
                 ToastCustomizado.toastCustomizado(String.format("%s %s%s", "Ocorreu um erro ao recuperar as suas conversas", "Code:", error.getCode()), requireContext());
                 requireActivity().onBackPressed();
             }
@@ -410,11 +442,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
     }
 
     private void adicionarChat(Chat chatAlvo) {
-        if (listaChat != null && listaChat.size() >= 1) {
-            ocultarProgress();
-            setLoading(false);
-            return;
-        }
+        travar = 1;
         recuperaDadosUser(chatAlvo.getIdUsuario(), new RecuperaUser() {
             @Override
             public void onRecuperado(Usuario dadosUser) {
@@ -426,9 +454,53 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 adapterChatList.updateChatList(listaChat, new AdapterChatList.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
+                        ToastCustomizado.toastCustomizadoCurto("NEW DATA " + dadosUser.getNomeUsuario(), requireContext());
                         adicionarDadoDoUsuario(dadosUser, null, null);
                         ocultarProgress();
                         setLoading(false);
+
+                        if (travar != 0) {
+                            if (areFirstThreeItemsVisible(recyclerView)) {
+                                int newPosition = 0; // A posição para a qual você deseja rolar
+                                recyclerView.scrollToPosition(newPosition);
+                            }
+
+                            ToastCustomizado.toastCustomizadoCurto("Listener mudanças",requireContext());
+                            newDataRef = firebaseRef.child("detalhesChat")
+                                    .child(idUsuario)
+                                    .orderByKey()
+                                    .equalTo(dadosUser.getIdUsuario());
+                            childEventListenerNewData = newDataRef.addChildEventListener(new ChildEventListener() {
+                                @Override
+                                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                                    adicionarListener(dadosUser.getIdUsuario(), newDataRef, childEventListenerChat);
+                                }
+
+                                @Override
+                                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                                    if (snapshot.getValue() != null) {
+                                        logicaAtualizacao(snapshot);
+                                    }
+                                }
+
+                                @Override
+                                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.getValue() != null) {
+                                        logicaRemocao(snapshot.getValue(Chat.class));
+                                    }
+                                }
+
+                                @Override
+                                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        }
                     }
                 });
             }
@@ -588,8 +660,8 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
         } else {
             queryLoadMore = firebaseRef.child("detalhesChat")
                     .child(idUsuario)
-                    .orderByChild("idUsuario")
-                    .startAt(lastId)
+                    .orderByChild("timestampLastMsg")
+                    .startAt(lastTimestamp)
                     .limitToFirst(PAGE_SIZE);
             childEventListenerChat = queryLoadMore.addChildEventListener(new ChildEventListener() {
                 @Override
@@ -609,20 +681,20 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                             }
                             //*ToastCustomizado.toastCustomizadoCurto("ADICIONADO " + chatMore.getIdUsuario(), requireContext());
                             List<Chat> newChat = new ArrayList<>();
-                            String key = chatMore.getIdUsuario();
-                            if (lastId != null && key != null) {
-                                if (!key.equals(lastId) || listaChat.size() > 0 &&
+                            long key = chatMore.getTimestampLastMsg();
+                            if (lastTimestamp != -1 && key != -1) {
+                                if (key != lastTimestamp || listaChat.size() > 0 &&
                                         !chatMore.getIdUsuario()
                                                 .equals(listaChat.get(listaChat.size() - 1).getIdUsuario())) {
                                     newChat.add(chatMore);
-                                    lastId = key;
+                                    lastTimestamp = key;
                                 }
                             }
                             // Remove a última chave usada
                             if (newChat.size() > PAGE_SIZE) {
                                 newChat.remove(0);
                             }
-                            if (lastId != null) {
+                            if (lastTimestamp != -1) {
                                 adicionarMaisDados(newChat, chatMore.getIdUsuario(), queryLoadMore);
                             }
                         }
@@ -652,7 +724,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     ocultarProgress();
-                    lastId = null;
+                    lastTimestamp = -1;
                 }
             });
         }
@@ -829,6 +901,7 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
     }
 
     private void limparPeloDestroyView() {
+        firebaseUtils.removerQueryChildListener(queryInicial, childListenerInicio);
         firebaseUtils.removerQueryChildListener(queryLoadMore, childEventListenerChat);
         firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childEventListenerFiltro);
         removeValueEventListener();
@@ -955,6 +1028,9 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
     }
 
     private void logicaRemocao(Chat chatRemovido) {
+
+        ToastCustomizado.toastCustomizadoCurto("REMOVER", requireContext());
+
         if (chatRemovido == null) {
             return;
         }
@@ -1155,5 +1231,12 @@ public class ChatListFragment extends Fragment implements AdapterChatList.Recupe
         searchView = view.findViewById(R.id.searchViewLstChat);
         spinProgress = view.findViewById(R.id.spinProgressBarRecycler);
         txtViewTitle = view.findViewById(R.id.txtViewTitleLstChat);
+    }
+
+    // Método para verificar se os 3 primeiros itens estão visíveis
+    private boolean areFirstThreeItemsVisible(RecyclerView recyclerView) {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+        return firstVisibleItemPosition <= 2;
     }
 }
