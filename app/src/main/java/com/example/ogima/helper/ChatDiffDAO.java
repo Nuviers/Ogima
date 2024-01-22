@@ -32,7 +32,7 @@ public class ChatDiffDAO {
             listaChat.add(chat);
         } else if (listaChat != null && listaChat.size() >= 1) {
             Log.d("DAO", "NOVO ITEM");
-            listaChat.add(listaChat.size(), chat);
+            listaChat.add(0, chat);
         }
     }
 
