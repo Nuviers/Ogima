@@ -24,28 +24,24 @@ public class FirebaseUtils {
     public void removerRefChildListener(DatabaseReference reference, ChildEventListener childEventListener) {
         if (childEventListener != null) {
             reference.removeEventListener(childEventListener);
-            childEventListener = null;
         }
     }
 
     public void removerQueryChildListener(Query reference, ChildEventListener childEventListener) {
         if (childEventListener != null) {
             reference.removeEventListener(childEventListener);
-            childEventListener = null;
         }
     }
 
     public void removerQueryValueListener(Query reference, ValueEventListener valueEventListener) {
         if (valueEventListener != null) {
             reference.removeEventListener(valueEventListener);
-            valueEventListener = null;
         }
     }
 
     public void removerValueListener(DatabaseReference reference, ValueEventListener valueEventListener) {
         if (valueEventListener != null) {
             reference.removeEventListener(valueEventListener);
-            valueEventListener = null;
         }
     }
 

@@ -20,6 +20,10 @@ public class ChatDiffDAO {
         this.adapter = adapterRecebido;
     }
 
+    public interface RetornaBundleCallback{
+        void onBundleRecuperado(int index, Bundle bundleRecup);
+    }
+
     public void adicionarChat(Chat chat) {
 
         if (listaChat != null
@@ -29,10 +33,10 @@ public class ChatDiffDAO {
 
         if (listaChat != null && listaChat.size() == 0) {
             Log.d("DAO", "INICIO ITEM");
-            listaChat.add(chat);
+            listaChat.add(0, chat);
         } else if (listaChat != null && listaChat.size() >= 1) {
             Log.d("DAO", "NOVO ITEM");
-            listaChat.add(0, chat);
+            listaChat.add(chat);
         }
     }
 
@@ -53,7 +57,7 @@ public class ChatDiffDAO {
         }
     }
 
-    public void atualizarChatPorPayload(Chat chat, String tipoPayload) {
+    public void atualizarChatPorPayload(Chat chat, String tipoPayload, RetornaBundleCallback callback) {
         int index = -1;
         for (int i = 0; i < listaChat.size(); i++) {
             if (listaChat.get(i).getIdUsuario().equals(chat.getIdUsuario())) {
@@ -70,7 +74,8 @@ public class ChatDiffDAO {
                             totalMsgNaoLida = chat.getTotalMsgNaoLida();
                         }
                         listaChat.get(index).setTotalMsgNaoLida(totalMsgNaoLida);
-                        adapter.notifyItemChanged(index, createPayloadLong(tipoPayload, totalMsgNaoLida));
+                        callback.onBundleRecuperado(index, createPayloadLong(tipoPayload, totalMsgNaoLida));
+                        //*adapter.notifyItemChanged(index, createPayloadLong(tipoPayload, totalMsgNaoLida));
                         break;
                     case "totalMsg":
                         long totalMsg = 0;
@@ -78,7 +83,8 @@ public class ChatDiffDAO {
                             totalMsg = chat.getTotalMsg();
                         }
                         listaChat.get(index).setTotalMsg(totalMsg);
-                        adapter.notifyItemChanged(index, createPayloadLong(tipoPayload, totalMsg));
+                        callback.onBundleRecuperado(index, createPayloadLong(tipoPayload, totalMsg));
+                        //*adapter.notifyItemChanged(index, createPayloadLong(tipoPayload, totalMsg));
                         break;
                     case "tipoMidiaLastMsg":
                         String tipoMidiaLastMsg = "";
@@ -86,7 +92,8 @@ public class ChatDiffDAO {
                             tipoMidiaLastMsg = chat.getTipoMidiaLastMsg();
                         }
                         listaChat.get(index).setTipoMidiaLastMsg(tipoMidiaLastMsg);
-                        adapter.notifyItemChanged(index, createPayloadString(tipoPayload, tipoMidiaLastMsg));
+                        callback.onBundleRecuperado(index, createPayloadString(tipoPayload, tipoMidiaLastMsg));
+                        //*adapter.notifyItemChanged(index, createPayloadString(tipoPayload, tipoMidiaLastMsg));
                         break;
                     case "timestampLastMsg":
                         long timestampLastMsg = -1;
@@ -94,7 +101,8 @@ public class ChatDiffDAO {
                             timestampLastMsg = chat.getTimestampLastMsg();
                         }
                         listaChat.get(index).setTimestampLastMsg(timestampLastMsg);
-                        adapter.notifyItemChanged(index, createPayloadLong(tipoPayload, timestampLastMsg));
+                        callback.onBundleRecuperado(index, createPayloadLong(tipoPayload, timestampLastMsg));
+                        //*adapter.notifyItemChanged(index, createPayloadLong(tipoPayload, timestampLastMsg));
                         break;
                     case "conteudoLastMsg":
                         String conteudoLastMsg = "";
@@ -102,7 +110,8 @@ public class ChatDiffDAO {
                             conteudoLastMsg = chat.getConteudoLastMsg();
                         }
                         listaChat.get(index).setConteudoLastMsg(conteudoLastMsg);
-                        adapter.notifyItemChanged(index, createPayloadString(tipoPayload, conteudoLastMsg));
+                        callback.onBundleRecuperado(index, createPayloadString(tipoPayload, conteudoLastMsg));
+                        //*adapter.notifyItemChanged(index, createPayloadString(tipoPayload, conteudoLastMsg));
                         break;
                 }
             }

@@ -81,7 +81,7 @@ public class Chat implements Serializable, Comparator<Chat> {
     @Override
     public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Chat)) return false;
+        if (obj == null || getClass() != obj.getClass()) return false;
         Chat chat = (Chat) obj;
         return Objects.equals(getIdUsuario(), chat.getIdUsuario());
     }

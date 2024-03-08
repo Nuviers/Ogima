@@ -32,6 +32,8 @@ import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,6 +52,7 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private RecuperaPosicaoAnterior recuperaPosicaoAnteriorListener;
     private AnimacaoIntent animacaoIntentListener;
     private RemoverChatListener removerChatListener;
+    private Chat chatComparator = new Chat();
 
     public interface RecuperaPosicaoAnterior {
         void onPosicaoAnterior(int posicaoAnterior);
@@ -229,6 +232,7 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
         listaChats.clear();
         listaChats.addAll(listaChatsAtualizada);
+
         diffResult.dispatchUpdatesTo(this);
 
         if (callback != null) {
