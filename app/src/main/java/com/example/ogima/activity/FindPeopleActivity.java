@@ -83,11 +83,22 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     private String currentSearchText = "";
     private boolean atualizandoLista = false;
     private SpinKitView spinProgressBarFind;
+    private int controleRemocao = 0;
+    private String idUltimoElementoFiltro = "";
+    private ValueEventListener listenerUltimoElementoFiltro;
+    private Query queryUltimoElementoFiltro;
 
-    public interface VerificaBlockCallback{
+    public interface VerificaBlockCallback {
         void onAjustado(Usuario usuarioAjustado);
     }
 
+    private interface RemoverListenersCallback {
+        void onRemovido();
+    }
+
+    private interface RecuperaUltimoElemento {
+        void onRecuperado();
+    }
 
     @Override
     public void onStart() {
@@ -132,7 +143,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     @Override
     public void onDestroy() {
         super.onDestroy();
-        removeChildEventListener();
+        removeChildEventListener(null);
         listaDadosUser.clear();
         idsUsuarios.clear();
         if (listaFiltrada != null && listaFiltrada.size() > 0) {
@@ -237,16 +248,36 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                                     exibirProgress();
                                     searchCounter++;
                                     final int counter = searchCounter;
-                                    if (listaFiltrada != null && listaFiltrada.size() > 0) {
-                                        limparFiltragem();
-                                    }
-                                    nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
-                                    nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
-                                    dadoInicialFiltragem(nomePesquisado, counter);
+                                    setLoading(true);
+                                    removeChildEventListener(new RemoverListenersCallback() {
+                                        @Override
+                                        public void onRemovido() {
+
+                                            if (listaFiltrada != null && !listaFiltrada.isEmpty()) {
+                                                limparFiltragem(false);
+                                            }
+
+                                            idUltimoElementoFiltro = null;
+
+                                            if (listenerUltimoElementoFiltro != null && queryUltimoElementoFiltro != null) {
+                                                queryUltimoElementoFiltro.removeEventListener(listenerUltimoElementoFiltro);
+                                            }
+
+                                            nomePesquisado = FormatarNomePesquisaUtils.formatarNomeParaPesquisa(newText);
+                                            nomePesquisado = FormatarNomePesquisaUtils.removeAcentuacao(nomePesquisado).toUpperCase(Locale.ROOT);
+                                            recuperarUltimoElemento(nomePesquisado, new RecuperaUltimoElemento() {
+                                                @Override
+                                                public void onRecuperado() {
+                                                    dadoInicialFiltragem(nomePesquisado, counter);
+                                                }
+                                            });
+                                        }
+                                    });
                                 }
                             } else {
                                 atualizandoLista = true;
-                                limparFiltragem();
+                                removeChildEventListener(null);
+                                limparFiltragem(true);
                             }
                         }
                     }, queryDelayMillis);
@@ -264,7 +295,8 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
             @Override
             public void onChildAdded(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (counter != searchCounter) {
-                    limparFiltragem();
+                    removeChildEventListener(null);
+                    limparFiltragem(true);
                     return;
                 }
                 if (snapshot.getValue() != null) {
@@ -343,8 +375,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         setLoading(false);
     }
 
-    private void limparFiltragem() {
-        removeChildEventListener();
+    private void limparFiltragem(boolean mudarSetLoading) {
         lastName = null;
         idsFiltrados.clear();
         nomePesquisado = "";
@@ -352,7 +383,9 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         if (listaFiltrada != null) {
             adapterFindPeoples.updateUsersList(listaFiltrada);
         }
-        setLoading(false);
+        if (mudarSetLoading) {
+            setLoading(false);
+        }
         atualizandoLista = false;
     }
 
@@ -395,33 +428,59 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
     }
 
     private void carregarMaisDados(String dadoAnterior) {
-        if (listaFiltrada != null && listaFiltrada.size() > 0
+
+        if (listaFiltrada.size() > 1
+                && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
+                && idUltimoElementoFiltro.equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdUsuario())) {
+            ocultarProgress();
+            ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, getApplicationContext());
+            return;
+        }
+
+        if (listaFiltrada != null && !listaFiltrada.isEmpty()
                 && lastName != null && !lastName.isEmpty()) {
             queryLoadMoreFiltro = firebaseRef.child("usuarios")
                     .orderByChild("nomeUsuarioPesquisa")
-                    .startAt(lastName).endAt(dadoAnterior + "\uf8ff").limitToFirst(PAGE_SIZE);
+                    .startAt(dadoAnterior).endAt(dadoAnterior + "\uf8ff").limitToFirst(PAGE_SIZE);
             ChildEventListener childEventListener = queryLoadMoreFiltro.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     if (snapshot.getValue() != null) {
                         Usuario usuarioMore = snapshot.getValue(Usuario.class);
-                        List<Usuario> newUsuario = new ArrayList<>();
-                        String key = snapshot.child("nomeUsuarioPesquisa").getValue(String.class);
-                        if (lastName != null && key != null && !key.equals(lastName)) {
-                            if (usuarioMore != null &&
-                                    !usuarioMore.getIdUsuario().equals(idUsuario)) {
-                                newUsuario.add(usuarioMore);
+
+                        if (listenerHashMap != null && !listenerHashMap.isEmpty()
+                                && listenerHashMap.containsKey(usuarioMore.getIdUsuario())) {
+                            ToastCustomizado.toastCustomizadoCurto("RETORNO PESQUISA IF " + usuarioMore.getIdUsuario(), getApplicationContext());
+                            ocultarProgress();
+                            setLoading(false);
+                        }else{
+
+                            if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
+                                    && idsFiltrados.contains(usuarioMore.getIdUsuario())) {
+                                ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + usuarioMore.getIdUsuario(), getApplicationContext());
+                                ocultarProgress();
+                                setLoading(false);
+                                return;
                             }
-                            lastName = key;
-                        }
-                        // Remove a última chave usada
-                        if (newUsuario.size() > PAGE_SIZE) {
-                            newUsuario.remove(0);
-                        }
-                        if (lastName != null && !lastName.isEmpty() && usuarioMore != null) {
-                            referenceHashMap.put(usuarioMore.getIdUsuario(), queryLoadMoreFiltro);
-                            listenerHashMap.put(usuarioMore.getIdUsuario(), this);
-                            adicionarMaisDadosFiltrados(newUsuario, usuarioMore);
+
+                            List<Usuario> newUsuario = new ArrayList<>();
+                            String key = snapshot.child("nomeUsuarioPesquisa").getValue(String.class);
+                            if (lastName != null && key != null && !key.equals(lastName)) {
+                                if (usuarioMore != null &&
+                                        !usuarioMore.getIdUsuario().equals(idUsuario)) {
+                                    newUsuario.add(usuarioMore);
+                                }
+                                lastName = key;
+                            }
+                            // Remove a última chave usada
+                            if (newUsuario.size() > PAGE_SIZE) {
+                                newUsuario.remove(0);
+                            }
+                            if (lastName != null && !lastName.isEmpty() && usuarioMore != null) {
+                                referenceHashMap.put(usuarioMore.getIdUsuario(), queryLoadMoreFiltro);
+                                listenerHashMap.put(usuarioMore.getIdUsuario(), this);
+                                adicionarMaisDadosFiltrados(newUsuario, usuarioMore);
+                            }
                         }
                     }
                 }
@@ -491,10 +550,10 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         spinProgressBarFind = findViewById(R.id.spinProgressBarFind);
     }
 
-    private void removeChildEventListener() {
+    private void removeChildEventListener(RemoverListenersCallback callback) {
         if (listenerHashMap != null
-                && listenerHashMap.size() > 0
-                && referenceHashMap != null && referenceHashMap.size() > 0) {
+                && !listenerHashMap.isEmpty()
+                && referenceHashMap != null && !referenceHashMap.isEmpty()) {
             for (String userId : listenerHashMap.keySet()) {
                 Query userRef = referenceHashMap.get(userId);
                 ChildEventListener listener = listenerHashMap.get(userId);
@@ -502,13 +561,25 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                     Log.d("REMOVIDOLISTENER", "REMOVIDOLISTENER");
                     userRef.removeEventListener(listener);
                 }
+
+                controleRemocao++;
+                if (controleRemocao == referenceHashMap.size()) {
+                    referenceHashMap.clear();
+                    listenerHashMap.clear();
+                    controleRemocao = 0;
+                    if (callback != null) {
+                        callback.onRemovido();
+                    }
+                }
             }
-            referenceHashMap.clear();
-            listenerHashMap.clear();
+        } else {
+            if (callback != null) {
+                callback.onRemovido();
+            }
         }
     }
 
-    private void removerChildUnico(ChildEventListener childEventListener, Query queryAlvo){
+    private void removerChildUnico(ChildEventListener childEventListener, Query queryAlvo) {
         if (queryAlvo != null && childEventListener != null) {
             queryAlvo.removeEventListener(childEventListener);
         }
@@ -527,17 +598,17 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
         }
     }
 
-    private void exibirProgress(){
+    private void exibirProgress() {
         spinProgressBarFind.setVisibility(View.VISIBLE);
         ProgressBarUtils.exibirProgressBar(spinProgressBarFind, FindPeopleActivity.this);
     }
 
-    private void ocultarProgress(){
+    private void ocultarProgress() {
         spinProgressBarFind.setVisibility(View.GONE);
         ProgressBarUtils.ocultarProgressBar(spinProgressBarFind, FindPeopleActivity.this);
     }
 
-    private void verificaBlock(Usuario usuarioAlvo, VerificaBlockCallback callback){
+    private void verificaBlock(Usuario usuarioAlvo, VerificaBlockCallback callback) {
         UsuarioUtils.checkBlockingStatus(getApplicationContext(), usuarioAlvo.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
             @Override
             public void onBlocked(boolean status) {
@@ -549,6 +620,27 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
             public void onError(String message) {
                 usuarioAlvo.setIndisponivel(true);
                 callback.onAjustado(usuarioAlvo);
+            }
+        });
+    }
+
+    private void recuperarUltimoElemento(String nome, RecuperaUltimoElemento callback) {
+        queryUltimoElementoFiltro = firebaseRef.child("usuarios")
+                .orderByChild("nomeUsuarioPesquisa")
+                .startAt(nome).endAt(nome + "\uf8ff").limitToLast(1);
+        listenerUltimoElementoFiltro = queryUltimoElementoFiltro.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                    idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
+                    setLoading(false);
+                    callback.onRecuperado();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onRecuperado();
             }
         });
     }

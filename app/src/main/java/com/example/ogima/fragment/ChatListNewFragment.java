@@ -367,122 +367,7 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                                         carregarMaisDadosFiltrados(nomePesquisado, new RecuperarIdsFiltroCallback() {
                                             @Override
                                             public void onRecuperado(Set<Usuario> listaIdsRecuperados) {
-
-                                                for (Usuario usuarioPesquisa : listaIdsRecuperados) {
-                                                    aosFiltros++;
-                                                    if (aosFiltros > listaIdsRecuperados.size()) {
-                                                        aosFiltros = 0;
-                                                        return;
-                                                    }
-
-                                                    childListenerMoreFiltro = null;
-                                                    queryLoadMoreFiltro = null;
-
-                                                    queryLoadMoreFiltro = firebaseRef.child("detalhesChat")
-                                                            .child(idUsuario).orderByChild("idUsuario").equalTo(usuarioPesquisa.getIdUsuario()).limitToFirst(1);
-
-                                                    //ToastCustomizado.toastCustomizadoCurto("AOS FILTROS: " + usuarioPesquisa.getIdUsuario(), requireContext());
-                                                    //ToastCustomizado.toastCustomizadoCurto("NR FILTROS: " + aosFiltros, requireContext());
-
-                                                    ChildEventListener childListener = new ChildEventListener() {
-                                                        @Override
-                                                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                                                            Chat chatMore = snapshot.getValue(Chat.class);
-                                                            if (chatMore != null
-                                                                    && chatMore.getIdUsuario() != null
-                                                                    && !chatMore.getIdUsuario().isEmpty()) {
-
-                                                                //**ToastCustomizado.toastCustomizadoCurto("NEW PESQUISA: " + chatMore.getIdUsuario(), requireContext());
-                                                                Log.d(TAG, "Timestamp key: " + lastTimestamp);
-                                                                Log.d(TAG, "id: " + chatMore.getIdUsuario() + " time: " + chatMore.getTimestampLastMsg());
-                                                                if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
-                                                                        && idsFiltrados.contains(chatMore.getIdUsuario())) {
-                                                                    Log.d(TAG, "Id já existia: " + chatMore.getIdUsuario());
-                                                                    ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + chatMore.getIdUsuario(), requireContext());
-                                                                    ocultarProgress();
-                                                                    setLoading(false);
-                                                                    return;
-                                                                }
-
-                                                                List<Chat> newChat = new ArrayList<>();
-                                                                String key = usuarioPesquisa.getNomeUsuarioPesquisa();
-                                                                if (lastName != null && !lastName.isEmpty() && key != null
-                                                                        && !key.isEmpty()) {
-                                                                    if (!key.equals(lastName) || listaFiltrada.size() > 0 &&
-                                                                            !chatMore.getIdUsuario()
-                                                                                    .equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdUsuario())) {
-                                                                        newChat.add(chatMore);
-                                                                        //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
-                                                                        lastName = key;
-                                                                    }
-                                                                }
-                                                                // Remove a última chave usada
-                                                                if (newChat.size() > PAGE_SIZE) {
-                                                                    newChat.remove(0);
-                                                                }
-                                                                if (lastName != null && !lastName.isEmpty()) {
-                                                                    if (aosFiltros >= listaIdsRecuperados.size()) {
-                                                                        aosFiltros = 0;
-                                                                    }
-                                                                    adicionarMaisDadosFiltrados(newChat, chatMore.getIdUsuario(), queryLoadMoreFiltro, childListenerMoreFiltro);
-                                                                }
-                                                            }
-                                                        }
-
-                                                        @Override
-                                                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                                                            if (snapshot.getValue() == null) {
-                                                                return;
-                                                            }
-                                                            Chat chatUpdate = snapshot.getValue(Chat.class);
-
-                                                            if (chatUpdate == null) {
-                                                                return;
-                                                            }
-
-                                                            if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
-                                                                    && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdUsuario())) {
-                                                                ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdUsuario(), requireContext());
-                                                                return;
-                                                            }
-                                                            if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
-                                                                    && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Chat.class).getIdUsuario())) {
-                                                                return;
-                                                            }
-
-                                                            if (listenerHashMap != null && listenerHashMap.size() > 0
-                                                                    && listenerHashMap.containsKey(snapshot.getValue(Chat.class).getIdUsuario())) {
-                                                                return;
-                                                            }
-
-                                                            if (listaFiltrada != null && listaFiltrada.size() > 0
-                                                                    && chatUpdate.getIdUsuario().equals(listaFiltrada.get(0).getIdUsuario())) {
-                                                                return;
-                                                            }
-
-                                                            ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH + DADOS " + chatUpdate.getIdUsuario(), requireContext());
-                                                            logicaAtualizacao(snapshot, false);
-                                                        }
-
-                                                        @Override
-                                                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                                                        }
-
-                                                        @Override
-                                                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                                                        }
-
-                                                        @Override
-                                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                                        }
-                                                    };
-                                                    queryLoadMoreFiltro.addChildEventListener(childListener);
-                                                    listenerFiltroHashMap.put(usuarioPesquisa.getIdUsuario(), childListener);
-                                                    referenceFiltroHashMap.put(usuarioPesquisa.getIdUsuario(), queryLoadMoreFiltro);
-                                                }
+                                                recuperarDetalhes(listaIdsRecuperados);
                                             }
                                         });
                                     } else {
@@ -854,13 +739,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                     && idUltimoElementoFiltro.equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdUsuario())) {
                 ocultarProgress();
                 ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, requireContext());
-                //NO LUGAR DE COMPARAR COM O ÚLTIMO ITEM ADICIONADO NA LISTA
-                //O CORRETO É TER UM MÉTODO SEPARADO QUE PEGA O ÚLTIMO ELEMENTO
-                //NO SERVIDOR COM O LISTENER ATIVO SEMPRE ASSIM EU COMPARO COM O ID
-                //DESSE DADO, ASSIM EU TENHO COMO SABER QUANDO A PAGINAÇÃO NÃO DEVE CONTINUAR
-                //JÁ QUE SABERIA QUE A LISTA JÁ PEGOU TODOS OS DADOS POSSÍVEIS DO SERVIDOR
-                //E NÃO TERIA MAIS DADOS ALÉM DELE, POSSO COLOCAR ESSA LÓGICA NO SCROLLISTENER
-                //E RETIRAR ESSE CÓDIGO ANTERIOR DO MÉTODO CARREGARMAISDADOS.
                 return;
             }
 
@@ -1780,7 +1658,10 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
     // Método para verificar se os 3 primeiros itens estão visíveis
     private boolean areFirstThreeItemsVisible(RecyclerView recyclerView) {
         LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+        int firstVisibleItemPosition = 0;
+        if (layoutManager != null) {
+            firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+        }
         return firstVisibleItemPosition <= 2;
     }
 
@@ -1852,6 +1733,159 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
         });
     }
 
+    private void recuperarDetalhes(Set<Usuario> listaIdsRecuperados){
+        for (Usuario usuarioPesquisa : listaIdsRecuperados) {
+            aosFiltros++;
+            if (aosFiltros > listaIdsRecuperados.size()) {
+                aosFiltros = 0;
+                return;
+            }
+
+            childListenerMoreFiltro = null;
+            queryLoadMoreFiltro = null;
+
+            queryLoadMoreFiltro = firebaseRef.child("detalhesChat")
+                    .child(idUsuario).orderByChild("idUsuario").equalTo(usuarioPesquisa.getIdUsuario()).limitToFirst(1);
+
+            //ToastCustomizado.toastCustomizadoCurto("AOS FILTROS: " + usuarioPesquisa.getIdUsuario(), requireContext());
+            //ToastCustomizado.toastCustomizadoCurto("NR FILTROS: " + aosFiltros, requireContext());
+
+            ChildEventListener childListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    Chat chatMore = snapshot.getValue(Chat.class);
+                    if (chatMore != null
+                            && chatMore.getIdUsuario() != null
+                            && !chatMore.getIdUsuario().isEmpty()) {
+
+                        //**ToastCustomizado.toastCustomizadoCurto("NEW PESQUISA: " + chatMore.getIdUsuario(), requireContext());
+                        Log.d(TAG, "Timestamp key: " + lastTimestamp);
+                        Log.d(TAG, "id: " + chatMore.getIdUsuario() + " time: " + chatMore.getTimestampLastMsg());
+                        if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
+                                && idsFiltrados.contains(chatMore.getIdUsuario())) {
+                            Log.d(TAG, "Id já existia: " + chatMore.getIdUsuario());
+                            ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + chatMore.getIdUsuario(), requireContext());
+                            ocultarProgress();
+                            setLoading(false);
+                            return;
+                        }
+
+                        List<Chat> newChat = new ArrayList<>();
+                        String key = usuarioPesquisa.getNomeUsuarioPesquisa();
+                        if (lastName != null && !lastName.isEmpty() && key != null
+                                && !key.isEmpty()) {
+                            if (!key.equals(lastName) || listaFiltrada.size() > 0 &&
+                                    !chatMore.getIdUsuario()
+                                            .equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdUsuario())) {
+                                newChat.add(chatMore);
+                                //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
+                                lastName = key;
+                            }
+                        }
+                        // Remove a última chave usada
+                        if (newChat.size() > PAGE_SIZE) {
+                            newChat.remove(0);
+                        }
+                        if (lastName != null && !lastName.isEmpty()) {
+                            if (aosFiltros >= listaIdsRecuperados.size()) {
+                                aosFiltros = 0;
+                            }
+                            adicionarMaisDadosFiltrados(newChat, chatMore.getIdUsuario(), queryLoadMoreFiltro, childListenerMoreFiltro);
+                        }
+                    }
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    if (snapshot.getValue() == null) {
+                        return;
+                    }
+                    Chat chatUpdate = snapshot.getValue(Chat.class);
+
+                    if (chatUpdate == null) {
+                        return;
+                    }
+
+                    if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
+                            && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdUsuario())) {
+                        ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdUsuario(), requireContext());
+                        return;
+                    }
+                    if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
+                            && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Chat.class).getIdUsuario())) {
+                        return;
+                    }
+
+                    if (listenerHashMap != null && listenerHashMap.size() > 0
+                            && listenerHashMap.containsKey(snapshot.getValue(Chat.class).getIdUsuario())) {
+                        return;
+                    }
+
+                    if (listaFiltrada != null && listaFiltrada.size() > 0
+                            && chatUpdate.getIdUsuario().equals(listaFiltrada.get(0).getIdUsuario())) {
+                        return;
+                    }
+
+                    ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH + DADOS " + chatUpdate.getIdUsuario(), requireContext());
+                    logicaAtualizacao(snapshot, false);
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Chat chatRemovido = snapshot.getValue(Chat.class);
+                        if (chatRemovido == null) {
+                            return;
+                        }
+
+                        if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
+                                && listenerHashMapNEWDATA.containsKey(chatRemovido.getIdUsuario())
+                                || listaChat != null && listaChat.size() > 0
+                                && listaChat.get(0).getIdUsuario().equals(chatRemovido.getIdUsuario())) {
+                            return;
+                        }
+
+                        verificaExistencia(chatRemovido.getIdUsuario(), new VerificaExistenciaCallback() {
+                            @Override
+                            public void onExistencia(boolean status, Chat chatAtualizado) {
+
+                                ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + chatRemovido.getIdUsuario(), requireContext());
+
+                                logicaRemocao(chatRemovido, true, true);
+
+                                if (status) {
+                                    boolean menorque = chatAtualizado.getTimestampLastMsg() <= listaChat.get(0).getTimestampLastMsg();
+                                    if (!menorque) {
+                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + chatRemovido.getIdUsuario(), requireContext());
+                                        anexarNovoDado(chatAtualizado);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onError(String message) {
+
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+            queryLoadMoreFiltro.addChildEventListener(childListener);
+            listenerFiltroHashMap.put(usuarioPesquisa.getIdUsuario(), childListener);
+            referenceFiltroHashMap.put(usuarioPesquisa.getIdUsuario(), queryLoadMoreFiltro);
+        }
+    }
+
     private void ultimoElemento(RecuperaUltimoElemento callback) {
         queryUltimoElemento = firebaseRef.child("detalhesChat")
                 .child(idUsuario).orderByChild("timestampLastMsg").limitToLast(1);
@@ -1892,16 +1926,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 callback.onRecuperado();
             }
         });
-    }
-
-    public int findPositionInListFiltro(String userId) {
-        for (int i = 0; i < listaFiltrada.size(); i++) {
-            Chat chat = listaFiltrada.get(i);
-            if (chat.getIdUsuario().equals(userId)) {
-                return i; // Retorna a posição na lista quando o ID corresponder
-            }
-        }
-        return -1; // Retorna -1 se o ID não for encontrado na lista
     }
 
     public int findPositionInList(String userId) {

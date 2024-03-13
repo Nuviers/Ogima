@@ -178,6 +178,7 @@ public class ChatInteractionsActivity extends AppCompatActivity {
                 .create());
 
         viewPager.setAdapter(fragmentPagerItemAdapter);
+        viewPager.setOffscreenPageLimit(2);
         smartTab.setViewPager(viewPager);
     }
 
