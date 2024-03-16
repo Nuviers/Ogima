@@ -99,7 +99,7 @@ public class FriendsUtils {
     }
 
     public interface AjustarContatoCallback {
-        void onAjustar(String nivelAmizade, int totalMensagens);
+        void onAjustar(String nivelAmizade, long totalMensagens);
 
         void onError(String message);
     }
@@ -509,12 +509,12 @@ public class FriendsUtils {
 
         ajustarAmizadeEMsgContato(contadorMensagemRef, new AjustarContatoCallback() {
             @Override
-            public void onAjustar(String nivelAmizade, int totalMensagens) {
+            public void onAjustar(String nivelAmizade, long totalMensagens) {
                 operacoes.put(caminhoContatoAtual + "nivelAmizade", nivelAmizade);
                 operacoes.put(caminhoContatoAtual + "totalMensagens", totalMensagens);
                 ajustarAmizadeEMsgContato(contadorMensagemSelecionadoRef, new AjustarContatoCallback() {
                     @Override
-                    public void onAjustar(String nivelAmizade, int totalMensagens) {
+                    public void onAjustar(String nivelAmizade, long totalMensagens) {
                         operacoes.put(caminhoContatoAlvo + "nivelAmizade", nivelAmizade);
                         operacoes.put(caminhoContatoAlvo + "totalMensagens", totalMensagens);
                         firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {

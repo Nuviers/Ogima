@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.example.ogima.R;
 import com.example.ogima.fragment.ChatListFragment;
 import com.example.ogima.fragment.ChatListNewFragment;
+import com.example.ogima.fragment.ContactListFragment;
 import com.example.ogima.fragment.ContatoFragment;
 import com.example.ogima.fragment.ListagemGrupoFragment;
 import com.example.ogima.fragment.TesteSearchFragment;
@@ -172,8 +173,7 @@ public class ChatInteractionsActivity extends AppCompatActivity {
         fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(), FragmentPagerItems.with(ChatInteractionsActivity.this)
                 .add("CHATS", ChatListNewFragment.class)
-                //.add("CHATS", TesteSearchFragment.class)
-                .add("CONTATOS", ContatoFragment.class)
+                .add("CONTATOS", ContactListFragment.class)
                 .add("GRUPOS", ListagemGrupoFragment.class)
                 .create());
 
