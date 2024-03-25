@@ -113,6 +113,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
     private int posicaoChanged = -1;
     private HashMap<String, Bundle> idsParaAtualizar = new HashMap<>();
     private int contadorUpdate = 0;
+    private int contadorNome = 0;
 
     private interface VerificaExistenciaCallback {
         void onExistencia(boolean status, Contatos contatoAtualizado);
@@ -189,7 +190,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
 
     public ContactListFragment() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
-        contatoComparator = new Contatos();
+        contatoComparator = new Contatos(false, true);
     }
 
     @Override
@@ -207,6 +208,10 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 //ToastCustomizado.toastCustomizadoCurto("TIME: " + lastTimestamp, requireContext());
                 //ToastCustomizado.toastCustomizadoCurto("Id: " + listaContatos.get(0).getIdUsuario() + " Time: " + listaContatos.get(0).getTimestampLastMsg(), requireContext());
                 //ToastCustomizado.toastCustomizadoCurto("Maior: " + verificacao, requireContext());
+                for(Contatos contatos : listaContatos){
+                    ToastCustomizado.toastCustomizadoCurto("Nome contato: " + contatos.getNomeContato(), requireContext());
+                }
+
                 if (idUltimoElemento != null && !idUltimoElemento.isEmpty()) {
                     ToastCustomizado.toastCustomizadoCurto("Ultimo: " + idUltimoElemento, requireContext());
                 }else{
@@ -586,6 +591,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             @Override
             public void onRecuperado(Usuario dadosUser) {
 
+                contatoAlvo.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
                 contactDiffDAO.adicionarContato(contatoAlvo);
                 contactDiffDAO.adicionarIdAoSet(idsUsuarios, dadosUser.getIdUsuario());
 
@@ -594,8 +600,9 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                     listaAtual = listaFiltrada;
                 } else {
                     listaAtual = listaContatos;
-                    Collections.sort(listaContatos, contatoComparator);
                 }
+
+                Collections.sort(listaAtual, contatoComparator);
 
                 adapterContactList.updateContatoList(listaAtual, new AdapterContactList.ListaAtualizadaCallback() {
                     @Override
@@ -660,6 +667,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                     Contatos contatoAtual = snapshot.getValue(Contatos.class);
 
                     if (contatoAtual != null) {
+                        contatoAtual.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
                         contatoAtual.setIndisponivel(dadosUser.isIndisponivel());
                     }
 
@@ -676,6 +684,8 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
 
                     contactDAOFiltrado.adicionarContato(contatoAtual);
                     contactDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosUser.getIdUsuario());
+
+                    Collections.sort(listaFiltrada, contatoComparator);
                     adapterContactList.updateContatoList(listaFiltrada, new AdapterContactList.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
@@ -860,7 +870,34 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                                 newContatos.remove(0);
                             }
                             if (lastTimestamp != -1) {
-                                adicionarMaisDados(newContatos, contatoMore.getIdContato(), queryLoadMore);
+
+                                recuperaDadosUser(contatoMore.getIdContato(), new RecuperaUser() {
+                                    @Override
+                                    public void onRecuperado(Usuario dadosUser) {
+                                        for(Contatos contato : newContatos){
+                                            if (contato.getIdContato().equals(dadosUser.getIdUsuario())) {
+                                                newContatos.remove(contato);
+                                                contato.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
+                                                newContatos.add(contato);
+                                                contadorNome++;
+                                            }
+                                            if (contadorNome == newContatos.size()) {
+                                                contadorNome = 0;
+                                                adicionarMaisDados(newContatos, contatoMore.getIdContato(), dadosUser, queryLoadMore);
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onSemDado() {
+                                        ocultarProgress();
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        ocultarProgress();
+                                    }
+                                });
                             }
                         }
                     } else {
@@ -939,33 +976,18 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
         }
     }
 
-    private void adicionarMaisDados(List<Contatos> newContatos, String idUser, Query queryAlvo) {
+    private void adicionarMaisDados(List<Contatos> newContatos, String idUser, Usuario dadosUser, Query queryAlvo) {
         if (newContatos != null && newContatos.size() >= 1) {
-            recuperaDadosUser(idUser, new RecuperaUser() {
-                @Override
-                public void onRecuperado(Usuario dadosUser) {
-                    contactDiffDAO.carregarMaisContato(newContatos, idsUsuarios);
-                    contactDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
+            contactDiffDAO.carregarMaisContato(newContatos, idsUsuarios);
+            contactDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
 
-                    Collections.sort(listaContatos, contatoComparator);
-                    adapterContactList.updateContatoList(listaContatos, new AdapterContactList.ListaAtualizadaCallback() {
-                        @Override
-                        public void onAtualizado() {
-                            ocultarProgress();
-                            adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerContatos, false);
-                            setLoading(false);
-                        }
-                    });
-                }
-
+            Collections.sort(listaContatos, contatoComparator);
+            adapterContactList.updateContatoList(listaContatos, new AdapterContactList.ListaAtualizadaCallback() {
                 @Override
-                public void onSemDado() {
+                public void onAtualizado() {
                     ocultarProgress();
-                }
-
-                @Override
-                public void onError(String message) {
-                    ocultarProgress();
+                    adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerContatos, false);
+                    setLoading(false);
                 }
             });
         } else {
@@ -979,16 +1001,30 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             recuperaDadosUser(idUser, new RecuperaUser() {
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
-                    contactDAOFiltrado.carregarMaisContato(newContatos, idsFiltrados);
-                    contactDAOFiltrado.adicionarIdAoSet(idsFiltrados, idUser);
-                    adapterContactList.updateContatoList(listaFiltrada, new AdapterContactList.ListaAtualizadaCallback() {
-                        @Override
-                        public void onAtualizado() {
-                            ocultarProgress();
-                            adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerAlvo, false);
-                            setLoading(false);
+                    for(Contatos contatos : newContatos){
+                        if (contatos.getIdContato().equals(dadosUser.getIdUsuario())) {
+                            newContatos.remove(contatos);
+                            contatos.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
+                            newContatos.add(contatos);
+                            contadorNome++;
                         }
-                    });
+
+                        if (contadorNome == newContatos.size()) {
+                            contadorNome = 0;
+                            contactDAOFiltrado.carregarMaisContato(newContatos, idsFiltrados);
+                            contactDAOFiltrado.adicionarIdAoSet(idsFiltrados, idUser);
+
+                            Collections.sort(listaFiltrada, contatoComparator);
+                            adapterContactList.updateContatoList(listaFiltrada, new AdapterContactList.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+                                    ocultarProgress();
+                                    adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerAlvo, false);
+                                    setLoading(false);
+                                }
+                            });
+                        }
+                    }
                 }
 
                 @Override
@@ -1478,6 +1514,8 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 }
 
                 if (isPesquisaAtivada() && listaFiltrada != null) {
+
+                    Collections.sort(listaFiltrada, contatoComparator);
 
                     adapterContactList.updateContatoList(listaFiltrada, new AdapterContactList.ListaAtualizadaCallback() {
                         @Override

@@ -2,6 +2,8 @@ package com.example.ogima.model;
 
 import androidx.annotation.Nullable;
 
+import com.google.firebase.database.Exclude;
+
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Objects;
@@ -17,8 +19,17 @@ public class Contatos implements Serializable, Comparator<Contatos> {
     private boolean contatoFavorito;
     private long timestampContato;
     private boolean indisponivel;
+    private String nomeContato;
+
+    @Exclude
+    private boolean orderByTimeStamp, orderByName;
 
     public Contatos() {
+    }
+
+    public Contatos(boolean orderByTimeStamp, boolean orderByName) {
+        this.orderByTimeStamp = orderByTimeStamp;
+        this.orderByName = orderByName;
     }
 
     public String getIdContato() {
@@ -27,6 +38,14 @@ public class Contatos implements Serializable, Comparator<Contatos> {
 
     public void setIdContato(String idContato) {
         this.idContato = idContato;
+    }
+
+    public String getNomeContato() {
+        return nomeContato;
+    }
+
+    public void setNomeContato(String nomeContato) {
+        this.nomeContato = nomeContato;
     }
 
     public boolean isIndisponivel() {
@@ -95,7 +114,25 @@ public class Contatos implements Serializable, Comparator<Contatos> {
 
     @Override
     public int compare(Contatos c1, Contatos c2) {
-        return Long.compare(c1.getTimestampContato(), c2.getTimestampContato());
+        if (orderByTimeStamp) {
+            return Long.compare(c1.getTimestampContato(), c2.getTimestampContato());
+        } else {
+            // Verifica se um dos elementos está como favoritado e o outro não.
+            if (c1.isContatoFavorito() && !c2.isContatoFavorito()) {
+                return -1; // Primeiro elemento vem antes.
+            } else if (!c1.isContatoFavorito() && c2.isContatoFavorito()) {
+                return 1; // Segundo Elemento vem antes.
+            } else {
+                // Ambos são favoritados ou ambos não são.
+                if (c1.isContatoFavorito()) {
+                    // Ordenados por nome.
+                    return c1.getNomeContato().compareTo(c2.getNomeContato());
+                } else {
+                    // Ordenados por nome.
+                    return c1.getNomeContato().compareTo(c2.getNomeContato());
+                }
+            }
+        }
     }
 
     //Essencial para o funcionamento do DiffUtilCallback, sem ele a lógica sempre terá erro.
