@@ -7,6 +7,7 @@ import android.os.Bundle;
 import com.example.ogima.R;
 import com.example.ogima.activity.ChatInicioActivity;
 import com.example.ogima.activity.ChatInteractionsActivity;
+import com.example.ogima.activity.CreateGroupActivity;
 import com.example.ogima.activity.ListaComunidadesActivityNEW;
 import com.example.ogima.activity.parc.ParceirosActivity;
 import com.example.ogima.activity.ProfileViewsActivity;
@@ -256,7 +257,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         startActivity(intent);
          */
 
-        Intent intent = new Intent(getApplicationContext(), ChatInteractionsActivity.class);
+        //*Intent intent = new Intent(getApplicationContext(), ChatInteractionsActivity.class);
+        Intent intent = new Intent(getApplicationContext(), CreateGroupActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }

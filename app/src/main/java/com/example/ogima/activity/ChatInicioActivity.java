@@ -113,7 +113,7 @@ public class ChatInicioActivity extends AppCompatActivity {
         fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(), FragmentPagerItems.with(this)
                 .add("Chats", ChatFragment.class)
-                .add("Contatos", ContatoFragment.class)
+                //.add("Contatos", ContatoFragment.class)
                 .add("Chat em grupo", ListagemGrupoFragment.class)
                 .create());
 

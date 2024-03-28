@@ -55,6 +55,14 @@ public class FirebaseRecuperarUsuario {
         void onError(String mensagem);
     }
 
+    public interface RecoverGroupCallback {
+        void onGrupoRecuperado(Grupo grupoAtual);
+
+        void onNaoExiste();
+
+        void onError(String mensagem);
+    }
+
     public interface RecuperaUsuarioCompletoCallback {
         void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado,
                                  Boolean epilepsia, ArrayList<String> listaIdAmigos,
@@ -452,6 +460,26 @@ public class FirebaseRecuperarUsuario {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+    public static void recoverGroup(String idGrupo, RecoverGroupCallback callback) {
+        DatabaseReference grupoRecuperadoRef = FirebaseDatabase.getInstance().getReference("grupos").child(idGrupo);
+        grupoRecuperadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    Grupo grupoRecuperado = snapshot.getValue(Grupo.class);
+                    callback.onGrupoRecuperado(grupoRecuperado);
+                } else {
+                    callback.onNaoExiste();
+                }
+                grupoRecuperadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
             }
         });
     }

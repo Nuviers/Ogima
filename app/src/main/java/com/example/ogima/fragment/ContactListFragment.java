@@ -89,7 +89,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
     private ChildEventListener childListenerInicioFiltro,
             childEventListenerContatos, childListenerMoreFiltro,
             childListenerInicio, childEventListenerNewData;
-    private HashMap<String, Object> listaAmigos = new HashMap<>();
     private AdapterContactList adapterContactList;
     private boolean trocarQueryInicial = false;
     private Contatos contatoComparator;
@@ -1148,9 +1147,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
         if (listaDadosUser != null) {
             listaDadosUser.clear();
         }
-        if (listaAmigos != null) {
-            listaAmigos.clear();
-        }
+
         if (idsUsuarios != null) {
             idsUsuarios.clear();
         }

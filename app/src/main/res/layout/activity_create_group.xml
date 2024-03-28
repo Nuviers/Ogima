@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.CreateGroupActivity">
+
+    <include
+        android:id="@+id/inc_toolbar_black"
+        layout="@layout/inc_toolbar_black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/inc_toolbar_black"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imgViewCadFotoGrupo"
+                    android:layout_width="@dimen/_125sdp"
+                    android:layout_height="@dimen/_125sdp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginStart="@dimen/_8sdp"
+                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:background="@drawable/circle"
+                    android:backgroundTint="#483D8B"
+                    android:padding="@dimen/_2sdp" />
+
+                <com.github.ybq.android.spinkit.SpinKitView
+                    android:id="@+id/progressBarCadFotoComunidade"
+                    style="@style/SpinKitView.DoubleBounce"
+                    android:layout_width="@dimen/_45sdp"
+                    android:layout_height="@dimen/_45sdp"
+                    android:layout_alignStart="@+id/imgViewCadFotoComunidade"
+                    android:layout_alignTop="@+id/imgViewCadFotoComunidade"
+                    android:layout_alignEnd="@+id/imgViewCadFotoComunidade"
+                    android:layout_alignBottom="@+id/imgViewCadFotoComunidade"
+                    android:background="@android:color/transparent"
+                    android:padding="@dimen/_30sdp"
+                    app:SpinKit_Color="@android:color/black"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/viewBackgroundCadFotoOne"
+                    android:layout_width="@dimen/_55sdp"
+                    android:layout_height="@dimen/_150sdp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="@dimen/_4sdp"
+                    android:layout_marginRight="@dimen/_8sdp"
+                    android:layout_marginEnd="@dimen/_8sdp"
+                    android:background="@drawable/background_button_entrar"
+                    android:backgroundTint="#3F51B5"
+                    android:padding="@dimen/_8sdp" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadGaleria"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_alignTop="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignStart="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignLeft="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignRight="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignEnd="@+id/viewBackgroundCadFotoOne"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:tint="#5951A5"
+                    app:srcCompat="@drawable/ic_galeria_postagem_vector" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadCamera"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_below="@id/imgBtnCadGaleria"
+                    android:layout_alignStart="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignLeft="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignRight="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignEnd="@+id/viewBackgroundCadFotoOne"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:tint="#5951A5"
+                    app:srcCompat="@drawable/ic_photo_camera_white_24dp" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnCadGif"
+                    android:layout_width="@dimen/_35sdp"
+                    android:layout_height="@dimen/_35sdp"
+                    android:layout_below="@id/imgBtnCadCamera"
+                    android:layout_alignStart="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignLeft="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignRight="@id/viewBackgroundCadFotoOne"
+                    android:layout_alignEnd="@+id/viewBackgroundCadFotoOne"
+                    android:layout_marginTop="@dimen/_8sdp"
+                    android:background="@android:color/transparent"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/giphyiconlight" />
+
+                <ImageButton
+                    android:id="@+id/imgBtnDeleteFotoComunidade"
+                    android:layout_width="@dimen/_38sdp"
+                    android:layout_height="@dimen/_38sdp"
+                    android:layout_below="@+id/imgViewCadFotoGrupo"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/background_button_entrar"
+                    android:backgroundTint="#000000"
+                    android:scaleType="fitCenter"
+                    android:visibility="invisible"
+                    app:srcCompat="@drawable/ic_delete_dado"
+                    app:tint="#574D4D"/>
+
+
+            </RelativeLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+</RelativeLayout>

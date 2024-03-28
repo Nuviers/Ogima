@@ -186,11 +186,7 @@ public class UsersInviteCommunityActivity extends AppCompatActivity implements A
         recuperarComunidade(new RecuperarComunidadeCallback() {
             @Override
             public void onConcluido(Comunidade comunidadeRecuperada) {
-                if (comunidadeRecuperada.getNrParticipantes() < 1) {
-                    setLimiteSelecao(CommunityUtils.MAX_NUMBER_PARTICIPANTS);
-                } else {
-                    setLimiteSelecao(CommunityUtils.MAX_NUMBER_PARTICIPANTS - comunidadeRecuperada.getNrParticipantes());
-                }
+                setLimiteSelecao(CommunityUtils.MAX_SELECAO);
                 txtViewLimiteSelecao.setText(String.format("%d%s%d", 0, "/", getLimiteSelecao()));
                 communityUtils = new CommunityUtils(getApplicationContext());
                 progressDialog = new ProgressDialog(UsersInviteCommunityActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);

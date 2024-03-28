@@ -1,28 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/txtViewTitleChat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:textColor="@android:color/black"
+        android:visibility="gone"
+        android:textSize="@dimen/_18ssp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#3F51B5">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardViewChat"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/_8sdp">
+            android:orientation="horizontal">
 
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/searchViewChat"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_8sdp" />
-        </androidx.cardview.widget.CardView>
+                android:layout_height="@dimen/_42sdp"
+                android:layout_margin="@dimen/_8sdp"
+                app:cardCornerRadius="@dimen/_12sdp"
+                android:layout_weight="1">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchViewChat"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:queryHint="@string/hintSearchViewPeople" />
+            </androidx.cardview.widget.CardView>
+
+            <ImageButton
+                android:id="@+id/imgButtonCadastroGrupo"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_42sdp"
+                android:layout_margin="@dimen/_8sdp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/background_caixa_texto"
+                app:tint="#FFFFFF"
+                app:srcCompat="@drawable/ic_grupo_test1" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
@@ -30,42 +63,16 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-
-        <LinearLayout
+        <include
+            android:id="@+id/inc_progress_recycler"
+            layout="@layout/inc_progress_recycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/_8sdp"
-            android:background="#2196F3"
-            android:orientation="horizontal"
-            android:padding="@dimen/_8sdp">
-
-            <ImageButton
-                android:id="@+id/imgButtonCadastroGrupo"
-                android:layout_width="@dimen/_40sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_margin="@dimen/_8sdp"
-                android:background="@drawable/round_imagebackground"
-                app:srcCompat="@drawable/ic_menu_friends"
-                app:tint="#FFFFFF" />
-
-            <Button
-                android:id="@+id/btnCadastroGrupo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_8sdp"
-                android:background="@drawable/background_caixa_texto"
-                android:text="Criar Grupo"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/_15ssp" />
-        </LinearLayout>
+            android:layout_height="wrap_content" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerChat"
+            android:id="@+id/recyclerViewChat"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/_8sdp"
-            android:padding="@dimen/_8sdp" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/_2sdp"/>
     </LinearLayout>
-
 </LinearLayout>

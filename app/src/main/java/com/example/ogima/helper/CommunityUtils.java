@@ -34,7 +34,8 @@ public class CommunityUtils {
     public static final int MIN_LENGHT_DESCRIPTION = 10;
     public static final int MAX_LENGTH_TOPICOS = 15;
     public static final int MIN_LENGTH_TOPICOS = 1;
-    public static final int MAX_NUMBER_PARTICIPANTS = 40;
+    public static final int MAX_NUMBER_PARTICIPANTS = 10000000;
+    public static final int MAX_SELECAO = 40;
     public static final int MAX_NUMBER_ADMS = 5;
     public static final String ADM_POSITION = "ADM";
     public static final String FOUNDER_POSITION = "FOUNDER";

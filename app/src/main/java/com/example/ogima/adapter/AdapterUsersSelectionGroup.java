@@ -14,33 +14,43 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.helper.ContactDiffCallback;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffCallback;
 import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
-public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class AdapterUsersSelectionGroup extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<Usuario> listaUsuarios;
+    private List<Contatos> listaContatos;
     private Context context;
     private String idUsuario = "";
     private boolean statusEpilepsia = true;
     private HashMap<String, Object> listaDadosUser;
     private int hexSelecao = -1;
     private static final int MAX_LENGHT = 20;
-    private HashMap<String, Object> listaAmigos;
     private long limiteSelecao = 0;
     private MarcarUsuarioCallback marcarUsuarioCallback;
     private DesmarcarUsuarioCallback desmarcarUsuarioCallback;
     public ArrayList<String> listaSelecao;
+    private AnimacaoIntent animacaoIntentListener;
+    private RemoverContatoListener removerContatoListener;
+
+    public interface RemoverContatoListener {
+        void onRemocao(Contatos contatoAlvo, int posicao);
+    }
+
+    public interface AnimacaoIntent {
+        void onExecutarAnimacao();
+    }
 
     public interface MarcarUsuarioCallback {
         void onMarcado();
@@ -58,16 +68,20 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
         this.listaSelecao = listaSelecao;
     }
 
-    public AdapterUsersSelectionCommunity(Context c, List<Usuario> listaUsuarioOrigem,
-                                          HashMap<String, Object> listaDadosUser, int hexSelecao, long limiteSelecao,
-                                          MarcarUsuarioCallback listenerMarcarUsuario, DesmarcarUsuarioCallback listenerDesmarcarUsuario) {
+    public AdapterUsersSelectionGroup(Context c, List<Contatos> listaContatoOrigem,
+                                      HashMap<String, Object> listaDadosUser, int hexSelecao, long limiteSelecao,
+                                      MarcarUsuarioCallback listenerMarcarUsuario, DesmarcarUsuarioCallback listenerDesmarcarUsuario,
+                                      RemoverContatoListener removerContatoListener,
+                                      AnimacaoIntent animacaoIntent) {
         this.context = c;
-        this.listaUsuarios = listaUsuarioOrigem = new ArrayList<>();
+        this.listaContatos = listaContatoOrigem = new ArrayList<>();
         this.listaDadosUser = listaDadosUser;
         this.hexSelecao = hexSelecao;
         this.limiteSelecao = limiteSelecao;
         this.marcarUsuarioCallback = listenerMarcarUsuario;
         this.desmarcarUsuarioCallback = listenerDesmarcarUsuario;
+        this.removerContatoListener = removerContatoListener;
+        this.animacaoIntentListener = animacaoIntent;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
         listaSelecao = new ArrayList<>();
     }
@@ -83,12 +97,12 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ViewHolder) {
             ViewHolder holderPrincipal = (ViewHolder) holder;
-            Usuario usuario = listaUsuarios.get(position);
-            String idUser = listaUsuarios.get(position).getIdUsuario();
+            Contatos contato = listaContatos.get(position);
+            String idUser = listaContatos.get(position).getIdContato();
             Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
             if (dadoUser != null) {
                 if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
-                        && !usuario.isIndisponivel()) {
+                        && !contato.isIndisponivel()) {
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);
                     GlideCustomizado.loadUrlComListener(context,
                             dadoUser.getMinhaFoto(), holderPrincipal.imgViewIncPhoto,
@@ -151,7 +165,7 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
 
     @Override
     public int getItemCount() {
-        return listaUsuarios.size();
+        return listaContatos.size();
     }
 
     public interface ListaAtualizadaCallback {
@@ -167,12 +181,12 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
         return statusEpilepsia;
     }
 
-    public void updateUsersList(List<Usuario> listaUsuariosAtualizada, ListaAtualizadaCallback callback) {
+    public void updateContatoList(List<Contatos> listaContatosAtualizados, ListaAtualizadaCallback callback) {
         //Totalmente funcional, porém em atualizações granulares não é recomendado.
-        UsuarioDiffCallback diffCallback = new UsuarioDiffCallback(listaUsuarios, listaUsuariosAtualizada);
+        ContactDiffCallback diffCallback = new ContactDiffCallback(listaContatos, listaContatosAtualizados);
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-        listaUsuarios.clear();
-        listaUsuarios.addAll(listaUsuariosAtualizada);
+        listaContatos.clear();
+        listaContatos.addAll(listaContatosAtualizados);
         diffResult.dispatchUpdatesTo(this);
 
         if (callback != null) {
@@ -198,10 +212,10 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
         }
     }
 
-    public int findPositionInList(String userId) {
-        for (int i = 0; i < listaUsuarios.size(); i++) {
-            Usuario user = listaUsuarios.get(i);
-            if (user.getIdUsuario().equals(userId)) {
+    public int findPositionInList(String contatoId) {
+        for (int i = 0; i < listaContatos.size(); i++) {
+            Contatos contato = listaContatos.get(i);
+            if (contato.getIdContato().equals(contatoId)) {
                 return i; // Retorna a posição na lista quando o ID corresponder
             }
         }

@@ -21,12 +21,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ManageGroupUsersActivity;
 import com.example.ogima.activity.UsuariosGrupoActivity;
 import com.example.ogima.adapter.AdapterChatGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GrupoDAO;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.android.material.snackbar.Snackbar;
@@ -184,12 +186,15 @@ public class ListagemGrupoFragment extends Fragment {
             }
         });
 
+        /*
         btnCadastroGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 cadastrarGrupo();
             }
         });
+
+         */
 
         return view;
     }
@@ -204,16 +209,17 @@ public class ListagemGrupoFragment extends Fragment {
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
                 if(usuarioAtual.getIdMeusGrupos() != null
                 && usuarioAtual.getIdMeusGrupos().size() >= MAX_MY_GROUPS){
-                    snackbarLimiteGrupo = Snackbar.make(btnCadastroGrupo, "Limite de criação de grupos atingido, por favor exclua um deles para que seja possível criar um novo grupo", Snackbar.LENGTH_LONG);
+                    snackbarLimiteGrupo = Snackbar.make(imgButtonCadastroGrupo, "Limite de criação de grupos atingido, por favor exclua um deles para que seja possível criar um novo grupo", Snackbar.LENGTH_LONG);
                     View snackbarView = snackbarLimiteGrupo.getView();
                     TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
                     textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
                     textView.setMaxLines(5); // altera o número máximo de linhas exibidas
                     snackbarLimiteGrupo.show();
-                    //ToastCustomizado.toastCustomizado("Você já atingiu o limite de grupos que são 5 grupos por usuário, por favor exclua um deles para que seja possível a criação de um novo grupo", getContext());
+                    ToastCustomizado.toastCustomizado("Você já atingiu o limite de grupos que são 5 grupos por usuário, por favor exclua um deles para que seja possível a criação de um novo grupo", getContext());
                 }else{
-                    Intent intent = new Intent(getContext(), UsuariosGrupoActivity.class);
+                    Intent intent = new Intent(getContext(), ManageGroupUsersActivity.class);
                     startActivity(intent);
+                    requireActivity().finish();
                 }
             }
 
@@ -289,9 +295,9 @@ public class ListagemGrupoFragment extends Fragment {
     }
 
     private void inicializarComponentes(View view) {
-        recyclerChat = view.findViewById(R.id.recyclerChat);
+        recyclerChat = view.findViewById(R.id.recyclerViewChat);
         searchViewChat = view.findViewById(R.id.searchViewChat);
-        btnCadastroGrupo = view.findViewById(R.id.btnCadastroGrupo);
+        //**btnCadastroGrupo = view.findViewById(R.id.btnCadastroGrupo);
         imgButtonCadastroGrupo = view.findViewById(R.id.imgButtonCadastroGrupo);
     }
 
