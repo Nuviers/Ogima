@@ -412,4 +412,23 @@
     <string name="no_community_invites">There are no invitations at the moment.</string>
     <string name="view_invitations">View invitations</string>
     <string name="no_community_invites_v2">No community invites at this time</string>
+
+    <!-- CreateGroupActivity -->
+    <string name="group_name">Group name</string>
+    <string name="enter_name_group">Enter the name of the group:</string>
+    <string name="group_description">Group description</string>
+    <string name="enter_description_group">Enter the group description:</string>
+    <string name="public_group">Public</string>
+    <string name="group">Group</string>
+    <string name="error_displaying_group_setting">There was an error displaying your group settings.</string>
+    <string name="create_group">Create group</string>
+    <string name="error_loading_group_photo">An error occurred while loading your group photo.</string>
+    <string name="confirm_deletion_photo_group">Do you really want to delete the photo from your group?</string>
+    <string name="msg_deletion_photo_group">Your group photo will be permanently deleted.</string>
+    <string name="data_needed_group">The group must have a name and description.</string>
+    <string name="error_saving_group_photo">An error occurred while saving your group photo.</string>
+    <string name="error_saving_group">An error occurred while saving your group:</string>
+    <string name="title_without_choosing_group_photos">Do you really want to proceed without choosing your group photo?</string>
+    <string name="warning_without_choosing_group_photos">You will be able to select your group photo later in the group settings.</string>
+    <string name="error_adjusting_group">An error occurred while adjusting your group.</string>
 </resources>

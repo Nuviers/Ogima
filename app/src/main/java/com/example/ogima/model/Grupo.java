@@ -9,16 +9,18 @@ import com.google.firebase.database.DatabaseReference;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public class Grupo implements Serializable {
+public class Grupo implements Serializable, Comparator<Grupo> {
 
     private String idGrupo;
     private String idSuperAdmGrupo;
     private String fotoGrupo;
     private String nomeGrupo;
+    private String nomeGrupoPesquisa;
     private String descricaoGrupo;
     private ArrayList<String> participantes;
     private ArrayList<String> admsGrupo;
@@ -26,6 +28,7 @@ public class Grupo implements Serializable {
     //private Date dataMensagemCompleta;
     private ArrayList<String> topicos;
     private Boolean grupoPublico;
+    private long timestampinteracao;
 
     public Grupo() {
 
@@ -34,6 +37,22 @@ public class Grupo implements Serializable {
         DatabaseReference grupoRef = firebaseRef.child("grupos");
         String idRandomicoGrupo = grupoRef.push().getKey();
         setIdGrupo(idRandomicoGrupo);
+    }
+
+    public long getTimestampinteracao() {
+        return timestampinteracao;
+    }
+
+    public void setTimestampinteracao(long timestampinteracao) {
+        this.timestampinteracao = timestampinteracao;
+    }
+
+    public String getNomeGrupoPesquisa() {
+        return nomeGrupoPesquisa;
+    }
+
+    public void setNomeGrupoPesquisa(String nomeGrupoPesquisa) {
+        this.nomeGrupoPesquisa = nomeGrupoPesquisa;
     }
 
     public ArrayList<String> getAdmsGrupo() {
@@ -108,12 +127,16 @@ public class Grupo implements Serializable {
         this.grupoPublico = grupoPublico;
     }
 
+    @Override
+    public int compare(Grupo g1, Grupo g2) {
+        return g1.getNomeGrupo().compareToIgnoreCase(g2.getNomeGrupo());
+    }
 
     //Essencial para o funcionamento do DiffUtilCallback, sem ele a lógica sempre terá erro.
     @Override
     public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof Grupo)) return false;
+        if (obj == null || getClass() != obj.getClass()) return false;
         Grupo grupo = (Grupo) obj;
         return Objects.equals(getIdGrupo(), grupo.getIdGrupo());
     }

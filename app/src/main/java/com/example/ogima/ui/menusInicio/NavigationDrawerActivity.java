@@ -259,6 +259,8 @@ public class NavigationDrawerActivity extends AppCompatActivity {
 
         //*Intent intent = new Intent(getApplicationContext(), ChatInteractionsActivity.class);
         Intent intent = new Intent(getApplicationContext(), CreateGroupActivity.class);
+        intent.putExtra("grupoPublico", true);
+        intent.putExtra("edit", false);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }

@@ -331,4 +331,21 @@
     <string name="view_invitations">Ver convites</string>
     <string name="no_community_invites_v2">Sem convites de comunidade no momento</string>
 
+    <!-- CreateGroupActivity -->
+    <string name="group_name">Nome do grupo</string>
+    <string name="enter_name_group">Informe o nome do grupo:</string>
+    <string name="group_description">Descrição do grupo</string>
+    <string name="enter_description_group">Informe a descrição do grupo:</string>
+    <string name="public_group">Público</string>
+    <string name="group">Grupo</string>
+    <string name="error_displaying_group_setting">Ocorreu um erro ao exibir os ajustes do seu grupo.</string>
+    <string name="create_group">Criar grupo</string>
+    <string name="confirm_deletion_photo_group">Deseja realmente excluir a foto do seu grupo?</string>
+    <string name="msg_deletion_photo_group">A foto do seu grupo será excluída permanentemente.</string>
+    <string name="data_needed_group">Necessário que o grupo tenha um nome e uma descrição.</string>
+    <string name="error_saving_group_photo">Ocorreu um erro ao salvar a foto do seu grupo.</string>
+    <string name="error_saving_group">Ocorreu um erro ao salvar seu grupo:</string>
+    <string name="title_without_choosing_group_photos">Deseja realmente prosseguir sem escolher a foto do seu grupo?</string>
+    <string name="warning_without_choosing_group_photos">Você poderá selecionar a foto do seu grupo posteriormente nas configurações do grupo.</string>
+    <string name="error_adjusting_group">Ocorreu um erro ao ajustar seu grupo.</string>
 </resources>

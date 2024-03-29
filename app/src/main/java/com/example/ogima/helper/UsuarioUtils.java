@@ -112,6 +112,12 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
+    public interface RecuperarIdsMeusGruposCallback{
+        void onRecuperado(ArrayList<String> idsGrupos);
+        void onNaoExiste();
+        void onError(String message);
+    }
+
     public static String recuperarIdUserAtual() {
         FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         if (autenticacao.getCurrentUser() != null) {
@@ -488,6 +494,40 @@ public class UsuarioUtils {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         DatabaseReference recuperarIdsRef = firebaseRef.child("usuarios")
                 .child(idAlvo).child("idMinhasComunidades");
+        recuperarIdsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
+                    ArrayList<String> listaIds = snapshot.getValue(t);
+                    if (listaIds != null
+                            && listaIds.size() > 0) {
+                        callback.onRecuperado(listaIds);
+                    }else{
+                        callback.onNaoExiste();
+                    }
+                }else{
+                    callback.onNaoExiste();
+                }
+                recuperarIdsRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public static void recuperarIdsGrupos(Context context, String idAlvo, RecuperarIdsMeusGruposCallback callback){
+        if (idAlvo == null
+                || idAlvo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference recuperarIdsRef = firebaseRef.child("usuarios")
+                .child(idAlvo).child("idMeusGrupos");
         recuperarIdsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
