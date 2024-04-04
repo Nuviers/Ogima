@@ -431,4 +431,7 @@
     <string name="title_without_choosing_group_photos">Do you really want to proceed without choosing your group photo?</string>
     <string name="warning_without_choosing_group_photos">You will be able to select your group photo later in the group settings.</string>
     <string name="error_adjusting_group">An error occurred while adjusting your group.</string>
+
+    <!-- GroupDetailsActivity -->
+    <string name="group_does_not_exist">This group no longer exists</string>
 </resources>

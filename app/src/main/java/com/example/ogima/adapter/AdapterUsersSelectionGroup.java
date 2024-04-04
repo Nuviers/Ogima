@@ -86,6 +86,15 @@ public class AdapterUsersSelectionGroup extends RecyclerView.Adapter<RecyclerVie
         listaSelecao = new ArrayList<>();
     }
 
+    public long getLimiteSelecao() {
+        return limiteSelecao;
+    }
+
+    public void setLimiteSelecao(long limiteSelecao) {
+        this.limiteSelecao = limiteSelecao;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -101,6 +110,9 @@ public class AdapterUsersSelectionGroup extends RecyclerView.Adapter<RecyclerVie
             String idUser = listaContatos.get(position).getIdContato();
             Usuario dadoUser = (Usuario) listaDadosUser.get(idUser);
             if (dadoUser != null) {
+
+
+
                 if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()
                         && !contato.isIndisponivel()) {
                     holderPrincipal.spinKitLoadPhoto.setVisibility(View.VISIBLE);

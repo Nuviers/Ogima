@@ -21,8 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.ManageGroupUsersActivity;
-import com.example.ogima.activity.UsuariosGrupoActivity;
+import com.example.ogima.activity.AddGroupUsersActivity;
 import com.example.ogima.adapter.AdapterChatGrupo;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -134,7 +133,7 @@ public class ListagemGrupoFragment extends Fragment {
                     hashMapGrupoPesquisa.put(grupoPesquisado.getIdGrupo(), listaGruposPesquisa.size() - 1);
                     position = listaGruposPesquisa.indexOf(grupoPesquisado);
                     adapterChatGrupo.notifyItemInserted(position);
-                }else{
+                } else {
                     listaGruposPesquisa.set(hashMapGrupoPesquisa.get(grupoPesquisado.getIdGrupo()), grupoPesquisado);
                 }
             }
@@ -207,8 +206,8 @@ public class ListagemGrupoFragment extends Fragment {
         FirebaseRecuperarUsuario.recuperaUsuario(idUsuario, new FirebaseRecuperarUsuario.RecuperaUsuarioCallback() {
             @Override
             public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeAjustado, Boolean epilepsia) {
-                if(usuarioAtual.getIdMeusGrupos() != null
-                && usuarioAtual.getIdMeusGrupos().size() >= MAX_MY_GROUPS){
+                if (usuarioAtual.getIdMeusGrupos() != null
+                        && usuarioAtual.getIdMeusGrupos().size() >= MAX_MY_GROUPS) {
                     snackbarLimiteGrupo = Snackbar.make(imgButtonCadastroGrupo, "Limite de criação de grupos atingido, por favor exclua um deles para que seja possível criar um novo grupo", Snackbar.LENGTH_LONG);
                     View snackbarView = snackbarLimiteGrupo.getView();
                     TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
@@ -216,8 +215,8 @@ public class ListagemGrupoFragment extends Fragment {
                     textView.setMaxLines(5); // altera o número máximo de linhas exibidas
                     snackbarLimiteGrupo.show();
                     ToastCustomizado.toastCustomizado("Você já atingiu o limite de grupos que são 5 grupos por usuário, por favor exclua um deles para que seja possível a criação de um novo grupo", getContext());
-                }else{
-                    Intent intent = new Intent(getContext(), ManageGroupUsersActivity.class);
+                } else {
+                    Intent intent = new Intent(getContext(), AddGroupUsersActivity.class);
                     startActivity(intent);
                     requireActivity().finish();
                 }
@@ -239,7 +238,9 @@ public class ListagemGrupoFragment extends Fragment {
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     Grupo grupo = snapshot.getValue(Grupo.class);
-                    if (grupo.getParticipantes().contains(idUsuario)) {
+                    if (grupo != null && grupo.getParticipantes() != null
+                            && !grupo.getParticipantes().isEmpty()
+                            && grupo.getParticipantes().contains(idUsuario)) {
                         //Somente traz grupos onde o usuário atual é participante
                         grupoDAO.adicionarGrupo(grupo, adapterChatGrupo);
                     }

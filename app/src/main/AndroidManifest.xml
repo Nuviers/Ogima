@@ -457,11 +457,19 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activity.ManageGroupUsersActivity"
+            android:name=".activity.AddGroupUsersActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.CreateGroupActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.GroupDetailsActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.GroupManagementActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
 

@@ -127,6 +127,13 @@ public class MidiaUtils {
         this.context = context;
     }
 
+    public MidiaUtils(Activity activity, Context context, ProgressDialog progressDialog) {
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        this.activity = activity;
+        this.context = context;
+        this.progressDialog = progressDialog;
+    }
+
     public boolean isLayoutCircular() {
         return layoutCircular;
     }
@@ -429,6 +436,9 @@ public class MidiaUtils {
                 break;
             case "ajustando":
                 progressDialog.setMessage(context.getString(R.string.progress_adjusting_message, campo));
+                break;
+            case "salvarParticipantes":
+                progressDialog.setMessage("Adicionando usuários, aguarde um momento....");
                 break;
         }
         if (!activity.isFinishing()) {

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ConversaGrupoActivity;
+import com.example.ogima.activity.GroupDetailsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
@@ -176,9 +177,11 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
     }
 
     private void abrirConversa(Grupo grupoSelecionado) {
-        Intent intent = new Intent(context, ConversaGrupoActivity.class);
-        intent.putExtra("grupo", grupoSelecionado);
-        intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
+        //**Intent intent = new Intent(context, ConversaGrupoActivity.class);
+        //**intent.putExtra("grupo", grupoSelecionado);
+        //**intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
+        Intent intent = new Intent(context, GroupDetailsActivity.class);
+        intent.putExtra("idGrupo", grupoSelecionado.getIdGrupo());
         context.startActivity(intent);
     }
 }

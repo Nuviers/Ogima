@@ -41,6 +41,7 @@ import com.example.ogima.model.Grupo;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
@@ -90,6 +91,9 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
     private HashMap<String, Object> interessesAnteriores;
     private String msgSalvamento = "", msgEdicao = "", msgError = "";
     private CommunityUtils communityUtils;
+    private int contadorParticipantes = 0;
+    private ArrayList<String> idsARemover;
+    private int contadorRemocao = 0;
 
     private interface DadosIniciaisCallback {
         void onConcluido();
@@ -222,6 +226,11 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
             onBackPressed();
             return;
         }
+
+        if (dados.containsKey("idParticipantes")) {
+            participantes = dados.getStringArrayList("idParticipantes");
+        }
+
         groupUtils.configurarBundle(dados, new GroupUtils.ConfigBundleCallback() {
             @Override
             public void onCadastro() {
@@ -236,7 +245,6 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
                 idGrupo = FirebaseUtils.retornarIdRandom(gerarIdGrupoRef);
                 participantes.add(idUsuario);
                 caminhoGrupo = "/grupos/" + idGrupo + "/";
-                dadosGrupo.put(caminhoGrupo + "participantes", participantes);
                 dadosGrupo.put(caminhoGrupo + "idGrupo", idGrupo);
                 callback.onConcluido();
             }
@@ -744,42 +752,95 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
 
             @Override
             public void onRecuperado(long timestampNegativo, String data) {
+
                 if (!edicao) {
-                    if (grupoPublico) {
-                        dadosGrupo.put(caminhoGrupoPrivado, null);
-                        dadosGrupo.put(caminhoGrupoPublico + "idGrupo", idGrupo);
-                        dadosGrupo.put(caminhoGrupoPublico + "timestampinteracao", timestampNegativo);
-                    } else {
-                        dadosGrupo.put(caminhoGrupoPublico, null);
-                        dadosGrupo.put(caminhoGrupoPrivado + "idGrupo", idGrupo);
-                        dadosGrupo.put(caminhoGrupoPrivado + "timestampinteracao", timestampNegativo);
+
+                    HashMap<String, Object> dadosOperacao = new HashMap<>();
+                    String caminhoGrupo = "/grupos/" + idGrupo + "/";
+                    for (String idParticipante : participantes) {
+                        groupUtils.verificaBlock(idParticipante, idGrupo, new GroupUtils.VerificaBlockCallback() {
+                            @Override
+                            public void onBlock(boolean status) {
+                                if (status) {
+                                    //Bloqueado
+                                    contadorParticipantes++;
+                                    idsARemover.add(idParticipante);
+                                } else {
+                                    String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idParticipante + "/";
+                                    String caminhoFollowing = "/groupFollowing/" + idParticipante + "/" + idGrupo + "/";
+                                    dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(1));
+                                    dadosOperacao.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
+                                    dadosOperacao.put(caminhoFollowers + "idParticipante", idParticipante);
+                                    dadosOperacao.put(caminhoFollowers + "administrator", false);
+                                    dadosOperacao.put(caminhoFollowing + "idGrupo", idGrupo);
+                                    dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
+                                    firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                        @Override
+                                        public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                            contadorParticipantes++;
+                                        }
+                                    });
+                                }
+
+                                if (contadorParticipantes == participantes.size()) {
+                                    contadorParticipantes = 0;
+
+                                    if (idsARemover != null && !idsARemover.isEmpty()) {
+                                        for (String idRemover : idsARemover) {
+                                            contadorRemocao++;
+                                            participantes.remove(idRemover);
+                                            if (contadorRemocao == idsARemover.size()) {
+                                                idsARemover.clear();
+                                                contadorRemocao = 0;
+                                            }
+                                        }
+                                    }
+
+                                    if (grupoPublico) {
+                                        dadosGrupo.put(caminhoGrupoPrivado, null);
+                                        dadosGrupo.put(caminhoGrupoPublico + "idGrupo", idGrupo);
+                                        dadosGrupo.put(caminhoGrupoPublico + "timestampinteracao", timestampNegativo);
+                                    } else {
+                                        dadosGrupo.put(caminhoGrupoPublico, null);
+                                        dadosGrupo.put(caminhoGrupoPrivado + "idGrupo", idGrupo);
+                                        dadosGrupo.put(caminhoGrupoPrivado + "timestampinteracao", timestampNegativo);
+                                    }
+                                    dadosAlvo.put(caminhoGrupo + "timestampinteracao", timestampNegativo);
+                                    dadosAlvo.put(caminhoGrupo + "idSuperAdmGrupo", idUsuario);
+                                    dadosAlvo.put(caminhoGrupo + "participantes", participantes);
+
+                                    UsuarioUtils.recuperarIdsGrupos(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
+                                        ArrayList<String> listaMeusGrupos = new ArrayList<>();
+
+                                        @Override
+                                        public void onRecuperado(ArrayList<String> idsGrupos) {
+                                            listaMeusGrupos = idsGrupos;
+                                            listaMeusGrupos.add(idGrupo);
+                                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
+                                            salvarHashmap(dadosAlvo);
+                                        }
+
+                                        @Override
+                                        public void onNaoExiste() {
+                                            listaMeusGrupos.add(idGrupo);
+                                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
+                                            salvarHashmap(dadosAlvo);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_group), getApplicationContext());
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onError(String message) {
+
+                            }
+                        });
                     }
-                    dadosAlvo.put(caminhoGrupo + "timestampinteracao", timestampNegativo);
-                    dadosAlvo.put(caminhoGrupo + "idSuperAdmGrupo", idUsuario);
-
-                    UsuarioUtils.recuperarIdsGrupos(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
-                        ArrayList<String> listaMeusGrupos = new ArrayList<>();
-
-                        @Override
-                        public void onRecuperado(ArrayList<String> idsGrupos) {
-                            listaMeusGrupos = idsGrupos;
-                            listaMeusGrupos.add(idGrupo);
-                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
-                            salvarHashmap(dadosAlvo);
-                        }
-
-                        @Override
-                        public void onNaoExiste() {
-                            listaMeusGrupos.add(idGrupo);
-                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
-                            salvarHashmap(dadosAlvo);
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_group), getApplicationContext());
-                        }
-                    });
                 } else {
                     salvarHashmap(dadosAlvo);
                 }

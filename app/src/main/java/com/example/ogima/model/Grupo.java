@@ -29,6 +29,8 @@ public class Grupo implements Serializable, Comparator<Grupo> {
     private ArrayList<String> topicos;
     private Boolean grupoPublico;
     private long timestampinteracao;
+    private long nrParticipantes;
+    private int nrAdms;
 
     public Grupo() {
 
@@ -39,12 +41,28 @@ public class Grupo implements Serializable, Comparator<Grupo> {
         setIdGrupo(idRandomicoGrupo);
     }
 
+    public int getNrAdms() {
+        return nrAdms;
+    }
+
+    public void setNrAdms(int nrAdms) {
+        this.nrAdms = nrAdms;
+    }
+
     public long getTimestampinteracao() {
         return timestampinteracao;
     }
 
     public void setTimestampinteracao(long timestampinteracao) {
         this.timestampinteracao = timestampinteracao;
+    }
+
+    public long getNrParticipantes() {
+        return nrParticipantes;
+    }
+
+    public void setNrParticipantes(long nrParticipantes) {
+        this.nrParticipantes = nrParticipantes;
     }
 
     public String getNomeGrupoPesquisa() {

@@ -1,15 +1,5 @@
 package com.example.ogima.activity;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +16,16 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterAdmsComunidade;
 import com.example.ogima.helper.CommunityUtils;
@@ -34,67 +34,61 @@ import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.GroupUtils;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
-import com.example.ogima.model.Comunidade;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.OnDisconnect;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
-import com.king.zxing.CaptureActivity;
-import com.zhihu.matisse.internal.entity.Item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CommunityDetailsActivity extends AppCompatActivity {
+public class GroupDetailsActivity extends AppCompatActivity {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private TextView txtViewTitleToolbar;
-    private Toolbar toolbarIncPadrao;
-    private ImageButton imgBtnIncBackPadrao;
+    private FirebaseUtils firebaseUtils = new FirebaseUtils();
+    private StorageReference storageRef;
     private String idUsuario = "";
-    private ImageView imgViewFoto, imgViewFundo, imgViewFundador;
+    private TextView txtViewTitleToolbar;
+    private Toolbar toolbarIncBlack;
+    private ImageButton imgBtnIncBackBlack;
+    private ImageView imgViewFoto, imgViewFundador;
     private TextView txtViewNome, txtViewNrParticipantes, txtViewNrAdms,
             txtViewNomeFundador, txtViewDesc, txtViewPrivacidade;
-    private SpinKitView spinKitViewFoto, spinKitViewFundo, spinKitViewFundador;
-    private Button btnVerParticipantes, btnEditarComunidade, btnDeletarComunidade,
-            btnSairDaComunidade, btnGerenciarUsuarios;
-    private ImageButton imgBtnVerParticipantes, imgBtnConfigComunidade;
+    private SpinKitView spinKitViewFoto, spinKitViewFundador;
+    private Button btnVerParticipantes, btnEditarGrupo, btnDeletarGrupo,
+            btnSairDoGrupo, btnGerenciarUsuarios;
+    private ImageButton imgBtnVerParticipantes, imgBtnConfigGrupo;
     private boolean statusEpilepsia = true;
     private String msgErroAoExibirDetalhes = "", msgErroAoRecuperarDados = "";
-    private Query comunidadeRef, admsRef;
-    private ChildEventListener childListenerComunidade, childListenerAdms;
-    private String idComunidade = "";
-    private FirebaseUtils firebaseUtils = new FirebaseUtils();
+    private Query grupoRef;
+    private ChildEventListener childListenerGrupo;
+    private String idGrupo = "";
     private boolean dadosRecuperados = false;
     private List<Usuario> listaUsuariosAdms = new ArrayList<>();
     private int percorrido = 0;
     private LinearLayoutManager linearLayoutManager;
     private RecyclerView recyclerViewAdms;
-    private AdapterAdmsComunidade adapterAdmsComunidade;
+    private AdapterAdmsComunidade adapterAdmsGrupo;
     private UsuarioDiffDAO usuarioDiffDAO;
     private LinearLayout linearLayoutTopicos;
     private CommunityUtils communityUtils;
+    private GroupUtils groupUtils;
     private AlertDialog.Builder builder;
     private AlertDialog dialog;
     private ProgressDialog progressDialog;
@@ -102,41 +96,23 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     //Componentes bottomSheetDialogSair
     private TextView txtViewEscolherFundador, txtViewCancelarSaida;
     //Componentes bottomSheetDialogGerenciar
-    private Button btnViewAddUserComunidade, btnViewRemoverUserComunidade, btnViewPromoverUserComunidade,
-            btnViewDespromoverUserComunidade;
+    private Button btnViewAddUserGrupo, btnViewRemoverUserGrupo, btnViewPromoverUserGrupo,
+            btnViewDespromoverUserGrupo;
     private MidiaUtils midiaUtils;
-    private StorageReference storageRef;
-
     private boolean founder = false;
     private boolean administrator = false;
     private PopupMenu popupMenuConfig;
     private DatabaseReference verificaBlockRef, verificaDenunciaRef;
     private ValueEventListener listenerBlock, listenerDenuncia;
-    private boolean comunidadeBloqueada = false;
+    private boolean grupoBloqueado = false;
     private final Intent intentDenuncia = new Intent(Intent.ACTION_SEND);
     private ActivityResultLauncher<Intent> resultLauncher;
     private int limiteBloqueio = 0;
 
-    public CommunityDetailsActivity() {
+    public GroupDetailsActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
-        msgErroAoExibirDetalhes = "Ocorreu um erro ao exibir os detalhes da comunidade.";
-        msgErroAoRecuperarDados = "Ocorreu um erro ao recuperar os dados da comunidade.";
-    }
-
-    public boolean isStatusEpilepsia() {
-        return statusEpilepsia;
-    }
-
-    public void setStatusEpilepsia(boolean statusEpilepsia) {
-        this.statusEpilepsia = statusEpilepsia;
-    }
-
-    public boolean isComunidadeBloqueada() {
-        return comunidadeBloqueada;
-    }
-
-    public void setComunidadeBloqueada(boolean comunidadeBloqueada) {
-        this.comunidadeBloqueada = comunidadeBloqueada;
+        msgErroAoExibirDetalhes = "Ocorreu um erro ao exibir os detalhes do grupo.";
+        msgErroAoRecuperarDados = "Ocorreu um erro ao recuperar os dados do grupo.";
     }
 
     public interface DadosIniciaisCallback {
@@ -145,7 +121,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         void onError();
     }
 
-    public interface ComunidadeRecuperadaCallback {
+    public interface GrupoRecuperadoCallback {
         void onConcluido();
     }
 
@@ -163,7 +139,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         ToastCustomizado.toastCustomizadoCurto("DESTROY", getApplicationContext());
-        firebaseUtils.removerQueryChildListener(comunidadeRef, childListenerComunidade);
+        firebaseUtils.removerQueryChildListener(grupoRef, childListenerGrupo);
         firebaseUtils.removerValueListener(verificaBlockRef, listenerBlock);
         firebaseUtils.removerValueListener(verificaDenunciaRef, listenerDenuncia);
         if (usuarioDiffDAO != null) {
@@ -181,13 +157,14 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_community_details);
+        setContentView(R.layout.activity_group_details);
         inicializarComponentes();
         resultadoIntent();
     }
 
     private void configOnStart() {
         if (!dadosRecuperados) {
+            ToastCustomizado.toastCustomizadoCurto("Recuperar grupo", getApplicationContext());
             if (idUsuario.isEmpty()) {
                 ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
                 onBackPressed();
@@ -198,30 +175,30 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDialog.setCancelable(false);
-            midiaUtils = new MidiaUtils(CommunityDetailsActivity.this, getApplicationContext());
-            btnDeletarComunidade.setVisibility(View.GONE);
-            btnEditarComunidade.setVisibility(View.GONE);
-            btnSairDaComunidade.setVisibility(View.GONE);
+            midiaUtils = new MidiaUtils(GroupDetailsActivity.this, getApplicationContext());
+            btnDeletarGrupo.setVisibility(View.GONE);
+            btnEditarGrupo.setVisibility(View.GONE);
+            btnSairDoGrupo.setVisibility(View.GONE);
             btnGerenciarUsuarios.setVisibility(View.GONE);
             configRecycler();
-            usuarioDiffDAO = new UsuarioDiffDAO(listaUsuariosAdms, adapterAdmsComunidade);
+            usuarioDiffDAO = new UsuarioDiffDAO(listaUsuariosAdms, adapterAdmsGrupo);
             UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
                 @Override
                 public void onConcluido(boolean epilepsia) {
                     setStatusEpilepsia(epilepsia);
-                    adapterAdmsComunidade.setStatusEpilepsia(epilepsia);
+                    adapterAdmsGrupo.setStatusEpilepsia(epilepsia);
                     configInicial(new DadosIniciaisCallback() {
                         @Override
                         public void onConcluido() {
-                            if (idComunidade.isEmpty()) {
-                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados da comunidade", getApplicationContext());
+                            if (idGrupo.isEmpty()) {
+                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados do grupo", getApplicationContext());
                                 onBackPressed();
                                 return;
                             }
                             configurarBottomSheetDialog();
                             configMenuSuperior();
                             clickListeners();
-                            recuperarComunidade(new ComunidadeRecuperadaCallback() {
+                            recuperarGrupo(new GrupoRecuperadoCallback() {
                                 @Override
                                 public void onConcluido() {
 
@@ -254,9 +231,10 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     }
 
     private void configInicial(DadosIniciaisCallback callback) {
-        setSupportActionBar(toolbarIncPadrao);
+        setSupportActionBar(toolbarIncBlack);
         setTitle("");
-        String title = FormatarContadorUtils.abreviarTexto("Detalhes da comunidade", 32);
+        String title = FormatarContadorUtils.abreviarTexto("Detalhes do grupo", 32);
+        imgViewFoto.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FFFFFF")));
         txtViewTitleToolbar.setText(title);
         storageRef = ConfiguracaoFirebase.getFirebaseStorage();
         configBundle(callback);
@@ -268,63 +246,57 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             callback.onError();
             return;
         }
-        if (dados.containsKey("idComunidade")) {
-            idComunidade = dados.getString("idComunidade");
+        if (dados.containsKey("idGrupo")) {
+            idGrupo = dados.getString("idGrupo");
             callback.onConcluido();
         } else {
             callback.onError();
         }
     }
 
-    private void recuperarComunidade(ComunidadeRecuperadaCallback callback) {
-        comunidadeRef = firebaseRef.child("comunidades").orderByChild("idComunidade")
-                .equalTo(idComunidade);
+    private void recuperarGrupo(GrupoRecuperadoCallback callback) {
+        grupoRef = firebaseRef.child("grupos").orderByChild("idGrupo")
+                .equalTo(idGrupo);
 
-        childListenerComunidade = comunidadeRef.addChildEventListener(new ChildEventListener() {
+        childListenerGrupo = grupoRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    Comunidade comunidade = snapshot.getValue(Comunidade.class);
-                    if (comunidade == null) {
+                    Grupo grupo = snapshot.getValue(Grupo.class);
+                    if (grupo == null) {
                         ToastCustomizado.toastCustomizadoCurto(msgErroAoRecuperarDados, getApplicationContext());
                         onBackPressed();
                         return;
                     }
-                    if (comunidade.getFotoComunidade() != null
-                            && !comunidade.getFotoComunidade().isEmpty()) {
-                        exibirFoto(UsuarioUtils.FIELD_PHOTO, comunidade.getFotoComunidade(), false, false);
+                    if (grupo.getFotoGrupo() != null
+                            && !grupo.getFotoGrupo().isEmpty()) {
+                        exibirFoto(UsuarioUtils.FIELD_PHOTO, grupo.getFotoGrupo(), false, false);
                     } else {
                         exibirFoto(UsuarioUtils.FIELD_PHOTO, "", true, false);
                     }
-                    if (comunidade.getFundoComunidade() != null
-                            && !comunidade.getFundoComunidade().isEmpty()) {
-                        exibirFoto(UsuarioUtils.FIELD_BACKGROUND, comunidade.getFundoComunidade(), false, false);
-                    } else {
-                        exibirFoto(UsuarioUtils.FIELD_BACKGROUND, "", false, false);
-                    }
 
-                    if (comunidade.getNomeComunidade() != null
-                            && !comunidade.getNomeComunidade().isEmpty()) {
-                        exibirNome(comunidade.getNomeComunidade(), false);
+                    if (grupo.getNomeGrupo() != null
+                            && !grupo.getNomeGrupo().isEmpty()) {
+                        exibirNome(grupo.getNomeGrupo(), false);
                     }
 
                     int nrParticipantes = 0;
-                    if (comunidade.getNrParticipantes() != -1) {
-                        nrParticipantes = (int) comunidade.getNrParticipantes();
+                    if (grupo.getNrParticipantes() != -1) {
+                        nrParticipantes = (int) grupo.getNrParticipantes();
                     }
 
-                    txtViewNrParticipantes.setText(String.format("%d%s%d", nrParticipantes, "/", CommunityUtils.MAX_NUMBER_PARTICIPANTS));
+                    txtViewNrParticipantes.setText(String.format("%d%s%d", nrParticipantes, "/", GroupUtils.MAX_NUMBER_PARTICIPANTS));
 
                     int nrAdms = 0;
-                    if (comunidade.getNrAdms() != -1) {
-                        nrAdms = (int) comunidade.getNrAdms();
+                    if (grupo.getNrAdms() != -1) {
+                        nrAdms = grupo.getNrAdms();
                     }
 
                     txtViewNrAdms.setText(String.format("%d%s%d", nrAdms, "/", CommunityUtils.MAX_NUMBER_ADMS));
 
-                    if (comunidade.getAdmsComunidade() != null
-                            && comunidade.getAdmsComunidade().size() > 0) {
-                        recuperarAdms(comunidade.getAdmsComunidade(), new RecuperarAdmsCallback() {
+                    if (grupo.getAdmsGrupo() != null
+                            && !grupo.getAdmsGrupo().isEmpty()) {
+                        recuperarAdms(grupo.getAdmsGrupo(), new RecuperarAdmsCallback() {
                             @Override
                             public void onConcluido() {
 
@@ -332,62 +304,62 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                         });
                     }
 
-                    if (comunidade.getIdSuperAdmComunidade() == null
-                            || comunidade.getIdSuperAdmComunidade().isEmpty()) {
+                    if (grupo.getIdSuperAdmGrupo() == null
+                            || grupo.getIdSuperAdmGrupo().isEmpty()) {
                         callback.onConcluido();
                         return;
                     }
 
-                    recuperarDadosFundador(comunidade.getIdSuperAdmComunidade(), callback);
+                    recuperarDadosFundador(grupo.getIdSuperAdmGrupo(), callback);
 
-                    if (comunidade.getDescricaoComunidade() != null
-                            && !comunidade.getDescricaoComunidade().isEmpty()) {
-                        txtViewDesc.setText(comunidade.getDescricaoComunidade().trim());
+                    if (grupo.getDescricaoGrupo() != null
+                            && !grupo.getDescricaoGrupo().isEmpty()) {
+                        txtViewDesc.setText(grupo.getDescricaoGrupo().trim());
                     }
 
-                    if (comunidade.getTopicos() != null
-                            && comunidade.getTopicos().size() > 0) {
-                        exibirTopicos(comunidade.getTopicos());
+                    if (grupo.getTopicos() != null
+                            && !grupo.getTopicos().isEmpty()) {
+                        exibirTopicos(grupo.getTopicos());
                     }
 
                     String privacidade;
-                    if (comunidade.getComunidadePublica()) {
+                    if (grupo.getGrupoPublico()) {
                         privacidade = getString(R.string.public_community);
                     } else {
                         privacidade = getString(R.string.private_community);
                     }
                     txtViewPrivacidade.setText(privacidade);
 
-                    if (comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
-                        imgBtnConfigComunidade.setVisibility(View.GONE);
+                    if (grupo.getIdSuperAdmGrupo().equals(idUsuario)) {
+                        imgBtnConfigGrupo.setVisibility(View.GONE);
                     } else {
-                        imgBtnConfigComunidade.setVisibility(View.VISIBLE);
+                        imgBtnConfigGrupo.setVisibility(View.VISIBLE);
                     }
 
-                    if (comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
+                    if (grupo.getIdSuperAdmGrupo().equals(idUsuario)) {
                         btnGerenciarUsuarios.setVisibility(View.VISIBLE);
-                        btnEditarComunidade.setVisibility(View.VISIBLE);
-                        btnDeletarComunidade.setVisibility(View.VISIBLE);
-                        if (comunidade.getNrParticipantes() < 1) {
-                            btnDeletarComunidade.setText("Sair e excluir comunidade");
+                        btnEditarGrupo.setVisibility(View.VISIBLE);
+                        btnDeletarGrupo.setVisibility(View.VISIBLE);
+                        if (grupo.getNrParticipantes() < 1) {
+                            btnDeletarGrupo.setText("Sair e excluir grupo");
                         } else {
-                            btnSairDaComunidade.setText("Sair da comunidade");
-                            btnSairDaComunidade.setVisibility(View.VISIBLE);
+                            btnSairDoGrupo.setText("Sair do grupo");
+                            btnSairDoGrupo.setVisibility(View.VISIBLE);
                         }
-                    } else if (comunidade.getAdmsComunidade() != null
-                            && comunidade.getAdmsComunidade().size() > 0
-                            && comunidade.getAdmsComunidade().contains(idUsuario)) {
+                    } else if (grupo.getAdmsGrupo() != null
+                            && !grupo.getAdmsGrupo().isEmpty()
+                            && grupo.getAdmsGrupo().contains(idUsuario)) {
                         btnGerenciarUsuarios.setVisibility(View.VISIBLE);
-                        btnSairDaComunidade.setText("Sair da comunidade");
-                        btnSairDaComunidade.setVisibility(View.VISIBLE);
+                        btnSairDoGrupo.setText("Sair do grupo");
+                        btnSairDoGrupo.setVisibility(View.VISIBLE);
                     } else {
-                        communityUtils.verificaSeEParticipante(comunidade.getIdComunidade(), idUsuario, new CommunityUtils.VerificaParticipanteCallback() {
+                        groupUtils.verificaSeEParticipante(grupo.getIdGrupo(), idUsuario, new GroupUtils.VerificaParticipanteCallback() {
                             @Override
                             public void onParticipante(boolean status) {
                                 if (status) {
                                     //Participante
-                                    btnSairDaComunidade.setText("Sair da comunidade");
-                                    btnSairDaComunidade.setVisibility(View.VISIBLE);
+                                    btnSairDoGrupo.setText("Sair do grupo");
+                                    btnSairDoGrupo.setVisibility(View.VISIBLE);
                                 }
                             }
 
@@ -405,20 +377,20 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    Comunidade comunidade = snapshot.getValue(Comunidade.class);
-                    if (comunidade != null && comunidade.getIdSuperAdmComunidade() != null
-                            && !comunidade.getIdSuperAdmComunidade().isEmpty() &&
-                            comunidade.getIdSuperAdmComunidade().equals(idUsuario)) {
-                        imgBtnConfigComunidade.setVisibility(View.GONE);
+                    Grupo grupo = snapshot.getValue(Grupo.class);
+                    if (grupo != null && grupo.getIdSuperAdmGrupo() != null
+                            && !grupo.getIdSuperAdmGrupo().isEmpty() &&
+                            grupo.getIdSuperAdmGrupo().equals(idUsuario)) {
+                        imgBtnConfigGrupo.setVisibility(View.GONE);
                     } else {
-                        imgBtnConfigComunidade.setVisibility(View.VISIBLE);
+                        imgBtnConfigGrupo.setVisibility(View.VISIBLE);
                     }
                 }
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                ToastCustomizado.toastCustomizadoCurto(getString(R.string.community_does_not_exist), getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto(getString(R.string.group_does_not_exist), getApplicationContext());
                 onBackPressed();
             }
 
@@ -485,34 +457,10 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onError(String message) {
                             ocultarSpinKit(campo, fundador);
-                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao carregar a foto da comunidade.", getApplicationContext());
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao carregar a foto do grupo.", getApplicationContext());
                         }
                     });
 
-        } else if (campo.equals(UsuarioUtils.FIELD_BACKGROUND)) {
-            if (padrao) {
-                CommunityUtils.exibirFotoPadrao(getApplicationContext(), imgViewFundo, campo, false);
-                return;
-            }
-
-            if (url == null || url.isEmpty()) {
-                return;
-            }
-            exibirSpinKit(campo, fundador);
-            GlideCustomizado.loadUrlComListener(getApplicationContext(),
-                    url, imgViewFundo, android.R.color.transparent,
-                    GlideCustomizado.CENTER_CROP, false, isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
-                        @Override
-                        public void onCarregado() {
-                            ocultarSpinKit(campo, fundador);
-                        }
-
-                        @Override
-                        public void onError(String message) {
-                            ocultarSpinKit(campo, fundador);
-                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao carregar o plano de fundo da comunidade.", getApplicationContext());
-                        }
-                    });
         }
     }
 
@@ -521,8 +469,8 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             String nomeFundador = FormatarContadorUtils.abreviarTexto(nomeAlvo, UsuarioUtils.MAX_NAME_LENGHT_FOUNDER);
             txtViewNomeFundador.setText(nomeFundador);
         } else {
-            String nomeComunidade = FormatarContadorUtils.abreviarTexto(nomeAlvo, UsuarioUtils.MAX_COMMUNITY_NAME_LENGHT);
-            txtViewNome.setText(nomeComunidade);
+            String nomeGrupo = FormatarContadorUtils.abreviarTexto(nomeAlvo, UsuarioUtils.MAX_COMMUNITY_NAME_LENGHT);
+            txtViewNome.setText(nomeGrupo);
         }
     }
 
@@ -539,7 +487,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                         public void onBlocked(boolean status) {
                             usuarioAtual.setIndisponivel(status);
                             usuarioDiffDAO.adicionarUsuario(usuarioAtual);
-                            adapterAdmsComunidade.updateUsersList(listaUsuariosAdms, new AdapterAdmsComunidade.ListaAtualizadaCallback() {
+                            adapterAdmsGrupo.updateUsersList(listaUsuariosAdms, new AdapterAdmsComunidade.ListaAtualizadaCallback() {
                                 @Override
                                 public void onAtualizado() {
 
@@ -571,13 +519,14 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         }
         recyclerViewAdms.setHasFixedSize(false);
         recyclerViewAdms.setLayoutManager(linearLayoutManager);
-        if (adapterAdmsComunidade == null) {
-            adapterAdmsComunidade = new AdapterAdmsComunidade(getApplicationContext(), listaUsuariosAdms);
+        if (adapterAdmsGrupo == null) {
+            adapterAdmsGrupo = new AdapterAdmsComunidade(getApplicationContext(), listaUsuariosAdms);
         }
-        recyclerViewAdms.setAdapter(adapterAdmsComunidade);
+        recyclerViewAdms.setAdapter(adapterAdmsGrupo);
     }
 
-    private void recuperarDadosFundador(String idFundador, ComunidadeRecuperadaCallback callback) {
+
+    private void recuperarDadosFundador(String idFundador, GrupoRecuperadoCallback callback) {
         UsuarioUtils.recuperarDadosPadrao(getApplicationContext(), idFundador, new UsuarioUtils.DadosPadraoCallback() {
             @Override
             public void onRecuperado(String nome, String foto, String fundo) {
@@ -610,44 +559,16 @@ public class CommunityDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onSemDado() {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados do fundador da comunidade.", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados do fundador do grupo.", getApplicationContext());
                 callback.onConcluido();
             }
 
             @Override
             public void onError(String message) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados do fundador da comunidade.", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados do fundador do grupo.", getApplicationContext());
                 callback.onConcluido();
             }
         });
-    }
-
-    private void exibirSpinKit(String campo, boolean fundador) {
-        if (campo != null && !campo.isEmpty()) {
-            if (campo.equals(UsuarioUtils.FIELD_PHOTO)) {
-                if (fundador) {
-                    ProgressBarUtils.exibirProgressBar(spinKitViewFundador, CommunityDetailsActivity.this);
-                } else {
-                    ProgressBarUtils.exibirProgressBar(spinKitViewFoto, CommunityDetailsActivity.this);
-                }
-            } else if (campo.equals(UsuarioUtils.FIELD_BACKGROUND)) {
-                ProgressBarUtils.exibirProgressBar(spinKitViewFundo, CommunityDetailsActivity.this);
-            }
-        }
-    }
-
-    private void ocultarSpinKit(String campo, boolean fundador) {
-        if (campo != null && !campo.isEmpty()) {
-            if (campo.equals(UsuarioUtils.FIELD_PHOTO)) {
-                if (fundador) {
-                    ProgressBarUtils.ocultarProgressBar(spinKitViewFundador, CommunityDetailsActivity.this);
-                } else {
-                    ProgressBarUtils.ocultarProgressBar(spinKitViewFoto, CommunityDetailsActivity.this);
-                }
-            } else if (campo.equals(UsuarioUtils.FIELD_BACKGROUND)) {
-                ProgressBarUtils.ocultarProgressBar(spinKitViewFundo, CommunityDetailsActivity.this);
-            }
-        }
     }
 
     private void visitarPerfil(String idFundador) {
@@ -679,64 +600,64 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     }
 
     private void irParaEdicao() {
-        if (idComunidade.isEmpty()) {
-            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para edição de comunidade", getApplicationContext());
+        if (idGrupo.isEmpty()) {
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para edição do grupo", getApplicationContext());
             onBackPressed();
             return;
         }
-        FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+        FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
             @Override
-            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-                if (comunidadeAtual.getIdSuperAdmComunidade() != null
-                        && !comunidadeAtual.getIdSuperAdmComunidade().isEmpty()
-                        && comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
-                    Intent intent = new Intent(getApplicationContext(), CreateCommunityActivity.class);
+            public void onGrupoRecuperado(Grupo grupoAtual) {
+                if (grupoAtual.getIdSuperAdmGrupo() != null
+                        && !grupoAtual.getIdSuperAdmGrupo().isEmpty()
+                        && grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+                    Intent intent = new Intent(getApplicationContext(), CreateGroupActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("dadosEdicao", comunidadeAtual);
+                    intent.putExtra("dadosEdicao", grupoAtual);
                     intent.putExtra("edit", true);
                     startActivity(intent);
                 } else {
-                    ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para editar essa comunidade", getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para editar esse grupo", getApplicationContext());
                 }
             }
 
             @Override
             public void onNaoExiste() {
-                ToastCustomizado.toastCustomizadoCurto("Essa comunidade não existe mais", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Esse grupo não existe mais", getApplicationContext());
             }
 
             @Override
             public void onError(String mensagem) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para edição de comunidade", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para edição do grupo", getApplicationContext());
             }
         });
     }
 
-    private void dialogSairDaComunidade() {
-        FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+    private void dialogSairDoGrupo() {
+        FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
             @Override
-            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-                builder.setTitle("Deseja realmente sair da comunidade?");
-                communityUtils.recuperaCargo(comunidadeAtual, new CommunityUtils.RecuperaCargoCallback() {
+            public void onGrupoRecuperado(Grupo grupoAtual) {
+                builder.setTitle("Deseja realmente sair do grupo?");
+                groupUtils.recuperaCargo(grupoAtual, new GroupUtils.RecuperaCargoCallback() {
                     @Override
                     public void onConcluido(String cargo) {
                         String message = "";
                         if (cargo.equals(CommunityUtils.FOUNDER_POSITION)) {
-                            message = "Você será excluído da comunidade e você terá que escolher um novo fundador.";
+                            message = "Você será excluído do grupo e você terá que escolher um novo fundador.";
                         } else if (cargo.equals(CommunityUtils.ADM_POSITION)) {
-                            message = "Você não participará mais dessa comunidade e perderá seu cargo de administrador.";
+                            message = "Você não participará mais desse grupo e perderá seu cargo de administrador.";
                         } else if (cargo.equals(CommunityUtils.PARTICIPANT_POSITION)) {
-                            message = "Você não participará mais dessa comunidade.";
+                            message = "Você não participará mais desse grupo.";
                         }
 
                         builder.setMessage(message);
                         builder.setCancelable(true);
-                        builder.setPositiveButton("Sair da comunidade", new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton("Sair do grupo", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 if (cargo.equals(CommunityUtils.FOUNDER_POSITION)) {
-                                    sheetDialogSairDaComunidade();
+                                    sheetDialogSairDoGrupo();
                                 } else {
-                                    sairDaComunidade(comunidadeAtual);
+                                    sairDoGrupo(grupoAtual);
                                 }
                             }
                         });
@@ -754,23 +675,23 @@ public class CommunityDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onNaoExiste() {
-                ToastCustomizado.toastCustomizadoCurto("Essa comunidade não existe mais", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Esse grupo não existe mais", getApplicationContext());
                 onBackPressed();
             }
 
             @Override
             public void onError(String mensagem) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao sair da comunidade. Tente novamente.", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao sair do grupo. Tente novamente.", getApplicationContext());
             }
         });
     }
 
-    private void sheetDialogSairDaComunidade() {
+    private void sheetDialogSairDoGrupo() {
         bottomSheetDialogSair.show();
         bottomSheetDialogSair.setCancelable(true);
         txtViewEscolherFundador = bottomSheetDialogSair.findViewById(R.id.txtViewEscolherFundador);
         txtViewCancelarSaida = bottomSheetDialogSair.findViewById(R.id.txtViewCancelarSaida);
-        txtViewEscolherFundador.setText("Escolher um novo fundador e sair da comunidade");
+        txtViewEscolherFundador.setText("Escolher um novo fundador e sair dO grupo");
 
         txtViewEscolherFundador.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -790,27 +711,27 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void sairDaComunidade(Comunidade comunidadeAlvo) {
+    private void sairDoGrupo(Grupo grupoAlvo) {
         exibirProgressDialog("sair");
-        communityUtils.sairDaComunidade(idComunidade, idUsuario, new CommunityUtils.SairDaComunidadeCallback() {
+        groupUtils.sairDoGrupo(idGrupo, idUsuario, new GroupUtils.SairDoGrupoCallback() {
             @Override
             public void onConcluido() {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizadoCurto("Você deixou de participar da comunidade com sucesso.", getApplicationContext());
-                irParaListagemDeComunidades();
+                ToastCustomizado.toastCustomizadoCurto("Você deixou de participar do grupo com sucesso.", getApplicationContext());
+                irParaListagemDeGrupos();
             }
 
             @Override
             public void onError(String message) {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizado(String.format("%s %s%s", "Ocorreu um erro ao sair da comunidade.", "Code:", message), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s %s%s", "Ocorreu um erro ao sair do grupo.", "Code:", message), getApplicationContext());
                 onBackPressed();
             }
         });
     }
 
     private void clickListeners() {
-        imgBtnConfigComunidade.setOnClickListener(new View.OnClickListener() {
+        imgBtnConfigGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (popupMenuConfig != null) {
@@ -818,19 +739,19 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                 }
             }
         });
-        btnEditarComunidade.setOnClickListener(new View.OnClickListener() {
+        btnEditarGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 irParaEdicao();
             }
         });
-        btnSairDaComunidade.setOnClickListener(new View.OnClickListener() {
+        btnSairDoGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogSairDaComunidade();
+                dialogSairDoGrupo();
             }
         });
-        btnDeletarComunidade.setOnClickListener(new View.OnClickListener() {
+        btnDeletarGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialogExlusao();
@@ -845,9 +766,9 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         btnVerParticipantes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(CommunityDetailsActivity.this, CommunityParticipantsActivity.class);
+                Intent intent = new Intent(GroupDetailsActivity.this, CommunityParticipantsActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("idComunidade", idComunidade);
+                intent.putExtra("idGrupo", idGrupo);
                 startActivity(intent);
             }
         });
@@ -856,56 +777,55 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     public void exibirProgressDialog(String tipoMensagem) {
         switch (tipoMensagem) {
             case "sair":
-                progressDialog.setMessage("Saindo da comunidade, aguarde....");
+                progressDialog.setMessage("Saindo do grupo, aguarde....");
                 break;
             case "excluir":
-                progressDialog.setMessage("Exluindo sua comunidade, aguarde....");
+                progressDialog.setMessage("Exluindo seu grupo, aguarde....");
                 break;
             case "bloquear":
-                progressDialog.setMessage("Bloqueando comunidade, aguarde....");
+                progressDialog.setMessage("Bloqueando grupo, aguarde....");
                 break;
             case "desbloquear":
-                progressDialog.setMessage("Desbloqueando comunidade, aguarde....");
+                progressDialog.setMessage("Desbloqueando grupo, aguarde....");
                 break;
             case "denunciar":
                 progressDialog.setMessage("Ajustando denúncia, aguarde....");
                 break;
         }
-        if (!CommunityDetailsActivity.this.isFinishing()) {
+        if (!GroupDetailsActivity.this.isFinishing()) {
             progressDialog.show();
         }
     }
 
-
     public void ocultarProgressDialog() {
-        if (progressDialog != null && !CommunityDetailsActivity.this.isFinishing()
+        if (progressDialog != null && !GroupDetailsActivity.this.isFinishing()
                 && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
     }
 
-    private void irParaListagemDeComunidades() {
-        Intent intent = new Intent(CommunityDetailsActivity.this, ListaComunidadesActivityNEW.class);
+    private void irParaListagemDeGrupos() {
+        Intent intent = new Intent(GroupDetailsActivity.this, ListaComunidadesActivityNEW.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finish();
     }
 
     private void configurarBottomSheetDialog() {
-        bottomSheetDialogGerenciar = new BottomSheetDialog(CommunityDetailsActivity.this);
+        bottomSheetDialogGerenciar = new BottomSheetDialog(GroupDetailsActivity.this);
         bottomSheetDialogGerenciar.setContentView(R.layout.bottom_sheet_dialog_gerenciar_grupo);
 
-        bottomSheetDialogSair = new BottomSheetDialog(CommunityDetailsActivity.this);
+        bottomSheetDialogSair = new BottomSheetDialog(GroupDetailsActivity.this);
         bottomSheetDialogSair.setContentView(R.layout.bottom_sheet_sair_do_grupo);
     }
 
     private void dialogExlusao() {
-        builder.setTitle("Deseja realmente excluir sua comunidade?");
-        builder.setMessage("A comunidade será excluída permanentemente e seus participantes também.");
+        builder.setTitle("Deseja realmente excluir seu grupo?");
+        builder.setMessage("O grupo será excluído permanentemente e seus participantes também.");
         builder.setCancelable(true);
-        builder.setPositiveButton("Sair e excluir comunidade", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Sair e excluir grupo", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                excluirComunidade();
+                excluirGrupo();
             }
         });
         builder.setNegativeButton("Cancelar", null);
@@ -913,56 +833,41 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void excluirComunidade() {
-        if (idComunidade.isEmpty()) {
-            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados da comunidade", getApplicationContext());
+    private void excluirGrupo() {
+        if (idGrupo.isEmpty()) {
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados do grupo", getApplicationContext());
             onBackPressed();
             return;
         }
-        FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+        FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
             @Override
-            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
-                if (!comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
-                    ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para excluir essa comunidade", getApplicationContext());
+            public void onGrupoRecuperado(Grupo grupoAtual) {
+                if (!grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
+                    ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para excluir esse grupo", getApplicationContext());
                     return;
                 }
 
                 exibirProgressDialog("excluir");
 
-                StorageReference imagemRef = storageRef.child("comunidades")
-                        .child(comunidadeAtual.getIdComunidade())
-                        .child("fotoComunidade.jpeg");
-
-                StorageReference fundoRef = storageRef.child("comunidades")
-                        .child(comunidadeAtual.getIdComunidade())
-                        .child("fundoComunidade.jpeg");
+                StorageReference imagemRef = storageRef.child("grupos")
+                        .child(grupoAtual.getIdGrupo())
+                        .child("fotoGrupo.jpeg");
 
                 midiaUtils.removerDoStorage(imagemRef, new MidiaUtils.RemoverDoStorageCallback() {
                     @Override
                     public void onRemovido() {
-                        midiaUtils.removerDoStorage(fundoRef, new MidiaUtils.RemoverDoStorageCallback() {
+                        groupUtils.excluirGrupo(getApplicationContext(), idGrupo, new GroupUtils.ExcluirGrupoCallback() {
                             @Override
-                            public void onRemovido() {
-                                communityUtils.excluirComunidade(getApplicationContext(), idComunidade, new CommunityUtils.ExcluirComunidadeCallback() {
-                                    @Override
-                                    public void onConcluido() {
-                                        ocultarProgressDialog();
-                                        ToastCustomizado.toastCustomizadoCurto("Comunidade excluida com sucesso.", getApplicationContext());
-                                        irParaListagemDeComunidades();
-                                    }
-
-                                    @Override
-                                    public void onError(String message) {
-                                        ocultarProgressDialog();
-                                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir comunidade. Tente novamente.", getApplicationContext());
-                                    }
-                                });
+                            public void onConcluido() {
+                                ocultarProgressDialog();
+                                ToastCustomizado.toastCustomizadoCurto("Grupo excluido com sucesso.", getApplicationContext());
+                                irParaListagemDeGrupos();
                             }
 
                             @Override
                             public void onError(String message) {
                                 ocultarProgressDialog();
-                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir comunidade. Tente novamente.", getApplicationContext());
+                                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir o grupo. Tente novamente.", getApplicationContext());
                             }
                         });
                     }
@@ -970,7 +875,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onError(String message) {
                         ocultarProgressDialog();
-                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir comunidade. Tente novamente.", getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir o grupo. Tente novamente.", getApplicationContext());
                     }
                 });
             }
@@ -978,12 +883,12 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             @Override
             public void onNaoExiste() {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizadoCurto("Essa comunidade não existe mais", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Esse grupo não existe mais", getApplicationContext());
             }
 
             @Override
             public void onError(String mensagem) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir a sua comunidade", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao excluir o seu grupo", getApplicationContext());
                 onBackPressed();
             }
         });
@@ -994,130 +899,130 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao executar a função. Tente novamente.", getApplicationContext());
             return;
         }
-        FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
+        FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
             @Override
-            public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+            public void onGrupoRecuperado(Grupo grupoAtual) {
                 if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
-                    irParaGerenciamento(tipoGerenciamento, comunidadeAtual);
+                    irParaGerenciamento(tipoGerenciamento, grupoAtual);
                 } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_SET)) {
-                    abrirDialogGerenciamento(comunidadeAtual);
+                    abrirDialogGerenciamento(grupoAtual);
                 }
             }
 
             @Override
             public void onNaoExiste() {
-                ToastCustomizado.toastCustomizadoCurto("Essa comunidade não existe mais", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Esse grupo não existe mais", getApplicationContext());
             }
 
             @Override
             public void onError(String mensagem) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao sair da comunidade. Tente novamente.", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao sair do grupo. Tente novamente.", getApplicationContext());
             }
         });
     }
 
-    private void abrirDialogGerenciamento(Comunidade comunidadeAtual) {
+    private void abrirDialogGerenciamento(Grupo grupoAtual) {
 
-        if (comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
+        if (grupoAtual.getIdSuperAdmGrupo().equals(idUsuario)) {
             founder = true;
-        } else if (comunidadeAtual.getAdmsComunidade() != null
-                && comunidadeAtual.getAdmsComunidade().size() > 0
-                && comunidadeAtual.getAdmsComunidade().contains(idUsuario)) {
+        } else if (grupoAtual.getAdmsGrupo() != null
+                && !grupoAtual.getAdmsGrupo().isEmpty()
+                && grupoAtual.getAdmsGrupo().contains(idUsuario)) {
             administrator = true;
         }
 
         if (!founder && !administrator) {
-            ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para gerenciar essa comunidade.", getApplicationContext());
+            ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para gerenciar esse grupo.", getApplicationContext());
             return;
         }
 
         bottomSheetDialogGerenciar.show();
         bottomSheetDialogGerenciar.setCancelable(true);
 
-        btnViewAddUserComunidade = bottomSheetDialogGerenciar.findViewById(R.id.btnViewAddUserGrupo);
-        btnViewRemoverUserComunidade = bottomSheetDialogGerenciar.findViewById(R.id.btnViewRemoverUserGrupo);
-        btnViewPromoverUserComunidade = bottomSheetDialogGerenciar.findViewById(R.id.btnViewPromoverUserGrupo);
-        btnViewDespromoverUserComunidade = bottomSheetDialogGerenciar.findViewById(R.id.btnViewDespromoverUserGrupo);
+        btnViewAddUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewAddUserGrupo);
+        btnViewRemoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewRemoverUserGrupo);
+        btnViewPromoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewPromoverUserGrupo);
+        btnViewDespromoverUserGrupo = bottomSheetDialogGerenciar.findViewById(R.id.btnViewDespromoverUserGrupo);
 
         //Somente chega nessa etapa o usuário que possuir algum cargo.
-        if (comunidadeAtual.getNrParticipantes() < CommunityUtils.MAX_NUMBER_PARTICIPANTS) {
+        if (grupoAtual.getNrParticipantes() < GroupUtils.MAX_NUMBER_PARTICIPANTS) {
             //Somente é permitido convidar usuários se o limite de participantes não foi atingido.
-            btnViewAddUserComunidade.setVisibility(View.VISIBLE);
+            btnViewAddUserGrupo.setVisibility(View.VISIBLE);
         }
 
-        if (comunidadeAtual.getNrParticipantes() > 0) {
-            if (founder && comunidadeAtual.getNrAdms() < CommunityUtils.MAX_NUMBER_ADMS) {
+        if (grupoAtual.getNrParticipantes() > 0) {
+            if (founder && grupoAtual.getNrAdms() < CommunityUtils.MAX_NUMBER_ADMS) {
                 //Há participantes que não são adms e o limite ainda não foi atingido.
-                if (comunidadeAtual.getNrParticipantes() > comunidadeAtual.getNrAdms()
-                        || comunidadeAtual.getNrAdms() <= 0) {
-                    btnViewPromoverUserComunidade.setVisibility(View.VISIBLE);
+                if (grupoAtual.getNrParticipantes() > grupoAtual.getNrAdms()
+                        || grupoAtual.getNrAdms() <= 0) {
+                    btnViewPromoverUserGrupo.setVisibility(View.VISIBLE);
                 }
             }
-            if (founder || administrator && comunidadeAtual.getNrAdms() > comunidadeAtual.getNrParticipantes()) {
+            if (founder || administrator && grupoAtual.getNrAdms() > grupoAtual.getNrParticipantes()) {
                 //ADM e o fundador podem remover usuários, no caso de o usuário
                 //atual for um ADM ele só pode remover usuários que não são ADMS.
-                btnViewRemoverUserComunidade.setVisibility(View.VISIBLE);
+                btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
             }
 
-            if (founder && comunidadeAtual.getNrAdms() > 0) {
-                btnViewDespromoverUserComunidade.setVisibility(View.VISIBLE);
+            if (founder && grupoAtual.getNrAdms() > 0) {
+                btnViewDespromoverUserGrupo.setVisibility(View.VISIBLE);
             }
         }
 
-        btnViewAddUserComunidade.setOnClickListener(new View.OnClickListener() {
+        btnViewAddUserGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!founder && !administrator) {
-                    ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para gerenciar essa comunidade.", getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para gerenciar esse grupo.", getApplicationContext());
                     btnGerenciarUsuarios.setVisibility(View.GONE);
                     return;
                 }
-                Intent intent = new Intent(CommunityDetailsActivity.this, UsersInviteCommunityActivity.class);
+                Intent intent = new Intent(GroupDetailsActivity.this, AddGroupUsersActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("idComunidade", idComunidade);
+                intent.putExtra("idGrupo", idGrupo);
                 startActivity(intent);
             }
         });
-        btnViewRemoverUserComunidade.setOnClickListener(new View.OnClickListener() {
+        btnViewRemoverUserGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!founder && !administrator) {
                     ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para executar essa função.", getApplicationContext());
-                    btnViewRemoverUserComunidade.setVisibility(View.GONE);
+                    btnViewRemoverUserGrupo.setVisibility(View.GONE);
                     return;
                 }
-                irParaGerenciamento(CommunityUtils.FUNCTION_REMOVE, comunidadeAtual);
+                irParaGerenciamento(CommunityUtils.FUNCTION_REMOVE, grupoAtual);
             }
         });
-        btnViewPromoverUserComunidade.setOnClickListener(new View.OnClickListener() {
+        btnViewPromoverUserGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!founder) {
                     ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para executar essa função.", getApplicationContext());
-                    btnViewPromoverUserComunidade.setVisibility(View.GONE);
+                    btnViewPromoverUserGrupo.setVisibility(View.GONE);
                     return;
                 }
-                irParaGerenciamento(CommunityUtils.FUNCTION_PROMOTE, comunidadeAtual);
+                irParaGerenciamento(CommunityUtils.FUNCTION_PROMOTE, grupoAtual);
             }
         });
-        btnViewDespromoverUserComunidade.setOnClickListener(new View.OnClickListener() {
+        btnViewDespromoverUserGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!founder) {
                     ToastCustomizado.toastCustomizadoCurto("Você não tem permissão para executar essa função.", getApplicationContext());
-                    btnViewDespromoverUserComunidade.setVisibility(View.GONE);
+                    btnViewDespromoverUserGrupo.setVisibility(View.GONE);
                     return;
                 }
-                irParaGerenciamento(CommunityUtils.FUNCTION_DEMOTING, comunidadeAtual);
+                irParaGerenciamento(CommunityUtils.FUNCTION_DEMOTING, grupoAtual);
             }
         });
     }
 
-    private void irParaGerenciamento(String tipoGerenciamento, Comunidade comunidadeAtual) {
-        if (comunidadeAtual != null && tipoGerenciamento != null && !tipoGerenciamento.isEmpty()) {
-            DatabaseReference lockCommunity = firebaseRef.child("lockCommunityManagement")
-                    .child(idComunidade).child("idUsuario");
-            lockCommunity.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void irParaGerenciamento(String tipoGerenciamento, Grupo grupoAtual) {
+        if (grupoAtual != null && tipoGerenciamento != null && !tipoGerenciamento.isEmpty()) {
+            DatabaseReference lockGroup = firebaseRef.child("lockGroupManagement")
+                    .child(idGrupo).child("idUsuario");
+            lockGroup.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.getValue() != null) {
@@ -1135,44 +1040,44 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                                 }
                             });
                         } else {
-                            lockCommunity.removeValue();
-                            ToastCustomizado.toastCustomizado("Ocorre um erro ao ir para o gerenciamento da comunidade. Tente novamente.", getApplicationContext());
+                            lockGroup.removeValue();
+                            ToastCustomizado.toastCustomizado("Ocorre um erro ao ir para o gerenciamento do grupo. Tente novamente.", getApplicationContext());
                         }
                     } else {
                         HashMap<String, Object> operacoes = new HashMap<>();
-                        String caminhoLock = "/lockCommunityManagement/" + idComunidade + "/idUsuario";
+                        String caminhoLock = "/lockGroupManagement/" + idGrupo + "/idUsuario";
                         operacoes.put(caminhoLock, idUsuario);
                         firebaseRef.updateChildren(operacoes, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                                 if (error == null) {
-                                    Intent intent = new Intent(CommunityDetailsActivity.this, ManageCommunityUsersActivity.class);
+                                    Intent intent = new Intent(GroupDetailsActivity.this, ManageCommunityUsersActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    intent.putExtra("idComunidade", comunidadeAtual.getIdComunidade());
+                                    intent.putExtra("idGrupo", grupoAtual.getIdGrupo());
                                     intent.putExtra("tipoGerenciamento", tipoGerenciamento);
                                     startActivity(intent);
                                 } else {
-                                    ToastCustomizado.toastCustomizado(String.format("%s %s %s", "Ocorreu um erro ao ir para o gerenciamento da comunidade.", "Code:", error.getCode()), getApplicationContext());
+                                    ToastCustomizado.toastCustomizado(String.format("%s %s %s", "Ocorreu um erro ao ir para o gerenciamento do grupo.", "Code:", error.getCode()), getApplicationContext());
                                 }
                             }
                         });
                     }
-                    lockCommunity.removeEventListener(this);
+                    lockGroup.removeEventListener(this);
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    ToastCustomizado.toastCustomizado(String.format("%s %s %s", "Ocorreu um erro ao ir para o gerenciamento da comunidade.", "Code:", error.getCode()), getApplicationContext());
+                    ToastCustomizado.toastCustomizado(String.format("%s %s %s", "Ocorreu um erro ao ir para o gerenciamento do grupo.", "Code:", error.getCode()), getApplicationContext());
                 }
             });
         } else {
-            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados da comunidade.", getApplicationContext());
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao recuperar os dados do grupo.", getApplicationContext());
             onBackPressed();
         }
     }
 
     private void configMenuSuperior() {
-        popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigComunidade);
+        popupMenuConfig = new PopupMenu(getApplicationContext(), imgBtnConfigGrupo);
         popupMenuConfig.getMenuInflater().inflate(R.menu.popup_menu_configs_bloquear_denunciar, popupMenuConfig.getMenu());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1182,7 +1087,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         acompanhaBlock();
         acompanhaDenuncia();
 
-        imgBtnConfigComunidade.setOnClickListener(new View.OnClickListener() {
+        imgBtnConfigGrupo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 popupMenuConfig.show();
@@ -1195,7 +1100,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                 switch (menuItem.getItemId()) {
                     case R.id.itemBloquear:
                         //Ajustar para desbloquear também.
-                        bloquearComunidade();
+                        bloquearGrupo();
                         break;
                     case R.id.itemDenunciarBloquear:
                         ToastCustomizado.toastCustomizadoCurto("DENUNCIAR E BLOQUEAR", getApplicationContext());
@@ -1207,39 +1112,39 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void bloquearComunidade() {
+    private void bloquearGrupo() {
         if (limiteBloqueio == 4) {
             ToastCustomizado.toastCustomizado("Aguarde um momento para o uso dessa função.", getApplicationContext());
             return;
         }
-        communityUtils.verificaSeEParticipante(idComunidade, idUsuario, new CommunityUtils.VerificaParticipanteCallback() {
+        groupUtils.verificaSeEParticipante(idGrupo, idUsuario, new GroupUtils.VerificaParticipanteCallback() {
             @Override
             public void onParticipante(boolean status) {
                 if (status) {
-                    if (!isComunidadeBloqueada()) {
-                        ToastCustomizado.toastCustomizadoCurto("Você precisa sair da comunidade para que seja possível bloquear essa comunidade", getApplicationContext());
+                    if (!isGrupoBloqueado()) {
+                        ToastCustomizado.toastCustomizadoCurto("Você precisa sair do grupo para que seja possível bloquear esse grupo", getApplicationContext());
                     }
                     return;
                 }
                 exibirProgressDialog("desbloquear");
-                if (isComunidadeBloqueada()) {
-                    communityUtils.desbloquearComunidade(idComunidade, new CommunityUtils.DesbloquearComunidadeCallback() {
+                if (isGrupoBloqueado()) {
+                    groupUtils.desbloquearGrupo(idGrupo, new GroupUtils.DesbloquearGrupoCallback() {
                         @Override
                         public void onDesbloqueado() {
                             limiteBloqueio++;
                             ocultarProgressDialog();
-                            ToastCustomizado.toastCustomizadoCurto("A comunidade foi desbloqueada com sucesso.", getApplicationContext());
+                            ToastCustomizado.toastCustomizadoCurto("O grupo foi desbloqueado com sucesso.", getApplicationContext());
                         }
 
                         @Override
                         public void onError(String message) {
                             ocultarProgressDialog();
-                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desbloquear a comunidade.", getApplicationContext());
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao desbloquear o grupo.", getApplicationContext());
                         }
                     });
                 } else {
                     exibirProgressDialog("bloquear");
-                    communityUtils.bloquearComunidade(idComunidade, new CommunityUtils.BloquearComunidadeCallback() {
+                    groupUtils.bloquearGrupo(idGrupo, new GroupUtils.BloquearGrupoCallback() {
                         @Override
                         public void onBloqueado() {
                             limiteBloqueio++;
@@ -1250,7 +1155,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onError(String message) {
                             ocultarProgressDialog();
-                            ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear a comunidade. Tente novamente.", getApplicationContext());
+                            ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear o grupo. Tente novamente.", getApplicationContext());
                         }
                     });
                 }
@@ -1259,25 +1164,25 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             @Override
             public void onError(String message) {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear a comunidade. Tente novamente.", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear o grupo. Tente novamente.", getApplicationContext());
             }
         });
     }
 
     private void prepararDenuncia() {
-        communityUtils.verificaSeEParticipante(idComunidade, idUsuario, new CommunityUtils.VerificaParticipanteCallback() {
+        groupUtils.verificaSeEParticipante(idGrupo, idUsuario, new GroupUtils.VerificaParticipanteCallback() {
             @Override
             public void onParticipante(boolean status) {
                 if (status) {
-                    ToastCustomizado.toastCustomizadoCurto("Você precisa sair da comunidade para que seja possível bloquear e denunciar essa comunidade", getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto("Você precisa sair do grupo para que seja possível bloquear e denunciar esse grupo", getApplicationContext());
                     return;
                 }
                 exibirProgressDialog("denunciar");
-                if (isComunidadeBloqueada()) {
-                    //Não precisa bloquear a comunidade.
+                if (isGrupoBloqueado()) {
+                    //Não precisa bloquear o grupo.
                     enviarDenuncia();
                 } else {
-                    communityUtils.bloquearComunidade(idComunidade, new CommunityUtils.BloquearComunidadeCallback() {
+                    groupUtils.bloquearGrupo(idGrupo, new GroupUtils.BloquearGrupoCallback() {
                         @Override
                         public void onBloqueado() {
                             enviarDenuncia();
@@ -1286,7 +1191,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onError(String message) {
                             ocultarProgressDialog();
-                            ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear a comunidade. Tente novamente.", getApplicationContext());
+                            ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao bloquear o grupo. Tente novamente.", getApplicationContext());
                         }
                     });
                 }
@@ -1303,7 +1208,7 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     private void configDenuncia() {
         intentDenuncia.setType("message/rfc822");
         intentDenuncia.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
-        intentDenuncia.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + "Informe o motivo da denúncia" + idComunidade);
+        intentDenuncia.putExtra(Intent.EXTRA_SUBJECT, "Denúncia - " + "Informe o motivo da denúncia" + idGrupo);
         intentDenuncia.putExtra(Intent.EXTRA_TEXT, "Descreva sua denúncia nesse campo e anexe as provas no email," +
                 " por favor não apague o identificador da denúncia que está no assunto da mensagem");
         resultLauncher.launch(intentDenuncia);
@@ -1313,12 +1218,12 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    irParaListagemDeComunidades();
+                    irParaListagemDeGrupos();
                 });
     }
 
     private void enviarDenuncia() {
-        communityUtils.enviarDenunciaComunidade(idComunidade, new CommunityUtils.EnviarDenunciaCallback() {
+        groupUtils.enviarDenunciaGrupo(idGrupo, new GroupUtils.EnviarDenunciaCallback() {
             @Override
             public void onConcluido() {
                 ocultarProgressDialog();
@@ -1328,14 +1233,14 @@ public class CommunityDetailsActivity extends AppCompatActivity {
             @Override
             public void onJaExisteDenuncia() {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizado("Você já denunciou essa comunidade anteriormente.", getApplicationContext());
+                ToastCustomizado.toastCustomizado("Você já denunciou esse grupo anteriormente.", getApplicationContext());
                 popupMenuConfig.getMenu().getItem(1).setVisible(false);
             }
 
             @Override
             public void onError(String message) {
                 ocultarProgressDialog();
-                ToastCustomizado.toastCustomizado("Ocorreu um erro ao denúnciar a comunidade. Tente novamente.", getApplicationContext());
+                ToastCustomizado.toastCustomizado("Ocorreu um erro ao denúnciar o grupo. Tente novamente.", getApplicationContext());
             }
         });
     }
@@ -1344,20 +1249,20 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         if (listenerBlock != null) {
             return;
         }
-        verificaBlockRef = firebaseRef.child("blockCommunity")
-                .child(idUsuario).child(idComunidade);
+        verificaBlockRef = firebaseRef.child("blockGroup")
+                .child(idUsuario).child(idGrupo);
         listenerBlock = verificaBlockRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     if (popupMenuConfig != null) {
-                        setComunidadeBloqueada(true);
+                        setGrupoBloqueado(true);
                         popupMenuConfig.getMenu().getItem(0).setTitle("Desbloquear");
                         popupMenuConfig.getMenu().getItem(1).setTitle("Denunciar");
                     }
                 } else {
                     if (popupMenuConfig != null) {
-                        setComunidadeBloqueada(false);
+                        setGrupoBloqueado(false);
                         popupMenuConfig.getMenu().getItem(0).setTitle("Bloquear");
                         popupMenuConfig.getMenu().getItem(1).setTitle("Denunciar e bloquear");
                     }
@@ -1374,8 +1279,8 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         if (listenerDenuncia != null || popupMenuConfig == null) {
             return;
         }
-        verificaDenunciaRef = firebaseRef.child("communityReports")
-                .child(idComunidade).child(idUsuario);
+        verificaDenunciaRef = firebaseRef.child("groupReports")
+                .child(idGrupo).child(idUsuario);
         listenerDenuncia = verificaDenunciaRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -1389,30 +1294,68 @@ public class CommunityDetailsActivity extends AppCompatActivity {
         });
     }
 
+    private void exibirSpinKit(String campo, boolean fundador) {
+        if (campo != null && !campo.isEmpty()) {
+            if (campo.equals(UsuarioUtils.FIELD_PHOTO)) {
+                if (fundador) {
+                    ProgressBarUtils.exibirProgressBar(spinKitViewFundador, GroupDetailsActivity.this);
+                } else {
+                    ProgressBarUtils.exibirProgressBar(spinKitViewFoto, GroupDetailsActivity.this);
+                }
+            }
+        }
+    }
+
+    private void ocultarSpinKit(String campo, boolean fundador) {
+        if (campo != null && !campo.isEmpty()) {
+            if (campo.equals(UsuarioUtils.FIELD_PHOTO)) {
+                if (fundador) {
+                    ProgressBarUtils.ocultarProgressBar(spinKitViewFundador, GroupDetailsActivity.this);
+                } else {
+                    ProgressBarUtils.ocultarProgressBar(spinKitViewFoto, GroupDetailsActivity.this);
+                }
+            }
+        }
+    }
+
     private void inicializarComponentes() {
-        toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
-        imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
-        txtViewTitleToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
+        toolbarIncBlack = findViewById(R.id.toolbarIncBlack);
+        imgBtnIncBackBlack = findViewById(R.id.imgBtnIncBackBlack);
+        txtViewTitleToolbar = findViewById(R.id.txtViewIncTituloToolbarBlack);
         imgViewFoto = findViewById(R.id.imgViewIncPhoto);
-        imgViewFundo = findViewById(R.id.imgViewFundoDetalheComunidade);
-        txtViewNome = findViewById(R.id.txtViewNomeComunidadeDetalhes);
+        txtViewNome = findViewById(R.id.txtViewNomeGrupoDetalhes);
         spinKitViewFoto = findViewById(R.id.spinKitLoadPhotoUser);
-        spinKitViewFundo = findViewById(R.id.spinKitLoadFundoDetalheComunidade);
-        recyclerViewAdms = findViewById(R.id.recyclerViewAdmsComunidade);
-        btnVerParticipantes = findViewById(R.id.btnVerParticipantesComunidade);
+        recyclerViewAdms = findViewById(R.id.recyclerViewAdmsGrupo);
+        btnVerParticipantes = findViewById(R.id.btnVerParticipantesGrupo);
         imgBtnVerParticipantes = findViewById(R.id.imgBtnVerParticipantes);
-        txtViewNrParticipantes = findViewById(R.id.txtViewNrParticipantesComunidade);
-        txtViewNrAdms = findViewById(R.id.txtViewNrAdmsComunidadeDetalhes);
-        imgViewFundador = findViewById(R.id.imgViewFundadorComunidadeDetalhes);
-        txtViewNomeFundador = findViewById(R.id.txtViewNomeFundadorComunidadeDetalhes);
+        txtViewNrParticipantes = findViewById(R.id.txtViewNrParticipantesGrupo);
+        txtViewNrAdms = findViewById(R.id.txtViewNrAdmsGrupoDetalhes);
+        imgViewFundador = findViewById(R.id.imgViewFundadorGrupoDetalhes);
+        txtViewNomeFundador = findViewById(R.id.txtViewNomeFundadorGrupoDetalhes);
         spinKitViewFundador = findViewById(R.id.spinKitLoadPhotoUserFundador);
-        txtViewDesc = findViewById(R.id.txtViewDescComunidadeDetalhes);
-        linearLayoutTopicos = findViewById(R.id.linearLayoutTopicosComunidade);
-        txtViewPrivacidade = findViewById(R.id.txtViewPrivacidadeComunidadeDetalhes);
-        btnEditarComunidade = findViewById(R.id.btnEditarComunidade);
-        btnDeletarComunidade = findViewById(R.id.btnDeletarComunidade);
-        btnSairDaComunidade = findViewById(R.id.btnSairDaComunidade);
-        btnGerenciarUsuarios = findViewById(R.id.btnGerenciarParticipantesComunidade);
-        imgBtnConfigComunidade = findViewById(R.id.imgBtnConfigComunidade);
+        txtViewDesc = findViewById(R.id.txtViewDescGrupoDetalhes);
+        linearLayoutTopicos = findViewById(R.id.linearLayoutTopicosGrupo);
+        txtViewPrivacidade = findViewById(R.id.txtViewPrivacidadeGrupoDetalhes);
+        btnEditarGrupo = findViewById(R.id.btnEditarGrupo);
+        btnDeletarGrupo = findViewById(R.id.btnDeletarGrupo);
+        btnSairDoGrupo = findViewById(R.id.btnSairDoGrupo);
+        btnGerenciarUsuarios = findViewById(R.id.btnGerenciarParticipantesGrupo);
+        imgBtnConfigGrupo = findViewById(R.id.imgBtnConfigGrupo);
+    }
+
+    public boolean isStatusEpilepsia() {
+        return statusEpilepsia;
+    }
+
+    public void setStatusEpilepsia(boolean statusEpilepsia) {
+        this.statusEpilepsia = statusEpilepsia;
+    }
+
+    public boolean isGrupoBloqueado() {
+        return grupoBloqueado;
+    }
+
+    public void setGrupoBloqueado(boolean grupoBloqueado) {
+        this.grupoBloqueado = grupoBloqueado;
     }
 }
