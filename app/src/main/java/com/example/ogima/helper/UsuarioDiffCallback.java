@@ -2,14 +2,12 @@ package com.example.ogima.helper;
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DiffUtil;
 
-import com.example.ogima.model.DailyShort;
 import com.example.ogima.model.Usuario;
 
 import java.util.List;
-
-import io.reactivex.annotations.Nullable;
 
 public class UsuarioDiffCallback extends DiffUtil.Callback {
 
@@ -66,7 +64,6 @@ public class UsuarioDiffCallback extends DiffUtil.Callback {
     @Nullable
     @Override
     public Object getChangePayload(int oldItemPosition, int newItemPosition) {
-        Log.d("ChangePayload", "Change payload called");
         return super.getChangePayload(oldItemPosition, newItemPosition);
     }
 }

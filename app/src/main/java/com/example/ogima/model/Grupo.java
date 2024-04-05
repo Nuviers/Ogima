@@ -31,6 +31,9 @@ public class Grupo implements Serializable, Comparator<Grupo> {
     private long timestampinteracao;
     private long nrParticipantes;
     private int nrAdms;
+    private String idParticipante;
+    private boolean administrator;
+    private String nomeUsuarioPesquisa;
 
     public Grupo() {
 
@@ -39,6 +42,30 @@ public class Grupo implements Serializable, Comparator<Grupo> {
         DatabaseReference grupoRef = firebaseRef.child("grupos");
         String idRandomicoGrupo = grupoRef.push().getKey();
         setIdGrupo(idRandomicoGrupo);
+    }
+
+    public String getNomeUsuarioPesquisa() {
+        return nomeUsuarioPesquisa;
+    }
+
+    public void setNomeUsuarioPesquisa(String nomeUsuarioPesquisa) {
+        this.nomeUsuarioPesquisa = nomeUsuarioPesquisa;
+    }
+
+    public boolean isAdministrator() {
+        return administrator;
+    }
+
+    public void setAdministrator(boolean administrator) {
+        this.administrator = administrator;
+    }
+
+    public String getIdParticipante() {
+        return idParticipante;
+    }
+
+    public void setIdParticipante(String idParticipante) {
+        this.idParticipante = idParticipante;
     }
 
     public int getNrAdms() {

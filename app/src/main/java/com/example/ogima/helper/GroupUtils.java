@@ -120,6 +120,52 @@ public class GroupUtils {
         void onError(String message);
     }
 
+    public interface PromoverAdmCallback {
+        void onConcluido();
+
+        void onNaoParticipa();
+
+        void onError(String message);
+    }
+
+    public interface VerificaAdmCallback {
+        void onRecuperado(boolean adm);
+
+        void onError(String message);
+    }
+
+    public interface DespromoverAdmCallback {
+        void onConcluido();
+
+        void onNaoParticipa();
+
+        void onError(String message);
+    }
+
+    public interface TransferirFundadorCallback {
+        void onConcluido();
+
+        void onLimiteMaxAtingido();
+
+        void onNaoParticipante();
+
+        void onError(String message);
+    }
+
+    public interface AjustarMeusGruposCallback {
+        void onConcluido(ArrayList<String> idsUserAlvo, ArrayList<String> idsUserAtual);
+
+        void onLimiteMaxAtingido();
+
+        void onError(String message);
+    }
+
+    public interface AjustarIdsGrupoCallback {
+        void onAjustado(ArrayList<String> listaIds);
+
+        void onError(String message);
+    }
+
     public void configurarBundle(Bundle dados, ConfigBundleCallback callback) {
         if (dados != null) {
             if (dados.containsKey("edit")) {
@@ -601,6 +647,346 @@ public class GroupUtils {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public void promoverParaAdm(String idGrupo, String idAlvo, PromoverAdmCallback callback) {
+
+        if (idAlvo == null || idGrupo == null
+                || idAlvo.isEmpty() || idGrupo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        verificaSeEParticipante(idGrupo, idAlvo, new VerificaParticipanteCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idAlvo + "/";
+            String caminhoGrupo = "/grupos/" + idGrupo + "/";
+            ArrayList<String> listaPronta = new ArrayList<>();
+
+            @Override
+            public void onParticipante(boolean status) {
+                if (status) {
+                    dadosOperacao.put(caminhoFollowers + "administrator", true);
+                    dadosOperacao.put(caminhoGrupo + "nrAdms", ServerValue.increment(1));
+                    recuperarListaAdms(idGrupo, new RecuperarListaAdmsCallback() {
+                        @Override
+                        public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                            listaPronta = idsAdms;
+                            listaPronta.add(idAlvo);
+                            ToastCustomizado.toastCustomizadoCurto("ADD: " + idAlvo, context);
+                            dadosOperacao.put(caminhoGrupo + "admsGrupo/", listaPronta);
+                            salvarHashmapPromocao(dadosOperacao, callback);
+                        }
+
+                        @Override
+                        public void onNaoExiste() {
+                            ToastCustomizado.toastCustomizadoCurto("NOVO ADD: " + idAlvo, context);
+                            listaPronta.add(idAlvo);
+                            dadosOperacao.put(caminhoGrupo + "admsGrupo/", listaPronta);
+                            salvarHashmapPromocao(dadosOperacao, callback);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
+                } else {
+                    callback.onNaoParticipa();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void salvarHashmapPromocao(HashMap<String, Object> dadosOperacao, PromoverAdmCallback callback) {
+        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onConcluido();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
+            }
+        });
+    }
+
+    public void despromoverAdm(String idGrupo, String idAlvo, DespromoverAdmCallback callback) {
+
+        if (idAlvo == null || idGrupo == null
+                || idAlvo.isEmpty() || idGrupo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        verificaSeEParticipante(idGrupo, idAlvo, new VerificaParticipanteCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idAlvo + "/";
+            String caminhoGrupo = "/grupos/" + idGrupo + "/";
+
+            @Override
+            public void onParticipante(boolean status) {
+                if (status) {
+                    verificaAdm(idGrupo, idAlvo, new VerificaAdmCallback() {
+                        @Override
+                        public void onRecuperado(boolean adm) {
+                            if (adm) {
+                                //Usuário é realmente um dos adms.
+                                dadosOperacao.put(caminhoFollowers + "administrator", false);
+                                dadosOperacao.put(caminhoGrupo + "nrAdms", ServerValue.increment(-1));
+                                recuperarListaAdms(idGrupo, new RecuperarListaAdmsCallback() {
+                                    @Override
+                                    public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                                        idsAdms.remove(idAlvo);
+                                        ToastCustomizado.toastCustomizado("DELL: " + idAlvo, context);
+                                        if (idsAdms.size() <= 0) {
+                                            dadosOperacao.put(caminhoGrupo + "admsGrupo/", null);
+                                        } else {
+                                            dadosOperacao.put(caminhoGrupo + "admsGrupo/", idsAdms);
+                                        }
+                                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                            @Override
+                                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                                if (error == null) {
+                                                    callback.onConcluido();
+                                                } else {
+                                                    callback.onError(String.valueOf(error.getCode()));
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onNaoExiste() {
+                                        ToastCustomizado.toastCustomizado("NÃO É ADM: " + idAlvo, context);
+                                        //Usuário não é mais o adm.
+                                        callback.onConcluido();
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        callback.onError(message);
+                                    }
+                                });
+                            } else {
+                                //Usuário não é adm.
+                                callback.onConcluido();
+                            }
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            callback.onError(message);
+                        }
+                    });
+                } else {
+                    callback.onNaoParticipa();
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void verificaAdm(String idGrupo, String idAlvo, VerificaAdmCallback callback) {
+        if (idAlvo == null || idGrupo == null
+                || idAlvo.isEmpty() || idGrupo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
+            @Override
+            public void onGrupoRecuperado(Grupo grupoAtual) {
+                if (grupoAtual.getAdmsGrupo() != null
+                        && grupoAtual.getAdmsGrupo().size() > 0
+                        && grupoAtual.getAdmsGrupo().contains(idAlvo)) {
+                    callback.onRecuperado(true);
+                } else {
+                    callback.onRecuperado(false);
+                }
+            }
+
+            @Override
+            public void onNaoExiste() {
+                callback.onError("Esse grupo não existe mais.");
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                callback.onError(mensagem);
+            }
+        });
+    }
+
+    public void transferirFundador(String idGrupo, String idAlvo, TransferirFundadorCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idUsuario.isEmpty() || idAlvo == null || idGrupo == null
+                || idAlvo.isEmpty() || idGrupo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        ajustarIdGrupos(idAlvo, idGrupo, new AjustarMeusGruposCallback() {
+            HashMap<String, Object> dadosOperacao = new HashMap<>();
+            String caminhoGrupo = "/grupos/" + idGrupo + "/";
+            String usuarioAlvoCaminho = "/usuarios/" + idAlvo + "/idMeusGrupos/";
+            String usuarioAtualCaminho = "/usuarios/" + idUsuario + "/idMeusGrupos/";
+            String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idAlvo;
+
+            @Override
+            public void onConcluido(ArrayList<String> idsUserAlvo, ArrayList<String> idsUserAtual) {
+                dadosOperacao.put(caminhoFollowers, null);
+                dadosOperacao.put(caminhoGrupo + "idSuperAdmGrupo", idAlvo);
+                dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(-1));
+                dadosOperacao.put(usuarioAlvoCaminho, idsUserAlvo);
+                dadosOperacao.put(usuarioAtualCaminho, idsUserAtual);
+                verificaAdm(idGrupo, idAlvo, new VerificaAdmCallback() {
+                    @Override
+                    public void onRecuperado(boolean adm) {
+                        if (adm) {
+                            //Usuário escolhido é adm.
+                            despromoverAdm(idGrupo, idAlvo, new DespromoverAdmCallback() {
+                                @Override
+                                public void onConcluido() {
+                                    salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                }
+
+                                @Override
+                                public void onNaoParticipa() {
+                                    callback.onNaoParticipante();
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
+                        } else {
+                            //Usuário não é adm.
+                            salvarHashMapTransferirFundador(dadosOperacao, callback);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onLimiteMaxAtingido() {
+                callback.onLimiteMaxAtingido();
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void ajustarIdGrupos(String idAlvo, String idGrupo, AjustarMeusGruposCallback callback) {
+        //Verificar se usuário selecionado tem o limite máximo de grupo ou não.
+        UsuarioUtils.recuperarIdsGrupos(context, idAlvo, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
+            @Override
+            public void onRecuperado(ArrayList<String> idsUserAlvo) {
+                if (idsUserAlvo == null) {
+                    callback.onError("");
+                    return;
+                }
+                if (idsUserAlvo.size() >= 5) {
+                    callback.onLimiteMaxAtingido();
+                    return;
+                }
+                idsUserAlvo.add(idGrupo);
+                removerIdMeusGrupos(idGrupo, new AjustarIdsGrupoCallback() {
+                    @Override
+                    public void onAjustado(ArrayList<String> listaIds) {
+                        callback.onConcluido(idsUserAlvo, listaIds);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                ArrayList<String> idsUserAlvo = new ArrayList<>();
+                idsUserAlvo.add(idGrupo);
+                removerIdMeusGrupos(idGrupo, new AjustarIdsGrupoCallback() {
+                    @Override
+                    public void onAjustado(ArrayList<String> listaIds) {
+                        callback.onConcluido(idsUserAlvo, listaIds);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void removerIdMeusGrupos(String idGrupo, AjustarIdsGrupoCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idGrupo == null
+                || idUsuario.isEmpty() || idGrupo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        UsuarioUtils.recuperarIdsGrupos(context, idUsuario, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
+            @Override
+            public void onRecuperado(ArrayList<String> idsUserAtual) {
+                if (idsUserAtual == null) {
+                    callback.onError("");
+                    return;
+                }
+                if (idsUserAtual.contains(idGrupo)) {
+                    idsUserAtual.remove(idGrupo);
+                }
+                callback.onAjustado(idsUserAtual);
+            }
+
+            @Override
+            public void onNaoExiste() {
+                callback.onAjustado(null);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void salvarHashMapTransferirFundador(HashMap<String, Object> dadosOperacao, TransferirFundadorCallback callback) {
+        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onConcluido();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
             }
         });
     }

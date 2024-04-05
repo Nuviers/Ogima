@@ -58,6 +58,15 @@ public class AdapterUsersSelectionCommunity extends RecyclerView.Adapter<Recycle
         this.listaSelecao = listaSelecao;
     }
 
+    public long getLimiteSelecao() {
+        return limiteSelecao;
+    }
+
+    public void setLimiteSelecao(long limiteSelecao) {
+        this.limiteSelecao = limiteSelecao;
+        notifyDataSetChanged();
+    }
+
     public AdapterUsersSelectionCommunity(Context c, List<Usuario> listaUsuarioOrigem,
                                           HashMap<String, Object> listaDadosUser, int hexSelecao, long limiteSelecao,
                                           MarcarUsuarioCallback listenerMarcarUsuario, DesmarcarUsuarioCallback listenerDesmarcarUsuario) {
