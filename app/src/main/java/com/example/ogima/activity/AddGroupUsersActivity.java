@@ -105,6 +105,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     private AdapterUsersSelectionGroup adapterSelection;
     private boolean trocarQueryInicial = false, trocarQueryInicialFiltro = false,
             trocarQueryMaisDados = false, trocarQueryMaisDadosFiltro = false;
+    private long timeUltimo = -1, nameUltimo = -1;
     private Contatos contatoComparator;
     private int contadorRemocaoListener = 0;
     private FirebaseUtils firebaseUtils;
@@ -131,12 +132,12 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     private String idGrupo = "";
     private boolean edicao = false;
     private ProgressDialog progressDialog;
-    private String idElementoTroca = "";
     private int contadorParticipantes = 0;
     private ArrayList<String> idsARemover;
     private int contadorRemocao = 0;
     private ArrayList<String> idsNovosParticipantes;
     private MidiaUtils midiaUtils;
+    private boolean trocarQueryUltimo = false, trocarQueryUltimoFiltro = false;
 
     private interface VerificaExistenciaCallback {
         void onExistencia(boolean status, Contatos contatoAtualizado);
@@ -448,7 +449,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             @Override
             public void onRecuperado() {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizado("INICIO CHAMADO " + idUltimoElemento, getApplicationContext());
+                //ToastCustomizado.toastCustomizado("INICIO CHAMADO " + idUltimoElemento, getApplicationContext());
                 childListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -472,23 +473,22 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                             lastTimestamp = contato.getTimestampContato();
                                             ocultarProgress();
                                             trocarQueryInicial = true;
-                                            idElementoTroca = contato.getIdContato();
                                             recuperarDadosIniciais();
-                                            return;
-                                        }
-                                        idPrimeiroDado = contato.getIdContato();
-                                        if (travar == 0) {
-                                            lastTimestamp = contato.getTimestampContato();
-                                            adicionarContatos(contato, false);
-                                        } else {
-                                            ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), getApplicationContext());
-                                            //Dado mais recente que o anterior
-                                            if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
-                                                    && listenerHashMapNEWDATA.containsKey(contato.getIdContato())) {
-                                                return;
+                                        }else{
+                                            idPrimeiroDado = contato.getIdContato();
+                                            if (travar == 0) {
+                                                lastTimestamp = contato.getTimestampContato();
+                                                adicionarContatos(contato, false);
+                                            } else {
+                                                ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), getApplicationContext());
+                                                //Dado mais recente que o anterior
+                                                if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
+                                                        && listenerHashMapNEWDATA.containsKey(contato.getIdContato())) {
+                                                    return;
+                                                }
+                                                ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), getApplicationContext());
+                                                anexarNovoDado(contato);
                                             }
-                                            ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), getApplicationContext());
-                                            anexarNovoDado(contato);
                                         }
                                     }
 
@@ -571,50 +571,37 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
         recuperaDadosUser(contatoAlvo.getIdContato(), new RecuperaUser() {
             @Override
             public void onRecuperado(Usuario dadosUser) {
+                contatoAlvo.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
+                contactDiffDAO.adicionarContato(contatoAlvo);
+                contactDiffDAO.adicionarIdAoSet(idsUsuarios, dadosUser.getIdUsuario());
 
+                List<Contatos> listaAtual = new ArrayList<>();
+                if (isPesquisaAtivada()) {
+                    listaAtual = listaFiltrada;
+                } else {
+                    listaAtual = listaContatos;
+                }
 
-                groupUtils.verificaSeEParticipante(idGrupo, contatoAlvo.getIdContato(), new GroupUtils.VerificaParticipanteCallback() {
+                adapterSelection.updateContatoList(listaAtual, new AdapterUsersSelectionGroup.ListaAtualizadaCallback() {
                     @Override
-                    public void onParticipante(boolean status) {
-                        dadosUser.setJaParticipaDoGrupo(status);
-                        contatoAlvo.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
-                        contactDiffDAO.adicionarContato(contatoAlvo);
-                        contactDiffDAO.adicionarIdAoSet(idsUsuarios, dadosUser.getIdUsuario());
+                    public void onAtualizado() {
+                        travar = 1;
 
-                        List<Contatos> listaAtual = new ArrayList<>();
-                        if (isPesquisaAtivada()) {
-                            listaAtual = listaFiltrada;
+                        if (dadoModificado) {
+                            adicionarDadoDoUsuario(dadosUser, newDataRef, childEventListenerNewData, dadoModificado);
                         } else {
-                            listaAtual = listaContatos;
+                            adicionarDadoDoUsuario(dadosUser, null, null, dadoModificado);
                         }
+                        ocultarProgress();
+                        setLoading(false);
 
-                        adapterSelection.updateContatoList(listaAtual, new AdapterUsersSelectionGroup.ListaAtualizadaCallback() {
-                            @Override
-                            public void onAtualizado() {
-                                travar = 1;
-
-                                if (dadoModificado) {
-                                    adicionarDadoDoUsuario(dadosUser, newDataRef, childEventListenerNewData, dadoModificado);
-                                } else {
-                                    adicionarDadoDoUsuario(dadosUser, null, null, dadoModificado);
-                                }
-                                ocultarProgress();
-                                setLoading(false);
-
-                                if (travar != 0) {
-                                    if (areFirstThreeItemsVisible(recyclerViewManage)) {
-                                        int newPosition = 0; // A posição para a qual você deseja rolar
-                                        //*ToastCustomizado.toastCustomizadoCurto("SCROLL", requireContext());
-                                        recyclerViewManage.scrollToPosition(newPosition);
-                                    }
-                                }
+                        if (travar != 0) {
+                            if (areFirstThreeItemsVisible(recyclerViewManage)) {
+                                int newPosition = 0; // A posição para a qual você deseja rolar
+                                //*ToastCustomizado.toastCustomizadoCurto("SCROLL", requireContext());
+                                recyclerViewManage.scrollToPosition(newPosition);
                             }
-                        });
-                    }
-
-                    @Override
-                    public void onError(String message) {
-
+                        }
                     }
                 });
             }
@@ -696,7 +683,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     private void carregarMaisDados() {
         if (!isPesquisaAtivada()) {
             exibirProgress();
-            ToastCustomizado.toastCustomizadoCurto("Mais dados -_- ", getApplicationContext());
+            ToastCustomizado.toastCustomizadoCurto("Mais dados -_- " + idUltimoElemento, getApplicationContext());
             if (listaContatos.size() > 1
                     && idUltimoElemento != null && !idUltimoElemento.isEmpty()
                     && idUltimoElemento.equals(listaContatos.get(listaContatos.size() - 1).getIdContato())) {
@@ -751,45 +738,58 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                 if (key != lastTimestamp || listaContatos.size() > 0 &&
                                         !contatoMore.getIdContato()
                                                 .equals(listaContatos.get(listaContatos.size() - 1).getIdContato())) {
-                                    newContatos.add(contatoMore);
-                                    //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
-                                    lastTimestamp = key;
-                                }
-                            }
-                            // Remove a última chave usada
-                            if (newContatos.size() > PAGE_SIZE) {
-                                newContatos.remove(0);
-                            }
-                            if (lastTimestamp != -1) {
-
-                                recuperaDadosUser(contatoMore.getIdContato(), new RecuperaUser() {
-                                    @Override
-                                    public void onRecuperado(Usuario dadosUser) {
-                                        ocultarProgress();
-                                        for (Contatos contato : newContatos) {
-                                            if (contato.getIdContato().equals(dadosUser.getIdUsuario())) {
-                                                newContatos.remove(contato);
-                                                contato.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
-                                                newContatos.add(contato);
-                                                contadorNome++;
+                                    groupUtils.verificaSeEParticipante(idGrupo, contatoMore.getIdContato(), new GroupUtils.VerificaParticipanteCallback() {
+                                        @Override
+                                        public void onParticipante(boolean status) {
+                                            if (!status) {
+                                                newContatos.add(contatoMore);
                                             }
-                                            if (contadorNome == newContatos.size()) {
-                                                contadorNome = 0;
-                                                adicionarMaisDados(newContatos, contatoMore.getIdContato(), dadosUser, queryLoadMore);
+
+                                            //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
+                                            lastTimestamp = key;
+
+                                            // Remove a última chave usada
+                                            if (newContatos.size() > PAGE_SIZE) {
+                                                newContatos.remove(0);
+                                            }
+                                            if (lastTimestamp != -1) {
+
+                                                recuperaDadosUser(contatoMore.getIdContato(), new RecuperaUser() {
+                                                    @Override
+                                                    public void onRecuperado(Usuario dadosUser) {
+                                                        ocultarProgress();
+                                                        for (Contatos contato : newContatos) {
+                                                            if (contato.getIdContato().equals(dadosUser.getIdUsuario())) {
+                                                                newContatos.remove(contato);
+                                                                contato.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
+                                                                newContatos.add(contato);
+                                                                contadorNome++;
+                                                            }
+                                                            if (contadorNome == newContatos.size()) {
+                                                                contadorNome = 0;
+                                                                adicionarMaisDados(newContatos, contatoMore.getIdContato(), dadosUser, queryLoadMore);
+                                                            }
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void onSemDado() {
+                                                        ocultarProgress();
+                                                    }
+
+                                                    @Override
+                                                    public void onError(String message) {
+                                                        ocultarProgress();
+                                                    }
+                                                });
                                             }
                                         }
-                                    }
 
-                                    @Override
-                                    public void onSemDado() {
-                                        ocultarProgress();
-                                    }
-
-                                    @Override
-                                    public void onError(String message) {
-                                        ocultarProgress();
-                                    }
-                                });
+                                        @Override
+                                        public void onError(String message) {
+                                        }
+                                    });
+                                }
                             }
                         }
                     } else {
@@ -906,8 +906,20 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                         ocultarProgress();
                                         setLoading(false);
                                     } else {
-                                        idsTempFiltro.add(usuarioPesquisa);
-                                        callback.onRecuperado(idsTempFiltro);
+                                        groupUtils.verificaSeEParticipante(idGrupo, usuarioPesquisa.getIdUsuario(), new GroupUtils.VerificaParticipanteCallback() {
+                                            @Override
+                                            public void onParticipante(boolean status) {
+                                                if (!status) {
+                                                    idsTempFiltro.add(usuarioPesquisa);
+                                                }
+                                                callback.onRecuperado(idsTempFiltro);
+                                            }
+
+                                            @Override
+                                            public void onError(String message) {
+
+                                            }
+                                        });
                                     }
                                 }
                             }
@@ -933,24 +945,13 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
         if (newContatos != null && newContatos.size() >= 1) {
             contactDiffDAO.carregarMaisContato(newContatos, idsUsuarios);
             contactDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
-
-            groupUtils.verificaSeEParticipante(idGrupo, idUser, new GroupUtils.VerificaParticipanteCallback() {
+            Collections.sort(listaContatos, contatoComparator);
+            adapterSelection.updateContatoList(listaContatos, new AdapterUsersSelectionGroup.ListaAtualizadaCallback() {
                 @Override
-                public void onParticipante(boolean status) {
-                    dadosUser.setJaParticipaDoGrupo(status);
-                    Collections.sort(listaContatos, contatoComparator);
-                    adapterSelection.updateContatoList(listaContatos, new AdapterUsersSelectionGroup.ListaAtualizadaCallback() {
-                        @Override
-                        public void onAtualizado() {
-                            ocultarProgress();
-                            adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerContatos, false);
-                            setLoading(false);
-                        }
-                    });
-                }
-
-                @Override
-                public void onError(String message) {
+                public void onAtualizado() {
+                    ocultarProgress();
+                    adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerContatos, false);
+                    setLoading(false);
                 }
             });
         } else {
@@ -963,42 +964,30 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             recuperaDadosUser(idUser, new RecuperaUser() {
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
-
-                    groupUtils.verificaSeEParticipante(idGrupo, dadosUser.getIdUsuario(), new GroupUtils.VerificaParticipanteCallback() {
-                        @Override
-                        public void onParticipante(boolean status) {
-                            dadosUser.setJaParticipaDoGrupo(status);
-                            for (Contatos contatos : newContatos) {
-                                if (contatos.getIdContato().equals(dadosUser.getIdUsuario())) {
-                                    newContatos.remove(contatos);
-                                    contatos.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
-                                    newContatos.add(contatos);
-                                    contadorNome++;
-                                }
-
-                                if (contadorNome == newContatos.size()) {
-                                    contadorNome = 0;
-                                    contactDAOFiltrado.carregarMaisContato(newContatos, idsFiltrados);
-                                    contactDAOFiltrado.adicionarIdAoSet(idsFiltrados, idUser);
-
-                                    Collections.sort(listaFiltrada, contatoComparator);
-                                    adapterSelection.updateContatoList(listaFiltrada, new AdapterUsersSelectionGroup.ListaAtualizadaCallback() {
-                                        @Override
-                                        public void onAtualizado() {
-                                            ocultarProgress();
-                                            adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerAlvo, false);
-                                            setLoading(false);
-                                        }
-                                    });
-                                }
-                            }
+                    for (Contatos contatos : newContatos) {
+                        if (contatos.getIdContato().equals(dadosUser.getIdUsuario())) {
+                            newContatos.remove(contatos);
+                            contatos.setNomeContato(dadosUser.getNomeUsuarioPesquisa());
+                            newContatos.add(contatos);
+                            contadorNome++;
                         }
 
-                        @Override
-                        public void onError(String message) {
+                        if (contadorNome == newContatos.size()) {
+                            contadorNome = 0;
+                            contactDAOFiltrado.carregarMaisContato(newContatos, idsFiltrados);
+                            contactDAOFiltrado.adicionarIdAoSet(idsFiltrados, idUser);
 
+                            Collections.sort(listaFiltrada, contatoComparator);
+                            adapterSelection.updateContatoList(listaFiltrada, new AdapterUsersSelectionGroup.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+                                    ocultarProgress();
+                                    adicionarDadoDoUsuario(dadosUser, queryAlvo, childEventListenerAlvo, false);
+                                    setLoading(false);
+                                }
+                            });
                         }
-                    });
+                    }
                 }
 
                 @Override
@@ -1064,55 +1053,28 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             groupUtils.verificaSeEParticipante(idGrupo, usuarioPesquisa.getIdUsuario(), new GroupUtils.VerificaParticipanteCallback() {
                                 @Override
                                 public void onParticipante(boolean status) {
-
                                     if (status) {
                                         ocultarProgress();
                                         trocarQueryInicialFiltro = true;
                                         dadoInicialFiltragem(nome, counter);
-                                        return;
+                                    }else{
+                                        recuperaDadosUser(usuarioPesquisa.getIdUsuario(), new RecuperaUser() {
+                                            @Override
+                                            public void onRecuperado(Usuario usuarioAtual) {
+                                                adicionarContatosFiltrado(usuarioAtual);
+                                            }
+
+                                            @Override
+                                            public void onSemDado() {
+
+                                            }
+
+                                            @Override
+                                            public void onError(String message) {
+
+                                            }
+                                        });
                                     }
-
-                                    recuperaDadosUser(usuarioPesquisa.getIdUsuario(), new RecuperaUser() {
-                                        @Override
-                                        public void onRecuperado(Usuario usuarioAtual) {
-
-                                            //*ToastCustomizado.toastCustomizadoCurto("INICIO: " + usuarioAtual.getNomeUsuario(), requireContext());
-                                            groupUtils.verificaSeEParticipante(idGrupo, usuarioAtual.getIdUsuario(), new GroupUtils.VerificaParticipanteCallback() {
-                                                @Override
-                                                public void onParticipante(boolean status) {
-                                                    usuarioAtual.setJaParticipaDoGrupo(status);
-                                                    UsuarioUtils.checkBlockingStatus(getApplicationContext(), usuarioAtual.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
-                                                        @Override
-                                                        public void onBlocked(boolean status) {
-                                                            usuarioAtual.setIndisponivel(status);
-                                                            adicionarContatosFiltrado(usuarioAtual);
-                                                        }
-
-                                                        @Override
-                                                        public void onError(String message) {
-                                                            usuarioAtual.setIndisponivel(true);
-                                                            adicionarContatosFiltrado(usuarioAtual);
-                                                        }
-                                                    });
-                                                }
-
-                                                @Override
-                                                public void onError(String message) {
-
-                                                }
-                                            });
-                                        }
-
-                                        @Override
-                                        public void onSemDado() {
-
-                                        }
-
-                                        @Override
-                                        public void onError(String message) {
-
-                                        }
-                                    });
                                 }
 
                                 @Override
@@ -1781,17 +1743,42 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     }
 
     private void ultimoElemento(RecuperaUltimoElemento callback) {
-        queryUltimoElemento = firebaseRef.child("contatos")
-                .child(idUsuario).orderByChild("timestampContato").limitToLast(1);
+        if (trocarQueryUltimo) {
+            queryUltimoElemento = firebaseRef.child("contatos")
+                    .child(idUsuario).orderByChild("timestampContato")
+                    .endAt(timeUltimo - 1)
+                    .limitToLast(1);
+        }else{
+            queryUltimoElemento = firebaseRef.child("contatos")
+                    .child(idUsuario).orderByChild("timestampContato").limitToLast(1);
+        }
+
         listenerUltimoElemento = queryUltimoElemento.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    idUltimoElemento = snapshot1.getValue(Contatos.class).getIdContato();
-                    setLoading(false);
-                    if (callback != null && listaContatos != null && listaContatos.isEmpty()) {
-                        callback.onRecuperado();
-                    }
+                    groupUtils.verificaSeEParticipante(idGrupo, snapshot1.getValue(Contatos.class).getIdContato(), new GroupUtils.VerificaParticipanteCallback() {
+                        @Override
+                        public void onParticipante(boolean status) {
+                            if (status) {
+                                trocarQueryUltimo = true;
+                                timeUltimo = snapshot1.getValue(Contatos.class).getTimestampContato();
+                                queryUltimoElemento.removeEventListener(listenerUltimoElemento);
+                                ultimoElemento(callback);
+                            }else{
+                                idUltimoElemento = snapshot1.getValue(Contatos.class).getIdContato();
+                                setLoading(false);
+                                if (callback != null && listaContatos != null && listaContatos.isEmpty()) {
+                                    callback.onRecuperado();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onError(String message) {
+
+                        }
+                    });
                 }
             }
 
@@ -1805,19 +1792,44 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     }
 
     private void ultimoElementoFiltro(String nome, RecuperaUltimoElemento callback) {
-        queryUltimoElementoFiltro = firebaseRef.child("contatos_by_name")
-                .child(idUsuario)
-                .orderByChild("nomeUsuarioPesquisa")
-                .startAt(nome).endAt(nome + "\uf8ff").limitToLast(1);
+
+        if (trocarQueryUltimoFiltro) {
+            queryUltimoElementoFiltro = firebaseRef.child("contatos_by_name")
+                    .child(idUsuario)
+                    .orderByChild("nomeUsuarioPesquisa")
+                    .startAfter(nome).endAt(nome + "\uf8ff").limitToLast(1);
+        }else{
+            queryUltimoElementoFiltro = firebaseRef.child("contatos_by_name")
+                    .child(idUsuario)
+                    .orderByChild("nomeUsuarioPesquisa")
+                    .startAt(nome).endAt(nome + "\uf8ff").limitToLast(1);
+        }
+
         listenerUltimoElementoFiltro = queryUltimoElementoFiltro.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
-                    setLoading(false);
-                    if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
-                        callback.onRecuperado();
-                    }
+                    groupUtils.verificaSeEParticipante(idGrupo, snapshot1.getValue(Usuario.class).getIdUsuario(), new GroupUtils.VerificaParticipanteCallback() {
+                        @Override
+                        public void onParticipante(boolean status) {
+                            if (status) {
+                                queryUltimoElementoFiltro.removeEventListener(listenerUltimoElementoFiltro);
+                                trocarQueryUltimoFiltro = true;
+                                ultimoElementoFiltro(nome, callback);
+                            }else{
+                                idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
+                                setLoading(false);
+                                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                                    callback.onRecuperado();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onError(String message) {
+
+                        }
+                    });
                 }
             }
 

@@ -766,7 +766,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
         btnVerParticipantes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(GroupDetailsActivity.this, CommunityParticipantsActivity.class);
+                Intent intent = new Intent(GroupDetailsActivity.this, GroupParticipantsActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("idGrupo", idGrupo);
                 startActivity(intent);
@@ -1051,9 +1051,10 @@ public class GroupDetailsActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
                                 if (error == null) {
-                                    Intent intent = new Intent(GroupDetailsActivity.this, ManageCommunityUsersActivity.class);
+                                    Intent intent = new Intent(GroupDetailsActivity.this, GroupManagementActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                     intent.putExtra("idGrupo", grupoAtual.getIdGrupo());
+                                    intent.putExtra("idSuperAdmGrupo", grupoAtual.getIdSuperAdmGrupo());
                                     intent.putExtra("tipoGerenciamento", tipoGerenciamento);
                                     startActivity(intent);
                                 } else {

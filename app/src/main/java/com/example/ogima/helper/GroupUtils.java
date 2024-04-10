@@ -88,6 +88,12 @@ public class GroupUtils {
         void onError(String message);
     }
 
+    public interface RecuperarListaParticipantesCallback {
+        void onConcluido(ArrayList<String> idsParticipantes);
+
+        void onError(String message);
+    }
+
     public interface ExcluirGrupoCallback {
         void onConcluido();
 
@@ -344,7 +350,6 @@ public class GroupUtils {
         });
     }
 
-
     public void sairDoGrupo(String idGrupo, String idAlvo, SairDoGrupoCallback callback) {
         if (idAlvo == null || idGrupo == null
                 || idAlvo.isEmpty() || idGrupo.isEmpty()) {
@@ -371,7 +376,24 @@ public class GroupUtils {
                                 dadosOperacao.put(caminhoGrupo + "/admsGrupo/", idsAdms);
                                 dadosOperacao.put(caminhoGrupo + "nrAdms", ServerValue.increment(-1));
                             }
-                            salvarHashmapSairDoGrupo(dadosOperacao, callback);
+
+                            recuperarListaParticipantes(idGrupo, new RecuperarListaParticipantesCallback() {
+                                @Override
+                                public void onConcluido(ArrayList<String> idsParticipantes) {
+                                    if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                                        if (idsParticipantes.contains(idAlvo)) {
+                                            idsParticipantes.remove(idAlvo);
+                                        }
+                                    }
+                                    dadosOperacao.put(caminhoGrupo + "participantes", idsParticipantes);
+                                    salvarHashmapSairDoGrupo(dadosOperacao, callback);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
                         }
 
                         @Override
@@ -441,6 +463,43 @@ public class GroupUtils {
         });
     }
 
+    private void recuperarListaParticipantes(String idGrupo, RecuperarListaParticipantesCallback callback) {
+        String idUsuario;
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null || idGrupo == null
+                || idUsuario.isEmpty() || idGrupo.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        DatabaseReference recuperarListaRef = firebaseRef.child("grupos")
+                .child(idGrupo)
+                .child("participantes");
+
+        recuperarListaRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {
+                    };
+                    ArrayList<String> listaIds = snapshot.getValue(t);
+                    if (listaIds != null
+                            && !listaIds.isEmpty()) {
+                        callback.onConcluido(listaIds);
+                    } else {
+                        callback.onConcluido(null);
+                    }
+                } else {
+                    callback.onError("Ocorreu um erro ao recuperar os dados do grupo, tente novamente");
+                }
+                recuperarListaRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
 
     public void salvarHashmapSairDoGrupo(HashMap<String, Object> dadosOperacao, SairDoGrupoCallback callback) {
         firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
@@ -848,36 +907,55 @@ public class GroupUtils {
                 dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(-1));
                 dadosOperacao.put(usuarioAlvoCaminho, idsUserAlvo);
                 dadosOperacao.put(usuarioAtualCaminho, idsUserAtual);
-                verificaAdm(idGrupo, idAlvo, new VerificaAdmCallback() {
+
+                recuperarListaParticipantes(idGrupo, new RecuperarListaParticipantesCallback() {
                     @Override
-                    public void onRecuperado(boolean adm) {
-                        if (adm) {
-                            //Usuário escolhido é adm.
-                            despromoverAdm(idGrupo, idAlvo, new DespromoverAdmCallback() {
-                                @Override
-                                public void onConcluido() {
+                    public void onConcluido(ArrayList<String> idsParticipantes) {
+                        if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                            if (idsParticipantes.contains(idAlvo)) {
+                                idsParticipantes.remove(idAlvo);
+                            }
+                        }
+
+                        dadosOperacao.put(caminhoGrupo + "participantes", idsParticipantes);
+
+                        verificaAdm(idGrupo, idAlvo, new VerificaAdmCallback() {
+                            @Override
+                            public void onRecuperado(boolean adm) {
+                                if (adm) {
+                                    //Usuário escolhido é adm.
+                                    despromoverAdm(idGrupo, idAlvo, new DespromoverAdmCallback() {
+                                        @Override
+                                        public void onConcluido() {
+                                            salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                        }
+
+                                        @Override
+                                        public void onNaoParticipa() {
+                                            callback.onNaoParticipante();
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            callback.onError(message);
+                                        }
+                                    });
+                                } else {
+                                    //Usuário não é adm.
                                     salvarHashMapTransferirFundador(dadosOperacao, callback);
                                 }
+                            }
 
-                                @Override
-                                public void onNaoParticipa() {
-                                    callback.onNaoParticipante();
-                                }
-
-                                @Override
-                                public void onError(String message) {
-                                    callback.onError(message);
-                                }
-                            });
-                        } else {
-                            //Usuário não é adm.
-                            salvarHashMapTransferirFundador(dadosOperacao, callback);
-                        }
+                            @Override
+                            public void onError(String message) {
+                                callback.onError(message);
+                            }
+                        });
                     }
 
                     @Override
                     public void onError(String message) {
-                        callback.onError(message);
+
                     }
                 });
             }

@@ -408,7 +408,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
         ultimoElemento(new RecuperaUltimoElemento() {
             @Override
             public void onRecuperado() {
-                ToastCustomizado.toastCustomizado("INICIO CHAMADO " + idUltimoElemento, requireContext());
+                //*ToastCustomizado.toastCustomizado("INICIO CHAMADO " + idUltimoElemento, requireContext());
                 childListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {

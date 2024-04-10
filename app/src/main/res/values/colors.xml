@@ -36,6 +36,7 @@
     <color name="contato_favoritado">#FFC107</color>
     <color name="contato_sem_favorito">#ACA8A8</color>
     <color name="unread_messages_color">#4A1CC6</color>
+    <color name="group_participants">#3F51B5</color>
 
 
 </resources>

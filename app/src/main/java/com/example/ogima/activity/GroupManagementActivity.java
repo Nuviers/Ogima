@@ -37,7 +37,6 @@ import com.example.ogima.helper.TimestampUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
 import com.example.ogima.helper.UsuarioUtils;
-import com.example.ogima.model.Contatos;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -112,7 +111,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     private Set<String> idsAIgnorarListeners = new HashSet<>();
     private String idUltimoElemento, idUltimoElementoFiltro;
     private Query queryUltimoElemento, queryUltimoElementoFiltro;
-    private ValueEventListener listenerUltimoElemento, listenerUltimoElementoFiltro;
     private int controleRemocao = 0;
     private Set<Grupo> idsTempFiltro = new HashSet<>();
     private int aosFiltros = 0;
@@ -122,6 +120,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     private int contadorNome = 0;
     private int totalSelecionado = 0;
     private String idGrupo = "";
+    private String idSuperAdmGrupo = "";
     private boolean edicao = false;
     private ProgressDialog progressDialog;
     private int contadorParticipantes = 0;
@@ -137,12 +136,8 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     private boolean operacoesIgnoradas = false;
     private boolean operacaoComErro = false;
     private boolean operacaoConcluida = false;
-
-    private interface VerificaExistenciaCallback {
-        void onExistencia(boolean status, Contatos contatoAtualizado);
-
-        void onError(String message);
-    }
+    private boolean trocarQueryUltimo = false, trocarQueryUltimoFiltro = false;
+    private long timeUltimo = -1;
 
     private interface RecuperaUltimoElemento {
         void onRecuperado();
@@ -363,10 +358,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
 
                                             idUltimoElementoFiltro = null;
 
-                                            if (listenerUltimoElementoFiltro != null && queryUltimoElementoFiltro != null) {
-                                                queryUltimoElementoFiltro.removeEventListener(listenerUltimoElementoFiltro);
-                                            }
-
                                             ultimoElementoFiltro(nomePesquisado, new RecuperaUltimoElemento() {
                                                 @Override
                                                 public void onRecuperado() {
@@ -403,6 +394,9 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
         }
         if (dados.containsKey("idGrupo")) {
             idGrupo = dados.getString("idGrupo");
+        }
+        if (dados.containsKey("idSuperAdmGrupo")) {
+            idSuperAdmGrupo = dados.getString("idSuperAdmGrupo");
         }
         if (dados.containsKey("tipoGerenciamento")) {
             tipoGerenciamento = dados.getString("tipoGerenciamento");
@@ -482,6 +476,9 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                 setLimiteSelecao(1);
                 break;
         }
+    }
+
+    private void setarLimite() {
         adapterSelection.setLimiteSelecao(getLimiteSelecao());
         txtViewLimiteManage.setText(String.format("%d%s%d", 0, "/", getLimiteSelecao()));
     }
@@ -492,6 +489,11 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
             linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             recyclerViewManage.setHasFixedSize(true);
             recyclerViewManage.setLayoutManager(linearLayoutManager);
+
+            adapterSelection = new AdapterUsersSelectionCommunity(getApplicationContext(),
+                    listaUsuarios, listaDadosUser,
+                    getResources().getColor(R.color.chat_list_color), getLimiteSelecao(), this, this);
+            recyclerViewManage.setAdapter(adapterSelection);
 
             if (edicao) {
                 FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
@@ -525,11 +527,8 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
             }
 
             txtViewLimiteManage.setText(String.format("%d%s%d", 0, "/", getLimiteSelecao()));
-            adapterSelection = new AdapterUsersSelectionCommunity(getApplicationContext(),
-                    listaUsuarios, listaDadosUser,
-                    getResources().getColor(R.color.chat_list_color), getLimiteSelecao(), this, this);
-            recyclerViewManage.setAdapter(adapterSelection);
             adapterSelection.setStatusEpilepsia(epilepsia);
+            adapterSelection.setLimiteSelecao(getLimiteSelecao());
         }
     }
 
@@ -569,36 +568,43 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                                 if (grupoInicial != null
                                         && grupoInicial.getIdParticipante() != null
                                         && !grupoInicial.getIdParticipante().isEmpty()) {
-                                    if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
-                                        adicionarUser(grupoInicial);
-                                        lastTimestamp = grupoInicial.getTimestampinteracao();
-                                    } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
-                                        if (!grupoInicial.isAdministrator()) {
-                                            //Somente exibir usuários que não são adms.
-                                            adicionarUser(grupoInicial);
-                                            lastTimestamp = grupoInicial.getTimestampinteracao();
-                                        } else {
-                                            lastTimestamp = grupoInicial.getTimestampinteracao();
-                                            trocarQueryInicial = true;
-                                            recuperarDadosIniciais();
-                                        }
-                                    } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_DEMOTING)) {
-                                        if (grupoInicial.isAdministrator()) {
-                                            //Somente exibir usuários que são adms.
-                                            adicionarUser(grupoInicial);
-                                            lastTimestamp = grupoInicial.getTimestampinteracao();
-                                        } else {
-                                            lastTimestamp = grupoInicial.getTimestampinteracao();
-                                            trocarQueryInicial = true;
-                                            recuperarDadosIniciais();
-                                        }
-                                    } else if (fundador || !grupoInicial.isAdministrator()) {
-                                        adicionarUser(grupoInicial);
-                                        lastTimestamp = grupoInicial.getTimestampinteracao();
-                                    } else {
+
+                                    if (grupoInicial.getIdParticipante().equals(idSuperAdmGrupo)) {
                                         lastTimestamp = grupoInicial.getTimestampinteracao();
                                         trocarQueryInicial = true;
                                         recuperarDadosIniciais();
+                                    }else{
+                                        if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
+                                            adicionarUser(grupoInicial);
+                                            lastTimestamp = grupoInicial.getTimestampinteracao();
+                                        } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
+                                            if (!grupoInicial.isAdministrator()) {
+                                                //Somente exibir usuários que não são adms.
+                                                adicionarUser(grupoInicial);
+                                                lastTimestamp = grupoInicial.getTimestampinteracao();
+                                            } else {
+                                                lastTimestamp = grupoInicial.getTimestampinteracao();
+                                                trocarQueryInicial = true;
+                                                recuperarDadosIniciais();
+                                            }
+                                        } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_DEMOTING)) {
+                                            if (grupoInicial.isAdministrator()) {
+                                                //Somente exibir usuários que são adms.
+                                                adicionarUser(grupoInicial);
+                                                lastTimestamp = grupoInicial.getTimestampinteracao();
+                                            } else {
+                                                lastTimestamp = grupoInicial.getTimestampinteracao();
+                                                trocarQueryInicial = true;
+                                                recuperarDadosIniciais();
+                                            }
+                                        } else if (fundador || !grupoInicial.isAdministrator()) {
+                                            adicionarUser(grupoInicial);
+                                            lastTimestamp = grupoInicial.getTimestampinteracao();
+                                        } else {
+                                            lastTimestamp = grupoInicial.getTimestampinteracao();
+                                            trocarQueryInicial = true;
+                                            recuperarDadosIniciais();
+                                        }
                                     }
                                 } else {
                                     ocultarProgress();
@@ -652,23 +658,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
         });
     }
 
-    private void verificaExistencia(String idContatos, VerificaExistenciaCallback callback) {
-        DatabaseReference verificaExistenciaRef = firebaseRef.child("contatos")
-                .child(idUsuario).child(idContatos);
-        verificaExistenciaRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                callback.onExistencia(snapshot.getValue() != null, snapshot.getValue(Contatos.class));
-                verificaExistenciaRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                callback.onError(error.getMessage());
-            }
-        });
-    }
-
     private void configPaginacao() {
         if (recyclerViewManage != null) {
             scrollListener = new RecyclerView.OnScrollListener() {
@@ -708,14 +697,15 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
 
     private void carregarMaisDados() {
         if (!isPesquisaAtivada()) {
-            exibirProgress();
             if (listaUsuarios.size() > 1
                     && idUltimoElemento != null && !idUltimoElemento.isEmpty()
-                    && idUltimoElemento.equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdParticipante())) {
+                    && idUltimoElemento.equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())) {
                 ocultarProgress();
                 ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA CHAT " + idUltimoElemento, getApplicationContext());
                 return;
             }
+
+            exibirProgress();
 
             queryLoadMore = firebaseRef.child("groupFollowers")
                     .child(idGrupo)
@@ -732,6 +722,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                             if (dadoParticipante != null
                                     && dadoParticipante.getIdParticipante() != null
                                     && !dadoParticipante.getIdParticipante().isEmpty()) {
+
                                 if (listaUsuarios != null && listaUsuarios.size() > 1 && idsUsuarios != null && idsUsuarios.size() > 0
                                         && idsUsuarios.contains(dadoParticipante.getIdParticipante())) {
                                     ocultarProgress();
@@ -766,9 +757,9 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                                             lastTimestamp = key;
                                         }
                                     }
-                                }else if (fundador || !dadoParticipante.isAdministrator()) {
+                                } else if (fundador || !dadoParticipante.isAdministrator()) {
                                     prepararListaPaginacao(dadoParticipante);
-                                }else {
+                                } else {
                                     long key = dadoParticipante.getTimestampinteracao();
                                     if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
                                         lastTimestamp = key;
@@ -860,9 +851,9 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                                                         lastTimestamp = key;
                                                     }
                                                 }
-                                            }else if (fundador || !dadoParticipante.isAdministrator()) {
+                                            } else if (fundador || !dadoParticipante.isAdministrator()) {
                                                 prepararListaPaginacaoFiltro(grupoPesquisa.getNomeUsuarioPesquisa(), dadoParticipante);
-                                            }else {
+                                            } else {
                                                 long key = dadoParticipante.getTimestampinteracao();
                                                 if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
                                                     lastTimestamp = key;
@@ -908,17 +899,26 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
             recuperaDadosUser(idUser, new RecuperaUser() {
                 @Override
                 public void onRecuperado(Usuario dadosUser) {
-                    usuarioDiffDAO.carregarMaisUsuario(newUsuarios, idsUsuarios);
-                    usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
-                    Collections.sort(listaUsuarios, usuarioComparator);
-                    adapterSelection.updateUsersList(listaUsuarios, new AdapterUsersSelectionCommunity.ListaAtualizadaCallback() {
-                        @Override
-                        public void onAtualizado() {
-                            ocultarProgress();
-                            adicionarDadoDoUsuario(dadosUser);
-                            setLoading(false);
+                    for (Usuario usuarioSemNome : newUsuarios) {
+                        if (usuarioSemNome.getIdUsuario().equals(dadosUser.getIdUsuario())) {
+                            contadorNome++;
+                            newUsuarios.get(findPositionNewList(newUsuarios, usuarioSemNome.getIdUsuario())).setNomeUsuario(dadosUser.getNomeUsuario());
                         }
-                    });
+                        if (contadorNome == newUsuarios.size()) {
+                            contadorNome = 0;
+                            usuarioDiffDAO.carregarMaisUsuario(newUsuarios, idsUsuarios);
+                            usuarioDiffDAO.adicionarIdAoSet(idsUsuarios, idUser);
+                            Collections.sort(listaUsuarios, usuarioComparator);
+                            adapterSelection.updateUsersList(listaUsuarios, new AdapterUsersSelectionCommunity.ListaAtualizadaCallback() {
+                                @Override
+                                public void onAtualizado() {
+                                    ocultarProgress();
+                                    adicionarDadoDoUsuario(dadosUser);
+                                    setLoading(false);
+                                }
+                            });
+                        }
+                    }
                 }
 
                 @Override
@@ -933,6 +933,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
             });
         } else {
             ocultarProgress();
+            setLoading(false);
         }
     }
 
@@ -967,6 +968,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
             });
         } else {
             ocultarProgress();
+            setLoading(false);
         }
     }
 
@@ -1010,64 +1012,72 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                         if (grupoPesquisa != null && grupoPesquisa.getIdParticipante() != null
                                 && !grupoPesquisa.getIdParticipante().isEmpty()
                                 && !grupoPesquisa.getIdParticipante().equals(idUsuario)) {
-                            recuperarParticipante(grupoPesquisa.getIdParticipante(), new RecuperaParticipante() {
-                                @Override
-                                public void onRecuperado(Grupo dadoParticipante) {
-                                    recuperaDadosUser(grupoPesquisa.getIdParticipante(), new RecuperaUser() {
-                                        @Override
-                                        public void onRecuperado(Usuario dadosUser) {
-                                            lastName = grupoPesquisa.getNomeUsuarioPesquisa();
-                                            if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
-                                                adicionarUserFiltrado(dadosUser);
-                                            } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
-                                                if (!dadoParticipante.isAdministrator()) {
-                                                    //Somente exibir usuários que não são adms.
+
+                            if (!grupoPesquisa.getIdParticipante().equals(idSuperAdmGrupo)) {
+                                ocultarProgress();
+                                lastName = grupoPesquisa.getNomeUsuarioPesquisa();
+                                trocarQueryInicialFiltro = true;
+                                dadoInicialFiltragem(nome, counter);
+                            }else{
+                                recuperarParticipante(grupoPesquisa.getIdParticipante(), new RecuperaParticipante() {
+                                    @Override
+                                    public void onRecuperado(Grupo dadoParticipante) {
+                                        recuperaDadosUser(grupoPesquisa.getIdParticipante(), new RecuperaUser() {
+                                            @Override
+                                            public void onRecuperado(Usuario dadosUser) {
+                                                lastName = grupoPesquisa.getNomeUsuarioPesquisa();
+                                                if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
+                                                    adicionarUserFiltrado(dadosUser);
+                                                } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_PROMOTE)) {
+                                                    if (!dadoParticipante.isAdministrator()) {
+                                                        //Somente exibir usuários que não são adms.
+                                                        adicionarUserFiltrado(dadosUser);
+                                                    } else {
+                                                        trocarQueryInicialFiltro = true;
+                                                        dadoInicialFiltragem(nome, counter);
+                                                    }
+                                                } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_DEMOTING)) {
+                                                    if (dadoParticipante.isAdministrator()) {
+                                                        //Somente exibir usuários que são adms.
+                                                        adicionarUserFiltrado(dadosUser);
+                                                    } else {
+                                                        trocarQueryInicialFiltro = true;
+                                                        dadoInicialFiltragem(nome, counter);
+                                                    }
+                                                } else if (fundador || !dadoParticipante.isAdministrator()) {
                                                     adicionarUserFiltrado(dadosUser);
                                                 } else {
                                                     trocarQueryInicialFiltro = true;
                                                     dadoInicialFiltragem(nome, counter);
                                                 }
-                                            } else if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_DEMOTING)) {
-                                                if (dadoParticipante.isAdministrator()) {
-                                                    //Somente exibir usuários que são adms.
-                                                    adicionarUserFiltrado(dadosUser);
-                                                } else {
-                                                    trocarQueryInicialFiltro = true;
-                                                    dadoInicialFiltragem(nome, counter);
-                                                }
-                                            } else if (fundador || !dadoParticipante.isAdministrator()) {
-                                                adicionarUserFiltrado(dadosUser);
-                                            } else {
+                                            }
+
+                                            @Override
+                                            public void onSemDado() {
                                                 trocarQueryInicialFiltro = true;
                                                 dadoInicialFiltragem(nome, counter);
                                             }
-                                        }
 
-                                        @Override
-                                        public void onSemDado() {
-                                            trocarQueryInicialFiltro = true;
-                                            dadoInicialFiltragem(nome, counter);
-                                        }
+                                            @Override
+                                            public void onError(String message) {
 
-                                        @Override
-                                        public void onError(String message) {
+                                            }
+                                        });
+                                    }
 
-                                        }
-                                    });
-                                }
+                                    @Override
+                                    public void onSemDado() {
+                                        trocarQueryInicialFiltro = true;
+                                        dadoInicialFiltragem(nome, counter);
+                                    }
 
-                                @Override
-                                public void onSemDado() {
-                                    trocarQueryInicialFiltro = true;
-                                    dadoInicialFiltragem(nome, counter);
-                                }
-
-                                @Override
-                                public void onError(String message) {
-                                    ocultarProgress();
-                                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao realizar a pesquisa, tente novamente.", getApplicationContext());
-                                }
-                            });
+                                    @Override
+                                    public void onError(String message) {
+                                        ocultarProgress();
+                                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao realizar a pesquisa, tente novamente.", getApplicationContext());
+                                    }
+                                });
+                            }
                         } else if (grupoPesquisa != null
                                 && grupoPesquisa.getTimestampinteracao() != -1) {
                             ocultarProgress();
@@ -1148,10 +1158,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
         }
         removeValueEventListenerFiltro(null);
 
-        if (listenerUltimoElementoFiltro != null && queryUltimoElementoFiltro != null) {
-            queryUltimoElementoFiltro.removeEventListener(listenerUltimoElementoFiltro);
-        }
-
         lastName = null;
         if (idsFiltrados != null) {
             idsFiltrados.clear();
@@ -1221,18 +1227,34 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     }
 
     private void ultimoElemento(RecuperaUltimoElemento callback) {
-        queryUltimoElemento = firebaseRef.child("contatos")
-                .child(idUsuario).orderByChild("timestampContato").limitToLast(1);
-        listenerUltimoElemento = queryUltimoElemento.addValueEventListener(new ValueEventListener() {
+        if (trocarQueryUltimo) {
+            queryUltimoElemento = firebaseRef.child("groupFollowers")
+                    .child(idGrupo).orderByChild("timestampinteracao")
+                    .endAt(timeUltimo)
+                    .limitToLast(1);
+        }else{
+            queryUltimoElemento = firebaseRef.child("groupFollowers")
+                    .child(idGrupo).orderByChild("timestampinteracao").limitToLast(1);
+        }
+
+        queryUltimoElemento.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    idUltimoElemento = snapshot1.getValue(Contatos.class).getIdContato();
-                    setLoading(false);
-                    if (callback != null && listaUsuarios != null && listaUsuarios.isEmpty()) {
-                        callback.onRecuperado();
+                    if (snapshot1.getValue(Grupo.class).getIdParticipante().equals(idSuperAdmGrupo)) {
+                        trocarQueryUltimo = true;
+                        timeUltimo = snapshot1.getValue(Grupo.class).getTimestampinteracao();
+                        queryUltimoElemento.removeEventListener(this);
+                        ultimoElemento(callback);
+                    }else{
+                        idUltimoElemento = snapshot1.getValue(Grupo.class).getIdParticipante();
+                        setLoading(false);
+                        if (callback != null && listaUsuarios != null && listaUsuarios.isEmpty()) {
+                            callback.onRecuperado();
+                        }
                     }
                 }
+                queryUltimoElemento.removeEventListener(this);
             }
 
             @Override
@@ -1245,20 +1267,35 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     }
 
     private void ultimoElementoFiltro(String nome, RecuperaUltimoElemento callback) {
-        queryUltimoElementoFiltro = firebaseRef.child("group_participants_by_name")
-                .child(idUsuario)
-                .orderByChild("nomeUsuarioPesquisa")
-                .startAt(nome).endAt(nome + "\uf8ff").limitToLast(1);
-        listenerUltimoElementoFiltro = queryUltimoElementoFiltro.addValueEventListener(new ValueEventListener() {
+        if (trocarQueryUltimoFiltro) {
+            queryUltimoElementoFiltro = firebaseRef.child("group_by_name")
+                    .child(idGrupo)
+                    .orderByChild("nomeUsuarioPesquisa")
+                    .startAfter(nome).endAt(nome + "\uf8ff").limitToLast(1);
+        }else{
+            queryUltimoElementoFiltro = firebaseRef.child("group_by_name")
+                    .child(idGrupo)
+                    .orderByChild("nomeUsuarioPesquisa")
+                    .startAt(nome).endAt(nome + "\uf8ff").limitToLast(1);
+        }
+
+        queryUltimoElementoFiltro.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
-                    setLoading(false);
-                    if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
-                        callback.onRecuperado();
+                    if (snapshot1.getValue(Usuario.class).getIdUsuario().equals(idSuperAdmGrupo)) {
+                        trocarQueryUltimoFiltro = true;
+                        queryUltimoElementoFiltro.removeEventListener(this);
+                        ultimoElementoFiltro(nome, callback);
+                    }else{
+                        idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
+                        setLoading(false);
+                        if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                            callback.onRecuperado();
+                        }
                     }
                 }
+                queryUltimoElementoFiltro.removeEventListener(this);
             }
 
             @Override
@@ -1272,7 +1309,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
 
     private void limparActivity() {
         idsAIgnorarListeners.clear();
-        firebaseUtils.removerQueryValueListener(queryUltimoElemento, listenerUltimoElemento);
         removeValueEventListener();
         removeValueEventListenerFiltro(null);
         if (usuarioDiffDAO != null) {
@@ -1516,7 +1552,9 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                     !dadoParticipante.getIdParticipante().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())) {
                 Usuario usuarioNew = new Usuario();
                 usuarioNew.setIdUsuario(dadoParticipante.getIdParticipante());
-                newParticipante.add(usuarioNew);
+                if (!dadoParticipante.getIdParticipante().equals(idSuperAdmGrupo)) {
+                    newParticipante.add(usuarioNew);
+                }
                 lastTimestamp = key;
             }
         }
@@ -1538,9 +1576,11 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                             .equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdParticipante())) {
                 Usuario usuarioNew = new Usuario();
                 usuarioNew.setIdUsuario(dadoParticipante.getIdParticipante());
-                newParticipantes.add(usuarioNew);
-                //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
+                if (!usuarioNew.getIdUsuario().equals(idSuperAdmGrupo)) {
+                    newParticipantes.add(usuarioNew);
+                }
                 lastName = nomeParticipante;
+                //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
             }
         }
         // Remove a última chave usada
@@ -1700,7 +1740,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
 
                     @Override
                     public void onNaoParticipante() {
-                        ToastCustomizado.toastCustomizadoCurto("Usuário selecionado não faz mais parte dessa comunidade, escolha outro usuário.", getApplicationContext());
+                        ToastCustomizado.toastCustomizadoCurto("Usuário selecionado não faz mais parte desse grupo, escolha outro usuário.", getApplicationContext());
                     }
 
                     @Override
@@ -1731,7 +1771,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                 if (tipoGerenciamento.equals(CommunityUtils.FUNCTION_NEW_FOUNDER)) {
                     Intent intent = new Intent(GroupManagementActivity.this, ListaComunidadesActivityNEW.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+                    //*******startActivity(intent);
                     finish();
                     return;
                 }
@@ -1740,6 +1780,16 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                 callback.onConcluido();
             }
         }
+    }
+
+    private int findPositionNewList(List<Usuario> listaAlvo, String userId) {
+        for (int i = 0; i < listaAlvo.size(); i++) {
+            Usuario user = listaAlvo.get(i);
+            if (user.getIdUsuario().equals(userId)) {
+                return i; // Retorna a posição na lista quando o ID corresponder
+            }
+        }
+        return -1; // Retorna -1 se o ID não for encontrado na lista
     }
 
     private void inicializarComponentes() {
