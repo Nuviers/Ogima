@@ -419,6 +419,7 @@
     <string name="group_description">Group description</string>
     <string name="enter_description_group">Enter the group description:</string>
     <string name="public_group">Public</string>
+    <string name="private_group">Private</string>
     <string name="group">Group</string>
     <string name="error_displaying_group_setting">There was an error displaying your group settings.</string>
     <string name="create_group">Create group</string>

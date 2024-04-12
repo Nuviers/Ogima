@@ -296,8 +296,9 @@ public class ListagemGrupoFragment extends Fragment {
     }
 
     private void inicializarComponentes(View view) {
-        recyclerChat = view.findViewById(R.id.recyclerViewChat);
-        searchViewChat = view.findViewById(R.id.searchViewChat);
+        recyclerChat = view.findViewById(R.id.recyclerViewLstChatGrupo);
+        searchViewChat = view.findViewById(R.id.searchViewLstChatGrupo);
+        imgButtonCadastroGrupo = view.findViewById(R.id.imgButtonCadastroGrupo);
         //**btnCadastroGrupo = view.findViewById(R.id.btnCadastroGrupo);
         imgButtonCadastroGrupo = view.findViewById(R.id.imgButtonCadastroGrupo);
     }

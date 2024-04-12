@@ -119,6 +119,7 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private long nrConvitesComunidade;
     private Boolean jaParticipaDoGrupo;
     private String idParticipante;
+    private String idGrupo;
 
     public Usuario() {
     }
@@ -166,6 +167,14 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public String getIdGrupo() {
+        return idGrupo;
+    }
+
+    public void setIdGrupo(String idGrupo) {
+        this.idGrupo = idGrupo;
     }
 
     public String getIdParticipante() {

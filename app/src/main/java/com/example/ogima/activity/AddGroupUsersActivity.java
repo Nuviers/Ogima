@@ -110,7 +110,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     private int contadorRemocaoListener = 0;
     private FirebaseUtils firebaseUtils;
     private GroupUtils groupUtils;
-    private int travar = 0;
     private Set<String> idsListenersNEWDATA = new HashSet<>();
     private HashMap<String, Query> referenceHashMapNEWDATA = new HashMap<>();
     private HashMap<String, ChildEventListener> listenerHashMapNEWDATA = new HashMap<>();
@@ -277,9 +276,9 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                          */
 
                         if (edicao) {
-                            midiaUtils.exibirProgressDialog("","salvarParticipantes");
+                            midiaUtils.exibirProgressDialog("", "salvarParticipantes");
                             salvarParticipantesEdicao();
-                        }else{
+                        } else {
                             Intent intent = new Intent(AddGroupUsersActivity.this, CreateGroupActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             intent.putExtra("idParticipantes", adapterSelection.getListaSelecao());
@@ -388,6 +387,11 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             recyclerViewManage.setHasFixedSize(true);
             recyclerViewManage.setLayoutManager(linearLayoutManager);
 
+            adapterSelection = new AdapterUsersSelectionGroup(getApplicationContext(),
+                    listaContatos, listaDadosUser,
+                    getResources().getColor(R.color.chat_list_color), getLimiteSelecao(), this, this, this, this);
+            recyclerViewManage.setAdapter(adapterSelection);
+
             if (edicao) {
                 FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
                     @Override
@@ -395,7 +399,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                         //Recuperar o número de participantes - Max_participantes e setar no limite.
                         if (grupoAtual.getNrParticipantes() > 160) {
                             setLimiteSelecao(GroupUtils.MAX_NUMBER_PARTICIPANTS - grupoAtual.getNrParticipantes());
-                        }else{
+                        } else {
                             setLimiteSelecao(GroupUtils.MAX_SELECTION);
                         }
                         adapterSelection.setLimiteSelecao(getLimiteSelecao());
@@ -416,14 +420,10 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                 });
             } else {
                 setLimiteSelecao(GroupUtils.MAX_SELECTION);
-                adapterSelection.setLimiteSelecao(getLimiteSelecao());
+                adapterSelection.setLimiteSelecao(limiteSelecao);
             }
 
             txtViewLimiteManage.setText(String.format("%d%s%d", 0, "/", getLimiteSelecao()));
-            adapterSelection = new AdapterUsersSelectionGroup(getApplicationContext(),
-                    listaContatos, listaDadosUser,
-                    getResources().getColor(R.color.chat_list_color), getLimiteSelecao(), this, this, this, this);
-            recyclerViewManage.setAdapter(adapterSelection);
             adapterSelection.setStatusEpilepsia(epilepsia);
         }
     }
@@ -474,21 +474,10 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                             ocultarProgress();
                                             trocarQueryInicial = true;
                                             recuperarDadosIniciais();
-                                        }else{
+                                        } else {
                                             idPrimeiroDado = contato.getIdContato();
-                                            if (travar == 0) {
-                                                lastTimestamp = contato.getTimestampContato();
-                                                adicionarContatos(contato, false);
-                                            } else {
-                                                ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), getApplicationContext());
-                                                //Dado mais recente que o anterior
-                                                if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
-                                                        && listenerHashMapNEWDATA.containsKey(contato.getIdContato())) {
-                                                    return;
-                                                }
-                                                ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), getApplicationContext());
-                                                anexarNovoDado(contato);
-                                            }
+                                            lastTimestamp = contato.getTimestampContato();
+                                            adicionarContatos(contato, false);
                                         }
                                     }
 
@@ -585,7 +574,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                 adapterSelection.updateContatoList(listaAtual, new AdapterUsersSelectionGroup.ListaAtualizadaCallback() {
                     @Override
                     public void onAtualizado() {
-                        travar = 1;
 
                         if (dadoModificado) {
                             adicionarDadoDoUsuario(dadosUser, newDataRef, childEventListenerNewData, dadoModificado);
@@ -594,14 +582,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                         }
                         ocultarProgress();
                         setLoading(false);
-
-                        if (travar != 0) {
-                            if (areFirstThreeItemsVisible(recyclerViewManage)) {
-                                int newPosition = 0; // A posição para a qual você deseja rolar
-                                //*ToastCustomizado.toastCustomizadoCurto("SCROLL", requireContext());
-                                recyclerViewManage.scrollToPosition(newPosition);
-                            }
-                        }
                     }
                 });
             }
@@ -684,9 +664,13 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
         if (!isPesquisaAtivada()) {
             exibirProgress();
             ToastCustomizado.toastCustomizadoCurto("Mais dados -_- " + idUltimoElemento, getApplicationContext());
+            if (listaContatos.size() > 1) {
+                ToastCustomizado.toastCustomizadoCurto("IdLista: " + listaContatos.get(listaContatos.size() - 1).getIdContato(), getApplicationContext());
+            }
             if (listaContatos.size() > 1
                     && idUltimoElemento != null && !idUltimoElemento.isEmpty()
-                    && idUltimoElemento.equals(listaContatos.get(listaContatos.size() - 1).getIdContato())) {
+                    && idsUsuarios != null && !idsUsuarios.isEmpty()
+                    && idsUsuarios.contains(idUltimoElemento)) {
                 ocultarProgress();
                 ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA CHAT " + idUltimoElemento, getApplicationContext());
                 //NO LUGAR DE COMPARAR COM O ÚLTIMO ITEM ADICIONADO NA LISTA
@@ -875,7 +859,8 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
 
             if (listaFiltrada.size() > 1
                     && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
-                    && idUltimoElementoFiltro.equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdContato())) {
+                    && idsFiltrados != null && !idsFiltrados.isEmpty()
+                    && idsFiltrados.contains(idUltimoElementoFiltro)) {
                 ocultarProgress();
                 ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, getApplicationContext());
                 return;
@@ -1057,7 +1042,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                         ocultarProgress();
                                         trocarQueryInicialFiltro = true;
                                         dadoInicialFiltragem(nome, counter);
-                                    }else{
+                                    } else {
                                         recuperaDadosUser(usuarioPesquisa.getIdUsuario(), new RecuperaUser() {
                                             @Override
                                             public void onRecuperado(Usuario usuarioAtual) {
@@ -1748,7 +1733,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                     .child(idUsuario).orderByChild("timestampContato")
                     .endAt(timeUltimo - 1)
                     .limitToLast(1);
-        }else{
+        } else {
             queryUltimoElemento = firebaseRef.child("contatos")
                     .child(idUsuario).orderByChild("timestampContato").limitToLast(1);
         }
@@ -1765,7 +1750,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                 timeUltimo = snapshot1.getValue(Contatos.class).getTimestampContato();
                                 queryUltimoElemento.removeEventListener(listenerUltimoElemento);
                                 ultimoElemento(callback);
-                            }else{
+                            } else {
                                 idUltimoElemento = snapshot1.getValue(Contatos.class).getIdContato();
                                 setLoading(false);
                                 if (callback != null && listaContatos != null && listaContatos.isEmpty()) {
@@ -1798,7 +1783,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                     .child(idUsuario)
                     .orderByChild("nomeUsuarioPesquisa")
                     .startAfter(nome).endAt(nome + "\uf8ff").limitToLast(1);
-        }else{
+        } else {
             queryUltimoElementoFiltro = firebaseRef.child("contatos_by_name")
                     .child(idUsuario)
                     .orderByChild("nomeUsuarioPesquisa")
@@ -1816,7 +1801,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                 queryUltimoElementoFiltro.removeEventListener(listenerUltimoElementoFiltro);
                                 trocarQueryUltimoFiltro = true;
                                 ultimoElementoFiltro(nome, callback);
-                            }else{
+                            } else {
                                 idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
                                 setLoading(false);
                                 if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
@@ -1996,7 +1981,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
         return -1; // Retorna -1 se o ID não for encontrado na lista
     }
 
-    private void salvarParticipantesEdicao(){
+    private void salvarParticipantesEdicao() {
         FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
             @Override
             public void onGrupoRecuperado(Grupo grupoAtual) {
@@ -2006,63 +1991,74 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                         HashMap<String, Object> dadosOperacao = new HashMap<>();
                         String caminhoGrupo = "/grupos/" + idGrupo + "/";
                         for (String idParticipante : adapterSelection.getListaSelecao()) {
-                            groupUtils.verificaBlock(idParticipante, idGrupo, new GroupUtils.VerificaBlockCallback() {
-                                @Override
-                                public void onBlock(boolean status) {
-                                    if (status) {
-                                        //Bloqueado
-                                        contadorParticipantes++;
-                                        idsARemover.add(idParticipante);
-                                    } else {
-                                        String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idParticipante + "/";
-                                        String caminhoFollowing = "/groupFollowing/" + idParticipante + "/" + idGrupo + "/";
-                                        dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(1));
-                                        dadosOperacao.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
-                                        dadosOperacao.put(caminhoFollowers + "idParticipante", idParticipante);
-                                        dadosOperacao.put(caminhoFollowers + "administrator", false);
-                                        dadosOperacao.put(caminhoFollowing + "idGrupo", idGrupo);
-                                        dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
+                            GroupUtils.ajustarDadoParaPesquisa(getApplicationContext(),
+                                    dadosOperacao, idGrupo, idParticipante, new GroupUtils.AjustarDadoParaPesquisaCallback() {
+                                        @Override
+                                        public void onConcluido(HashMap<String, Object> dadosOperacao) {
+                                            groupUtils.verificaBlock(idParticipante, idGrupo, new GroupUtils.VerificaBlockCallback() {
+                                                @Override
+                                                public void onBlock(boolean status) {
+                                                    if (status) {
+                                                        //Bloqueado
+                                                        contadorParticipantes++;
+                                                        idsARemover.add(idParticipante);
+                                                    } else {
+                                                        String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idParticipante + "/";
+                                                        String caminhoFollowing = "/groupFollowing/" + idParticipante + "/" + idGrupo + "/";
+                                                        dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(1));
+                                                        dadosOperacao.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
+                                                        dadosOperacao.put(caminhoFollowers + "idParticipante", idParticipante);
+                                                        dadosOperacao.put(caminhoFollowers + "administrator", false);
+                                                        dadosOperacao.put(caminhoFollowing + "idGrupo", idGrupo);
+                                                        dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
 
-                                        contadorParticipantes++;
-                                    }
+                                                        contadorParticipantes++;
+                                                    }
 
-                                    if (contadorParticipantes == adapterSelection.getListaSelecao().size()) {
-                                        contadorParticipantes = 0;
+                                                    if (contadorParticipantes == adapterSelection.getListaSelecao().size()) {
+                                                        contadorParticipantes = 0;
 
-                                        if (idsARemover != null && !idsARemover.isEmpty()) {
-                                            for (String idRemover : idsARemover) {
-                                                contadorRemocao++;
-                                                adapterSelection.getListaSelecao().remove(idRemover);
-                                                if (contadorRemocao == idsARemover.size()) {
-                                                    idsARemover.clear();
-                                                    contadorRemocao = 0;
+                                                        if (idsARemover != null && !idsARemover.isEmpty()) {
+                                                            for (String idRemover : idsARemover) {
+                                                                contadorRemocao++;
+                                                                adapterSelection.getListaSelecao().remove(idRemover);
+                                                                if (contadorRemocao == idsARemover.size()) {
+                                                                    idsARemover.clear();
+                                                                    contadorRemocao = 0;
+                                                                }
+                                                            }
+                                                        }
+                                                        idsNovosParticipantes = grupoAtual.getParticipantes();
+                                                        idsNovosParticipantes.addAll(adapterSelection.getListaSelecao());
+                                                        dadosOperacao.put(caminhoGrupo + "participantes", idsNovosParticipantes);
+                                                        dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(1));
+
+                                                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                                            @Override
+                                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                midiaUtils.ocultarProgressDialog();
+                                                                Intent intent = new Intent(AddGroupUsersActivity.this, GroupDetailsActivity.class);
+                                                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                                intent.putExtra("idGrupo", idGrupo);
+                                                                startActivity(intent);
+                                                                finish();
+                                                            }
+                                                        });
+                                                    }
                                                 }
-                                            }
+
+                                                @Override
+                                                public void onError(String message) {
+
+                                                }
+                                            });
                                         }
-                                        idsNovosParticipantes = grupoAtual.getParticipantes();
-                                        idsNovosParticipantes.addAll(adapterSelection.getListaSelecao());
-                                        dadosOperacao.put(caminhoGrupo + "participantes", idsNovosParticipantes);
-                                        dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(1));
 
-                                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
-                                            @Override
-                                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                                                midiaUtils.ocultarProgressDialog();
-                                                Intent intent = new Intent(AddGroupUsersActivity.this, GroupDetailsActivity.class);
-                                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                                intent.putExtra("idGrupo", idGrupo);
-                                                startActivity(intent);
-                                                finish();
-                                            }
-                                        });
-                                    }
-                                }
+                                        @Override
+                                        public void onError(String message) {
 
-                                @Override
-                                public void onError(String message) {
-
-                                }
-                            });
+                                        }
+                                    });
                         }
                     }
 
@@ -2085,7 +2081,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
         });
     }
 
-    private void removerDaSelecao(String idRemovido){
+    private void removerDaSelecao(String idRemovido) {
         if (idRemovido != null && !idRemovido.isEmpty()
                 && adapterSelection.getListaSelecao() != null
                 && !adapterSelection.getListaSelecao().isEmpty()
@@ -2109,5 +2105,14 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
         txtViewLimiteManage = findViewById(R.id.txtViewLimiteManageGroup);
         spinProgress = findViewById(R.id.spinProgressBarRecycler);
         searchView = findViewById(R.id.searchViewUsers);
+    }
+
+    private boolean contemUltimoElemento() {
+        for (Contatos contatoAtual : listaContatos) {
+            if (idUltimoElemento.equals(contatoAtual.getIdContato())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

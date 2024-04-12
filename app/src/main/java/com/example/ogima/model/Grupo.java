@@ -34,6 +34,7 @@ public class Grupo implements Serializable, Comparator<Grupo> {
     private String idParticipante;
     private boolean administrator;
     private String nomeUsuarioPesquisa;
+    private boolean indisponivel;
 
     public Grupo() {
 
@@ -42,6 +43,14 @@ public class Grupo implements Serializable, Comparator<Grupo> {
         DatabaseReference grupoRef = firebaseRef.child("grupos");
         String idRandomicoGrupo = grupoRef.push().getKey();
         setIdGrupo(idRandomicoGrupo);
+    }
+
+    public boolean isIndisponivel() {
+        return indisponivel;
+    }
+
+    public void setIndisponivel(boolean indisponivel) {
+        this.indisponivel = indisponivel;
     }
 
     public String getNomeUsuarioPesquisa() {

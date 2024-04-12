@@ -477,7 +477,7 @@ public class CommunityUtils {
                                             idsParticipantes.remove(idAlvo);
                                         }
                                     }
-                                    dadosOperacao.put(caminhoComunidade + "participantes", idsParticipantes);
+                                    dadosOperacao.put(caminhoComunidade + "/participantes/", idsParticipantes);
                                     salvarHashmapSairDaComunidade(dadosOperacao, callback);
                                 }
 
@@ -493,7 +493,23 @@ public class CommunityUtils {
                             dadosOperacao.put(caminhoFollowers, null);
                             dadosOperacao.put(caminhoFollowing, null);
                             dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(-1));
-                            salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                            recuperarListaParticipantes(idComunidade, new RecuperarListaParticipantesCallback() {
+                                @Override
+                                public void onConcluido(ArrayList<String> idsParticipantes) {
+                                    if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                                        if (idsParticipantes.contains(idAlvo)) {
+                                            idsParticipantes.remove(idAlvo);
+                                        }
+                                    }
+                                    dadosOperacao.put(caminhoComunidade + "/participantes/", idsParticipantes);
+                                    salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
                         }
 
                         @Override

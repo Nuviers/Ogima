@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.model.Comunidade;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -133,6 +134,13 @@ public class UsuarioUtils {
     public static String recuperarNomeConfigurado(@NonNull Usuario usuario) {
         String nomeRecuperado;
         nomeRecuperado = usuario.getNomeUsuario();
+        return FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeRecuperado);
+    }
+
+    @NonNull
+    public static String recuperarNomeConfiguradoGrupo(@NonNull Grupo grupo) {
+        String nomeRecuperado;
+        nomeRecuperado = grupo.getNomeGrupo();
         return FormatarNomePesquisaUtils.formatarNomeParaPesquisa(nomeRecuperado);
     }
 

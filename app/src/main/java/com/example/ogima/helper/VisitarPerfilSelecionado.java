@@ -8,7 +8,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.example.ogima.R;
+import com.example.ogima.activity.ConversaGrupoActivity;
+import com.example.ogima.activity.GroupDetailsActivity;
 import com.example.ogima.activity.PersonProfileActivity;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -54,8 +57,64 @@ public class VisitarPerfilSelecionado {
                     ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_when_visiting_profile), context);
                 }
             });
-        }else{
+        } else {
             ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
+        }
+    }
+
+
+    public static void visitarGrupoSelecionado(Context context, String idGrupo) {
+
+        //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
+        //do usuário selecionado.
+
+        String idUsuarioLogado = "";
+        idUsuarioLogado = UsuarioUtils.recuperarIdUserAtual();
+
+        if (idGrupo != null) {
+
+            if (idUsuarioLogado != null && idUsuarioLogado.isEmpty()
+                    || idGrupo.equals(idUsuarioLogado)) {
+                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
+                return;
+            }
+
+            GroupUtils.verificaBlockGrupo(idGrupo, context, true, new GroupUtils.VerificaBlockGrupoCallback() {
+                @Override
+                public void onBloqueado() {
+                    //Toast já é exibido por esse método onBloqueado().
+                }
+
+                @Override
+                public void onDisponivel() {
+                    FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
+                        @Override
+                        public void onGrupoRecuperado(Grupo grupoAtual) {
+                            Intent intent = new Intent(context, ConversaGrupoActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.putExtra("grupo", grupoAtual);
+                            context.startActivity(intent);
+                        }
+
+                        @Override
+                        public void onNaoExiste() {
+                            ToastCustomizado.toastCustomizadoCurto("Esse grupo não existe mais", context);
+                        }
+
+                        @Override
+                        public void onError(String mensagem) {
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao exibir o chat selecionado. Tente novamente.", context);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(String message) {
+                    ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao exibir o chat selecionado. Tente novamente.", context);
+                }
+            });
+        } else {
+            ToastCustomizado.toastCustomizadoCurto("Chat selecionado indisponível", context);
         }
     }
 }

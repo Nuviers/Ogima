@@ -23,6 +23,7 @@ import com.example.ogima.fragment.ChatListFragment;
 import com.example.ogima.fragment.ChatListNewFragment;
 import com.example.ogima.fragment.ContactListFragment;
 import com.example.ogima.fragment.ContatoFragment;
+import com.example.ogima.fragment.GroupListFragment;
 import com.example.ogima.fragment.ListagemGrupoFragment;
 import com.example.ogima.fragment.TesteSearchFragment;
 import com.example.ogima.helper.ConfiguracaoFirebase;
@@ -174,7 +175,8 @@ public class ChatInteractionsActivity extends AppCompatActivity {
                 getSupportFragmentManager(), FragmentPagerItems.with(ChatInteractionsActivity.this)
                 .add("CHATS", ChatListNewFragment.class)
                 .add("CONTATOS", ContactListFragment.class)
-                .add("GRUPOS", ListagemGrupoFragment.class)
+                //.add("GRUPOS", ListagemGrupoFragment.class)
+                .add("GRUPOS", GroupListFragment.class)
                 .create());
 
         viewPager.setAdapter(fragmentPagerItemAdapter);

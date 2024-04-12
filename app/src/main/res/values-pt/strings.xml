@@ -337,6 +337,7 @@
     <string name="group_description">Descrição do grupo</string>
     <string name="enter_description_group">Informe a descrição do grupo:</string>
     <string name="public_group">Público</string>
+    <string name="private_group">Privado</string>
     <string name="group">Grupo</string>
     <string name="error_displaying_group_setting">Ocorreu um erro ao exibir os ajustes do seu grupo.</string>
     <string name="create_group">Criar grupo</string>

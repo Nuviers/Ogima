@@ -7,7 +7,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/txtViewTitleChat"
+        android:id="@+id/txtViewTitleLstChatGrupo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/_8sdp"
@@ -38,11 +38,11 @@
                 android:layout_weight="1">
 
                 <androidx.appcompat.widget.SearchView
-                    android:id="@+id/searchViewChat"
+                    android:id="@+id/searchViewLstChatGrupo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:queryHint="@string/hintSearchViewPeople" />
+                    app:queryHint="Pesquisar chat em grupo" />
             </androidx.cardview.widget.CardView>
 
             <ImageButton
@@ -70,7 +70,7 @@
             android:layout_height="wrap_content" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewChat"
+            android:id="@+id/recyclerViewLstChatGrupo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/_2sdp"/>

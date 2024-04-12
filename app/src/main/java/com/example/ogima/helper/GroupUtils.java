@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 
 import com.example.ogima.R;
 import com.example.ogima.model.Grupo;
+import com.example.ogima.model.Usuario;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -18,6 +20,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Objects;
 
 public class GroupUtils {
     private Activity activity;
@@ -169,6 +173,25 @@ public class GroupUtils {
     public interface AjustarIdsGrupoCallback {
         void onAjustado(ArrayList<String> listaIds);
 
+        void onError(String message);
+    }
+
+    public interface VerificaBlockGrupoCallback {
+        void onBloqueado();
+
+        void onDisponivel();
+
+        void onError(String message);
+    }
+
+    public interface CheckLockCallback {
+        void onBlocked(boolean status);
+
+        void onError(String message);
+    }
+
+    public interface AjustarDadoParaPesquisaCallback{
+        void onConcluido(HashMap<String, Object> dadosOperacao);
         void onError(String message);
     }
 
@@ -365,11 +388,13 @@ public class GroupUtils {
                         String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idAlvo;
                         String caminhoFollowing = "/groupFollowing/" + idAlvo + "/" + idGrupo;
                         String caminhoGrupo = "/grupos/" + idGrupo + "/";
+                        String caminhoPesquisa = "/group_participants_by_name/" + idGrupo + "/" + idAlvo;
 
                         @Override
                         public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
                             dadosOperacao.put(caminhoFollowers, null);
                             dadosOperacao.put(caminhoFollowing, null);
+                            dadosOperacao.put(caminhoPesquisa, null);
                             dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(-1));
                             if (usuarioAtualAdm) {
                                 idsAdms.remove(idAlvo);
@@ -385,7 +410,7 @@ public class GroupUtils {
                                             idsParticipantes.remove(idAlvo);
                                         }
                                     }
-                                    dadosOperacao.put(caminhoGrupo + "participantes", idsParticipantes);
+                                    dadosOperacao.put(caminhoGrupo + "/participantes/", idsParticipantes);
                                     salvarHashmapSairDoGrupo(dadosOperacao, callback);
                                 }
 
@@ -400,8 +425,25 @@ public class GroupUtils {
                         public void onNaoExiste() {
                             dadosOperacao.put(caminhoFollowers, null);
                             dadosOperacao.put(caminhoFollowing, null);
+                            dadosOperacao.put(caminhoPesquisa, null);
                             dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(-1));
-                            salvarHashmapSairDoGrupo(dadosOperacao, callback);
+                            recuperarListaParticipantes(idGrupo, new RecuperarListaParticipantesCallback() {
+                                @Override
+                                public void onConcluido(ArrayList<String> idsParticipantes) {
+                                    if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                                        if (idsParticipantes.contains(idAlvo)) {
+                                            idsParticipantes.remove(idAlvo);
+                                        }
+                                    }
+                                    dadosOperacao.put(caminhoGrupo + "/participantes/", idsParticipantes);
+                                    salvarHashmapSairDoGrupo(dadosOperacao, callback);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
                         }
 
                         @Override
@@ -532,6 +574,7 @@ public class GroupUtils {
             String caminhoGruposUsuario = "/usuarios/" + idUsuario + "/" + "idMeusGrupos/";
             String caminhoGrupoPublico = "/publicGroups/" + idGrupo;
             String caminhoGrupoPrivado = "/privateGroups/" + idGrupo;
+            String caminhoPesquisa = "/group_participants_by_name/" + idGrupo;
 
             @Override
             public void onConcluido(ArrayList<String> topicosAnteriores) {
@@ -545,6 +588,7 @@ public class GroupUtils {
                         dadosOperacao.put(caminhoGrupoPrivado, null);
                         dadosOperacao.put(caminhoFollowers, null);
                         dadosOperacao.put(caminhoGrupo, null);
+                        dadosOperacao.put(caminhoPesquisa, null);
                         UsuarioUtils.recuperarIdsGrupos(context, idUsuario, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
                             @Override
                             public void onRecuperado(ArrayList<String> idsGrupos) {
@@ -1065,6 +1109,91 @@ public class GroupUtils {
                 } else {
                     callback.onError(String.valueOf(error.getCode()));
                 }
+            }
+        });
+    }
+
+    public static void verificaBlockGrupo(String idGrupo, Context context, boolean exibirToast, VerificaBlockGrupoCallback callback) {
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
+        String emailUsuario, idUsuario;
+
+        emailUsuario = Objects.requireNonNull(autenticacao.getCurrentUser()).getEmail();
+        idUsuario = Base64Custom.codificarBase64(Objects.requireNonNull(emailUsuario));
+
+        DatabaseReference verificaBlockRef = firebaseRef.child("blockGroup")
+                .child(idUsuario).child(idGrupo);
+
+        verificaBlockRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    if (exibirToast) {
+                        ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.user_unavailable), context);
+                    }
+                    callback.onBloqueado();
+                } else {
+                    callback.onDisponivel();
+                }
+                verificaBlockRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+
+    public static void checkBlockingStatus(Context context, String idGrupo, CheckLockCallback callback) {
+        String idUsuario = "";
+        idUsuario = UsuarioUtils.recuperarIdUserAtual();
+        if (idUsuario == null
+                || idUsuario.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        if (idGrupo.equals(idUsuario)) {
+            callback.onBlocked(false);
+            return;
+        }
+        verificaBlockGrupo(idGrupo, context, false, new VerificaBlockGrupoCallback() {
+            @Override
+            public void onBloqueado() {
+                callback.onBlocked(true);
+            }
+
+            @Override
+            public void onDisponivel() {
+                callback.onBlocked(false);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    public static void ajustarDadoParaPesquisa(Context context, HashMap<String, Object> dadosOperacao, String idGrupo, String idParticipante, AjustarDadoParaPesquisaCallback callback) {
+        if (dadosOperacao == null
+                || idGrupo == null || idGrupo.isEmpty() || idParticipante == null || idParticipante.isEmpty()) {
+            callback.onError(context.getString(R.string.error_recovering_data));
+            return;
+        }
+        UsuarioUtils.recuperarNome(context, idParticipante, new UsuarioUtils.RecuperarNomeCallback() {
+            String caminhoPesquisa = "/group_participants_by_name/" + idGrupo + "/" + idParticipante + "/";
+            @Override
+            public void onRecuperado(String nome) {
+                dadosOperacao.put(caminhoPesquisa +"idParticipante", idParticipante);
+                dadosOperacao.put(caminhoPesquisa +"nomeUsuarioPesquisa", nome.toUpperCase(Locale.ROOT));
+                callback.onConcluido(dadosOperacao);
+            }
+
+            @Override
+            public void onError(String message) {
+               callback.onError(message);
             }
         });
     }

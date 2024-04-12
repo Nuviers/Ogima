@@ -545,7 +545,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
                     && lastName != null && !lastName.isEmpty()) {
 
                 queryLoadMorePesquisa = firebaseRef.child("group_participants_by_name")
-                        .child(idUsuario)
+                        .child(idGrupo)
                         .orderByChild("nomeUsuarioPesquisa")
                         .startAt(dadoAnterior).endAt(dadoAnterior + "\uf8ff").limitToFirst(PAGE_SIZE);
                 queryLoadMorePesquisa.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -695,12 +695,12 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
 
         if (trocarQueryInicialFiltro) {
             queryInicialFind = firebaseRef.child("group_participants_by_name")
-                    .child(idUsuario)
+                    .child(idGrupo)
                     .orderByChild("nomeUsuarioPesquisa")
                     .startAfter(nome).endAt(nome + "\uf8ff").limitToFirst(1);
         } else {
             queryInicialFind = firebaseRef.child("group_participants_by_name")
-                    .child(idUsuario)
+                    .child(idGrupo)
                     .orderByChild("nomeUsuarioPesquisa")
                     .startAt(nome).endAt(nome + "\uf8ff").limitToFirst(1);
         }
@@ -730,6 +730,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
                             recuperarParticipante(grupoPesquisa.getIdParticipante(), new RecuperaParticipante() {
                                 @Override
                                 public void onRecuperado(Grupo dadoParticipante) {
+                                    ToastCustomizado.toastCustomizadoCurto("Pesquisa: " + dadoParticipante.getIdParticipante(), getApplicationContext());
                                     recuperaDadosUser(grupoPesquisa.getIdParticipante(), new RecuperaUser() {
                                         @Override
                                         public void onRecuperado(Usuario dadosUser) {
@@ -739,13 +740,12 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
 
                                         @Override
                                         public void onSemDado() {
-                                            trocarQueryInicialFiltro = true;
-                                            dadoInicialFiltragem(nome, counter);
+                                            ocultarProgress();
                                         }
 
                                         @Override
                                         public void onError(String message) {
-
+                                            ocultarProgress();
                                         }
                                     });
                                 }
@@ -922,7 +922,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
     }
 
     private void ultimoElementoFiltro(String nome, RecuperaUltimoElemento callback) {
-        queryUltimoElementoFiltro = firebaseRef.child("group_by_name")
+        queryUltimoElementoFiltro = firebaseRef.child("group_participants_by_name")
                 .child(idGrupo)
                 .orderByChild("nomeUsuarioPesquisa")
                 .startAt(nome).endAt(nome + "\uf8ff").limitToLast(1);
@@ -931,7 +931,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                    idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
+                    idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdParticipante();
                     setLoading(false);
                     if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
                         callback.onRecuperado();
@@ -1019,7 +1019,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
 
     private void recuperarParticipante(String idAlvo, RecuperaParticipante callback) {
         DatabaseReference recuperarParticipanteRef = firebaseRef.child("groupFollowers")
-                .child(idAlvo).child(idGrupo);
+                .child(idGrupo).child(idAlvo);
         recuperarParticipanteRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1044,7 +1044,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
         long key = dadoParticipante.getTimestampinteracao();
         if (lastTimestamp != -1 && key != -1) {
             if (key != lastTimestamp || listaUsuarios.size() > 0 &&
-                    !dadoParticipante.getIdParticipante().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())) {
+                    !dadoParticipante.getIdParticipante().equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdParticipante())) {
                 Usuario usuarioNew = new Usuario();
                 usuarioNew.setIdUsuario(dadoParticipante.getIdParticipante());
                 newParticipante.add(usuarioNew);

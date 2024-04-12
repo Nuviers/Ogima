@@ -323,7 +323,6 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         if (dados != null) {
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
             grupoDestinatario = (Grupo) dados.getSerializable("grupo");
-            voltarChatFragment = dados.getString("voltarChatFragment");
         }
 
         //Referências do usuário atual.
@@ -2339,8 +2338,8 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     }
 
     private void irParaDetalhesGrupo(){
-        Intent intent = new Intent(getApplicationContext(), DetalhesGrupoActivity.class);
-        intent.putExtra("grupoAtual", grupoDestinatario);
+        Intent intent = new Intent(getApplicationContext(), GroupDetailsActivity.class);
+        intent.putExtra("idGrupo", grupoDestinatario.getIdGrupo());
         startActivity(intent);
         finish();
     }

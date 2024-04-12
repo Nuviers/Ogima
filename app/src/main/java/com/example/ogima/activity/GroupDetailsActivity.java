@@ -35,6 +35,7 @@ import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.GroupUtils;
+import com.example.ogima.helper.IntentUtils;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
@@ -138,7 +139,6 @@ public class GroupDetailsActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        ToastCustomizado.toastCustomizadoCurto("DESTROY", getApplicationContext());
         firebaseUtils.removerQueryChildListener(grupoRef, childListenerGrupo);
         firebaseUtils.removerValueListener(verificaBlockRef, listenerBlock);
         firebaseUtils.removerValueListener(verificaDenunciaRef, listenerDenuncia);
@@ -164,7 +164,6 @@ public class GroupDetailsActivity extends AppCompatActivity {
 
     private void configOnStart() {
         if (!dadosRecuperados) {
-            ToastCustomizado.toastCustomizadoCurto("Recuperar grupo", getApplicationContext());
             if (idUsuario.isEmpty()) {
                 ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
                 onBackPressed();
@@ -324,9 +323,9 @@ public class GroupDetailsActivity extends AppCompatActivity {
 
                     String privacidade;
                     if (grupo.getGrupoPublico()) {
-                        privacidade = getString(R.string.public_community);
+                        privacidade = getString(R.string.public_group);
                     } else {
-                        privacidade = getString(R.string.private_community);
+                        privacidade = getString(R.string.private_group);
                     }
                     txtViewPrivacidade.setText(privacidade);
 
@@ -601,7 +600,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 
     private void irParaEdicao() {
         if (idGrupo.isEmpty()) {
-            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para edição do grupo", getApplicationContext());
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para a edição do grupo", getApplicationContext());
             onBackPressed();
             return;
         }
@@ -628,7 +627,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onError(String mensagem) {
-                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para edição do grupo", getApplicationContext());
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao ir para a edição do grupo", getApplicationContext());
             }
         });
     }
@@ -691,7 +690,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
         bottomSheetDialogSair.setCancelable(true);
         txtViewEscolherFundador = bottomSheetDialogSair.findViewById(R.id.txtViewEscolherFundador);
         txtViewCancelarSaida = bottomSheetDialogSair.findViewById(R.id.txtViewCancelarSaida);
-        txtViewEscolherFundador.setText("Escolher um novo fundador e sair dO grupo");
+        txtViewEscolherFundador.setText("Escolher um novo fundador e sair do grupo");
 
         txtViewEscolherFundador.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -718,7 +717,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
             public void onConcluido() {
                 ocultarProgressDialog();
                 ToastCustomizado.toastCustomizadoCurto("Você deixou de participar do grupo com sucesso.", getApplicationContext());
-                irParaListagemDeGrupos();
+                irParaHome();
             }
 
             @Override
@@ -772,6 +771,12 @@ public class GroupDetailsActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        imgBtnIncBackBlack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
     }
 
     public void exibirProgressDialog(String tipoMensagem) {
@@ -804,11 +809,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void irParaListagemDeGrupos() {
-        Intent intent = new Intent(GroupDetailsActivity.this, ListaComunidadesActivityNEW.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
+    private void irParaHome() {
+        IntentUtils.irParaNavigation(GroupDetailsActivity.this, getApplicationContext());
     }
 
     private void configurarBottomSheetDialog() {
@@ -861,7 +863,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
                             public void onConcluido() {
                                 ocultarProgressDialog();
                                 ToastCustomizado.toastCustomizadoCurto("Grupo excluido com sucesso.", getApplicationContext());
-                                irParaListagemDeGrupos();
+                                irParaHome();
                             }
 
                             @Override
@@ -1219,7 +1221,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    irParaListagemDeGrupos();
+                    irParaHome();
                 });
     }
 

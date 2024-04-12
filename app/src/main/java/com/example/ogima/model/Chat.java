@@ -15,6 +15,15 @@ public class Chat implements Serializable, Comparator<Chat> {
     private String conteudoLastMsg;
     private long totalMsg;
     private long totalMsgNaoLida;
+    private String idGrupo;
+
+    public String getIdGrupo() {
+        return idGrupo;
+    }
+
+    public void setIdGrupo(String idGrupo) {
+        this.idGrupo = idGrupo;
+    }
 
     public String getIdUsuario() {
         return idUsuario;
