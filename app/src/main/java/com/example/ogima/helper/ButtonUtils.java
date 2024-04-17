@@ -3,6 +3,7 @@ package com.example.ogima.helper;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.core.view.ViewCompat;
 
@@ -35,6 +36,12 @@ public class ButtonUtils {
         if (btnAlvo != null) {
             btnAlvo.setEnabled(true);
             btnAlvo.setBackgroundTintList(ColorStateList.valueOf(corBackground));
+        }
+    }
+
+    public static void ativarImgBtn(ImageButton imgBtnAlvo){
+        if (imgBtnAlvo != null) {
+            imgBtnAlvo.setEnabled(true);
         }
     }
 }

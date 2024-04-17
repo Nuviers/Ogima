@@ -2040,6 +2040,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                                                 Intent intent = new Intent(AddGroupUsersActivity.this, GroupDetailsActivity.class);
                                                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                                                 intent.putExtra("idGrupo", idGrupo);
+                                                                intent.putExtra("chatComunidade", false);
                                                                 startActivity(intent);
                                                                 finish();
                                                             }

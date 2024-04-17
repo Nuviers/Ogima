@@ -63,7 +63,7 @@ public class VisitarPerfilSelecionado {
     }
 
 
-    public static void visitarGrupoSelecionado(Context context, String idGrupo) {
+    public static void visitarGrupoSelecionado(Context context, String idGrupo, boolean chatComunidade) {
 
         //Verifica se o usuário atual está bloqueado, se não então prosseguir para o perfil
         //do usuário selecionado.
@@ -93,6 +93,7 @@ public class VisitarPerfilSelecionado {
                             Intent intent = new Intent(context, ConversaGrupoActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.putExtra("grupo", grupoAtual);
+                            intent.putExtra("chatComunidade", chatComunidade);
                             context.startActivity(intent);
                         }
 

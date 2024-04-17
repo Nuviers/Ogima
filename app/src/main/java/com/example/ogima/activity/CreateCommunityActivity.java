@@ -28,6 +28,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.GroupUtils;
 import com.example.ogima.helper.LimparCacheUtils;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.NtpTimestampRepository;
@@ -40,6 +41,7 @@ import com.example.ogima.model.Comunidade;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
@@ -51,7 +53,7 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
 
     private ImageView imgViewCadFoto, imgViewCadFundo;
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
-    private String idUsuario = "", idComunidade = "";
+    private String idUsuario = "", idComunidade = "", idChatComunidade = "";
     private TextView txtViewTitleToolbar;
     private Toolbar toolbarIncPadrao;
     private ImageButton imgBtnIncBackPadrao;
@@ -123,6 +125,11 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
     private interface PrepararSalvamentoCallback {
         void onConcluido();
 
+        void onError(String message);
+    }
+
+    private interface AjustarChatCallback{
+        void onConcluido();
         void onError(String message);
     }
 
@@ -235,10 +242,14 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
                 btnViewSalvar.setText(getString(R.string.create_community));
                 DatabaseReference gerarIdComunidadeRef = firebaseRef.child("comunidades");
                 idComunidade = FirebaseUtils.retornarIdRandom(gerarIdComunidadeRef);
+                DatabaseReference gerarIdChatComunidadeRef = firebaseRef.child("grupos");
+                idChatComunidade = FirebaseUtils.retornarIdRandom(gerarIdChatComunidadeRef);
                 participantes.add(idUsuario);
                 caminhoComunidade = "/comunidades/" + idComunidade + "/";
-                dadosComunidade.put(caminhoComunidade + "seguidores", participantes);
+                dadosComunidade.put(caminhoComunidade + "participantes", participantes);
+                dadosComunidade.put(caminhoComunidade + "nrParticipantes", participantes.size());
                 dadosComunidade.put(caminhoComunidade + "idComunidade", idComunidade);
+                dadosComunidade.put(caminhoComunidade + "idChatComunidade", idChatComunidade);
                 callback.onConcluido();
             }
 
@@ -695,6 +706,13 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
         dadosComunidade.put(caminhoComunidade + "topicos", topicosSelecionados);
         dadosComunidade.put(caminhoComunidade + "comunidadePublica", comunidadePublica);
 
+        String caminhoGrupo = "/grupos/" + idChatComunidade + "/";
+        dadosComunidade.put(caminhoGrupo + "nomeGrupo", nome);
+        dadosComunidade.put(caminhoGrupo + "nomeGrupoPesquisa", FormatarNomePesquisaUtils.removeAcentuacao(nome).toUpperCase(Locale.ROOT));
+        dadosComunidade.put(caminhoGrupo + "descricaoGrupo", descricao);
+        dadosComunidade.put(caminhoGrupo + "topicos", topicosSelecionados);
+        dadosComunidade.put(caminhoGrupo + "grupoPublico", false);
+
         prepararSalvamento(new PrepararSalvamentoCallback() {
             @Override
             public void onConcluido() {
@@ -721,6 +739,7 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
                             @Override
                             public void onRemovido() {
                                 dadosComunidade.put(caminhoComunidade + "fotoComunidade", String.valueOf(uriFoto));
+                                dadosComunidade.put(caminhoGrupo + "fotoGrupo", String.valueOf(uriFoto));
                                 if (uriFundo == null) {
                                     //Não há mais o que salvar, finalizar activity.
                                     salvarComunidade(dadosComunidade);
@@ -742,6 +761,7 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
                             public void onConcluido(String urlUpada) {
                                 uriFoto = Uri.parse(urlUpada);
                                 dadosComunidade.put(caminhoComunidade + "fotoComunidade", urlUpada);
+                                dadosComunidade.put(caminhoGrupo + "fotoGrupo", urlUpada);
                                 if (uriFundo == null) {
                                     //Não há mais o que salvar, finalizar activity.
                                     midiaUtils.ocultarProgressDialog();
@@ -871,43 +891,52 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
 
             String caminhoComunidadePublica = "/publicCommunities/" + idComunidade + "/";
             String caminhoComunidadePrivada = "/privateCommunities/" + idComunidade + "/";
-
             @Override
             public void onRecuperado(long timestampNegativo, String data) {
                 if (!edicao) {
-                    if (comunidadePublica) {
-                        dadosComunidade.put(caminhoComunidadePrivada, null);
-                        dadosComunidade.put(caminhoComunidadePublica + "idComunidade", idComunidade);
-                        dadosComunidade.put(caminhoComunidadePublica + "timestampinteracao", timestampNegativo);
-                    } else {
-                        dadosComunidade.put(caminhoComunidadePublica, null);
-                        dadosComunidade.put(caminhoComunidadePrivada + "idComunidade", idComunidade);
-                        dadosComunidade.put(caminhoComunidadePrivada + "timestampinteracao", timestampNegativo);
-                    }
-                    dadosAlvo.put(caminhoComunidade + "timestampinteracao", timestampNegativo);
-                    dadosAlvo.put(caminhoComunidade + "idSuperAdmComunidade", idUsuario);
-
-                    UsuarioUtils.recuperarIdsComunidades(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
-                        ArrayList<String> listaMinhasComunidades = new ArrayList<>();
-
+                    ajustarChatComunidade(timestampNegativo, new AjustarChatCallback() {
                         @Override
-                        public void onRecuperado(ArrayList<String> idsComunidades) {
-                            listaMinhasComunidades = idsComunidades;
-                            listaMinhasComunidades.add(idComunidade);
-                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMinhasComunidades/", listaMinhasComunidades);
-                            salvarHashmap(dadosAlvo);
-                        }
+                        public void onConcluido() {
+                            if (comunidadePublica) {
+                                dadosComunidade.put(caminhoComunidadePrivada, null);
+                                dadosComunidade.put(caminhoComunidadePublica + "idComunidade", idComunidade);
+                                dadosComunidade.put(caminhoComunidadePublica + "timestampinteracao", timestampNegativo);
+                            } else {
+                                dadosComunidade.put(caminhoComunidadePublica, null);
+                                dadosComunidade.put(caminhoComunidadePrivada + "idComunidade", idComunidade);
+                                dadosComunidade.put(caminhoComunidadePrivada + "timestampinteracao", timestampNegativo);
+                            }
+                            dadosAlvo.put(caminhoComunidade + "timestampinteracao", timestampNegativo);
+                            dadosAlvo.put(caminhoComunidade + "idSuperAdmComunidade", idUsuario);
 
-                        @Override
-                        public void onNaoExiste() {
-                            listaMinhasComunidades.add(idComunidade);
-                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMinhasComunidades/", listaMinhasComunidades);
-                            salvarHashmap(dadosAlvo);
+                            UsuarioUtils.recuperarIdsComunidades(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMinhasComunidadesCallback() {
+                                ArrayList<String> listaMinhasComunidades = new ArrayList<>();
+
+                                @Override
+                                public void onRecuperado(ArrayList<String> idsComunidades) {
+                                    listaMinhasComunidades = idsComunidades;
+                                    listaMinhasComunidades.add(idComunidade);
+                                    dadosAlvo.put("/usuarios/" + idUsuario + "/idMinhasComunidades/", listaMinhasComunidades);
+                                    salvarHashmap(dadosAlvo);
+                                }
+
+                                @Override
+                                public void onNaoExiste() {
+                                    listaMinhasComunidades.add(idComunidade);
+                                    dadosAlvo.put("/usuarios/" + idUsuario + "/idMinhasComunidades/", listaMinhasComunidades);
+                                    salvarHashmap(dadosAlvo);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_community), getApplicationContext());
+                                }
+                            });
                         }
 
                         @Override
                         public void onError(String message) {
-                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_community), getApplicationContext());
+                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_adjusting_community), getApplicationContext());
                         }
                     });
                 } else {
@@ -1180,26 +1209,34 @@ public class CreateCommunityActivity extends AppCompatActivity implements View.O
         });
     }
 
-    private void ajustarTopicosORIGINAL(AjustarTopicosCallback callback) {
-        String caminhoInteresses = "/communityInterests/" + idComunidade + "/";
-        HashMap<String, Object> interessesAnteriores = new HashMap<>();
-        interessesAnteriores.put(caminhoInteresses, null);
-        firebaseRef.updateChildren(interessesAnteriores, new DatabaseReference.CompletionListener() {
+    private void ajustarChatComunidade(long timestampNegativo, AjustarChatCallback callback){
+        UsuarioUtils.recuperarNome(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarNomeCallback() {
+            String caminhoGrupo = "/grupos/" + idChatComunidade + "/";
+            String caminhoPesquisa = "/group_participants_by_name/" + idChatComunidade + "/" + idUsuario + "/";
+            String caminhoFollowers = "/groupFollowers/" + idChatComunidade + "/" + idUsuario + "/";
+            String caminhoFollowing = "/groupFollowing/" + idUsuario + "/" + idChatComunidade + "/";
             @Override
-            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                if (error == null) {
-                    for (String interesseAtual : topicosSelecionados) {
-                        dadosComunidade.put(caminhoInteresses + interesseAtual, true);
-                        dadosComunidade.put(caminhoInteresses + "idComunidade", idComunidade);
-                        interessesConcluidos++;
-                        if (interessesConcluidos == topicosSelecionados.size()) {
-                            interessesConcluidos = 0;
-                            callback.onConcluido();
-                        }
-                    }
-                } else {
-                    ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_community), getApplicationContext());
-                }
+            public void onRecuperado(String nome) {
+                dadosComunidade.put(caminhoGrupo + "idGrupo", idChatComunidade);
+                dadosComunidade.put(caminhoPesquisa +"idParticipante", idUsuario);
+                dadosComunidade.put(caminhoPesquisa +"nomeUsuarioPesquisa", nome.toUpperCase(Locale.ROOT));
+                dadosComunidade.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(1));
+                dadosComunidade.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
+                dadosComunidade.put(caminhoFollowers + "idParticipante", idUsuario);
+                dadosComunidade.put(caminhoFollowers + "administrator", false);
+                dadosComunidade.put(caminhoFollowing + "idGrupo", idChatComunidade);
+                dadosComunidade.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
+                dadosComunidade.put(caminhoGrupo + "timestampinteracao", timestampNegativo);
+                dadosComunidade.put(caminhoGrupo + "idSuperAdmGrupo", idUsuario);
+                ArrayList<String> participanteChat = new ArrayList<>();
+                participanteChat.add(idUsuario);
+                dadosComunidade.put(caminhoGrupo + "participantes", participanteChat);
+                callback.onConcluido();
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
             }
         });
     }

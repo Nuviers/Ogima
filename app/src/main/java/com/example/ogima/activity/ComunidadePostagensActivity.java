@@ -27,6 +27,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterPostagensComunidade;
 import com.example.ogima.adapter.HeaderAdapterPostagemComunidade;
 import com.example.ogima.helper.Base64Custom;
+import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FirebaseUtils;
@@ -121,8 +122,10 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     private int currentVideoVisible = -1;
     private RecyclerView.OnScrollListener scrollListener;
     private ProgressDialog progressDialog;
-    private DatabaseReference verificaParticipacaoRef;
-    private ValueEventListener listenerParticipacao;
+    private DatabaseReference verificaParticipacaoRef, verificaEntrarChatRef;
+    private ValueEventListener listenerParticipacao, listenerEntrarChat;
+    private String idChatComunidade = "";
+    private CommunityUtils communityUtils;
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -239,6 +242,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         FirebaseUtils firebaseUtils = new FirebaseUtils();
         firebaseUtils.removerValueListener(verificaParticipacaoRef, listenerParticipacao);
+        firebaseUtils.removerValueListener(verificaEntrarChatRef, listenerEntrarChat);
 
         if (exoPlayer != null) {
             adapterPostagens.releaseExoPlayer();
@@ -275,6 +279,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         setTitle("");
         txtViewIncTituloToolbar.setText("Postagens da comunidade");
 
+        communityUtils = new CommunityUtils(getApplicationContext());
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
@@ -289,6 +294,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             public void onAcompanhar() {
                 //Usuário atual não é fundador mas pode ser participante.
                 acompanharParticipacao();
+                acompanharChat();
             }
         });
 
@@ -948,15 +954,67 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         });
     }
 
+    private void acompanharChat() {
+
+        if (listenerEntrarChat != null) {
+            return;
+        }
+        if (idChatComunidade == null
+                || idChatComunidade.isEmpty()
+                || idUsuario == null
+                || idUsuario.isEmpty()) {
+            headerAdapter.setExibirEntrarChat(false);
+            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao verificar o chat dessa comunidade.", getApplicationContext());
+            return;
+        }
+        verificaEntrarChatRef = firebaseRef.child("groupFollowers")
+                .child(idChatComunidade).child(idUsuario);
+        listenerEntrarChat = verificaEntrarChatRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                communityUtils.verificaSeEParticipante(idComunidade, idUsuario, new CommunityUtils.VerificaParticipanteCallback() {
+                    @Override
+                    public void onParticipante(boolean status) {
+                        if (status) {
+                            //Participa da comunidade
+                            headerAdapter.setExibirEntrarChat(true);
+                        } else {
+                           //Não participa da comunidade
+                           headerAdapter.setExibirEntrarChat(false);
+                        }
+                        headerAdapter.setJaParticipaDoGrupo(snapshot.getValue() != null);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao verificar o chat dessa comunidade.", getApplicationContext());
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                headerAdapter.setExibirEntrarChat(false);
+                ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao verificar o chat dessa comunidade.", getApplicationContext());
+            }
+        });
+    }
+
     private void verificaParticipacao(VerificaParticipacaoCallback callback) {
         FirebaseRecuperarUsuario.recoverCommunity(idComunidade, new FirebaseRecuperarUsuario.RecoverCommunityCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
+                if (comunidadeAtual != null && comunidadeAtual.getIdChatComunidade() != null
+                        && !comunidadeAtual.getIdChatComunidade().isEmpty()) {
+                    idChatComunidade = comunidadeAtual.getIdChatComunidade();
+                }
                 if (comunidadeAtual != null
                         && comunidadeAtual.getIdSuperAdmComunidade() != null
                         && !comunidadeAtual.getIdSuperAdmComunidade().isEmpty()
                         && comunidadeAtual.getIdSuperAdmComunidade().equals(idUsuario)) {
                     headerAdapter.setExibirBtnEntrar(false);
+                    headerAdapter.setExibirEntrarChat(true);
+                    headerAdapter.setJaParticipaDoGrupo(true);
                 } else {
                     callback.onAcompanhar();
                 }

@@ -335,21 +335,37 @@ public class CommunityUtils {
 
             @Override
             public void onRecuperado(long timestampNegativo) {
-                dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(1));
-                dadosOperacao.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
-                dadosOperacao.put(caminhoFollowers + "idParticipante", idUsuario);
-                dadosOperacao.put(caminhoFollowers + "administrator", false);
-                dadosOperacao.put(caminhoConvites, null);
-                dadosOperacao.put(caminhoFollowing + "idComunidade", idComunidade);
-                dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
-                firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                recuperarListaParticipantes(idComunidade, new RecuperarListaParticipantesCallback() {
                     @Override
-                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                        if (error == null) {
-                            callback.onConcluido();
-                        } else {
-                            callback.onError(String.valueOf(error.getCode()));
+                    public void onConcluido(ArrayList<String> idsParticipantes) {
+                        if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                            idsParticipantes.add(idUsuario);
+                        }else{
+                            idsParticipantes = new ArrayList<>();
+                            idsParticipantes.add(idUsuario);
                         }
+                        dadosOperacao.put(caminhoComunidade + "nrParticipantes", ServerValue.increment(1));
+                        dadosOperacao.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
+                        dadosOperacao.put(caminhoFollowers + "idParticipante", idUsuario);
+                        dadosOperacao.put(caminhoFollowers + "administrator", false);
+                        dadosOperacao.put(caminhoConvites, null);
+                        dadosOperacao.put(caminhoFollowing + "idComunidade", idComunidade);
+                        dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
+                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                if (error == null) {
+                                    callback.onConcluido();
+                                } else {
+                                    callback.onError(String.valueOf(error.getCode()));
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
                     }
                 });
             }

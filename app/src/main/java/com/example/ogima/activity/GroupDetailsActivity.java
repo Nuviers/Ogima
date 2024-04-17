@@ -109,6 +109,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
     private final Intent intentDenuncia = new Intent(Intent.ACTION_SEND);
     private ActivityResultLauncher<Intent> resultLauncher;
     private int limiteBloqueio = 0;
+    private boolean chatComunidade = false;
 
     public GroupDetailsActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -170,6 +171,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
                 return;
             }
             communityUtils = new CommunityUtils(getApplicationContext());
+            groupUtils = new GroupUtils(getApplicationContext());
             builder = new AlertDialog.Builder(this);
             progressDialog = new ProgressDialog(this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -247,6 +249,9 @@ public class GroupDetailsActivity extends AppCompatActivity {
         }
         if (dados.containsKey("idGrupo")) {
             idGrupo = dados.getString("idGrupo");
+            if (dados.containsKey("chatComunidade")) {
+                chatComunidade = dados.getBoolean("chatComunidade");
+            }
             callback.onConcluido();
         } else {
             callback.onError();
@@ -949,7 +954,9 @@ public class GroupDetailsActivity extends AppCompatActivity {
         //Somente chega nessa etapa o usuário que possuir algum cargo.
         if (grupoAtual.getNrParticipantes() < GroupUtils.MAX_NUMBER_PARTICIPANTS) {
             //Somente é permitido convidar usuários se o limite de participantes não foi atingido.
-            btnViewAddUserGrupo.setVisibility(View.VISIBLE);
+            if (!chatComunidade) {
+                btnViewAddUserGrupo.setVisibility(View.VISIBLE);
+            }
         }
 
         if (grupoAtual.getNrParticipantes() > 0) {

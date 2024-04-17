@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
@@ -24,10 +25,13 @@ import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.GroupUtils;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.SnackbarUtils;
+import com.example.ogima.helper.TimestampUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Comunidade;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -37,11 +41,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import android.widget.ProgressBar;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<HeaderAdapterPostagemComunidade.HeaderViewHolder> {
 
@@ -52,8 +58,11 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
     private boolean interacaoEmAndamento = false;
     private int corBotaoDesativado = -1;
     private CommunityUtils communityUtils;
+    private GroupUtils groupUtils;
     private Activity activity;
     public boolean exibirBtnEntrar = false;
+    public boolean exibirEntrarChat = false;
+    public boolean jaParticipaDoGrupo = false;
 
     public HeaderAdapterPostagemComunidade(Context c, Activity activity, String idComunidadeRecebida) {
         this.context = c;
@@ -61,6 +70,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
         this.activity = activity;
         this.idUsuarioLogado = UsuarioUtils.recuperarIdUserAtual();
         this.communityUtils = new CommunityUtils(context);
+        this.groupUtils = new GroupUtils(context);
         corBotaoDesativado = context.getResources().getColor(R.color.join_community_button_disabled);
     }
 
@@ -70,6 +80,24 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
 
     public void setExibirBtnEntrar(boolean exibirBtnEntrar) {
         this.exibirBtnEntrar = exibirBtnEntrar;
+        notifyDataSetChanged();
+    }
+
+    public boolean isExibirEntrarChat() {
+        return exibirEntrarChat;
+    }
+
+    public boolean isJaParticipaDoGrupo() {
+        return jaParticipaDoGrupo;
+    }
+
+    public void setJaParticipaDoGrupo(boolean jaParticipaDoGrupo) {
+        this.jaParticipaDoGrupo = jaParticipaDoGrupo;
+        notifyDataSetChanged();
+    }
+
+    public void setExibirEntrarChat(boolean exibirEntrarChat) {
+        this.exibirEntrarChat = exibirEntrarChat;
         notifyDataSetChanged();
     }
 
@@ -99,6 +127,17 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
             holder.btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
         }
 
+        if (isExibirEntrarChat()) {
+            holder.linearLayoutChatComunidade.setVisibility(View.VISIBLE);
+            if (isJaParticipaDoGrupo()) {
+                holder.txtViewChatComunidade.setText("CHAT");
+            }else{
+                holder.txtViewChatComunidade.setText("Participar do chat");
+            }
+        } else {
+            holder.linearLayoutChatComunidade.setVisibility(View.INVISIBLE);
+        }
+
         FirebaseRecuperarUsuario.recuperaComunidade(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeCallback() {
             @Override
             public void onComunidadeRecuperada(Comunidade comunidadeAtual) {
@@ -112,8 +151,32 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                             ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.wait_a_moment), context);
                             return;
                         }
-                        holder.aparenciaBtnInt(true);
+                        holder.aparenciaBtnInt(true, true);
                         holder.participarDaComunidade(comunidadeAtual);
+                    }
+                });
+
+                holder.imgBtnChatComunidade.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (interacaoEmAndamento) {
+                            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.wait_a_moment), context);
+                            return;
+                        }
+                        holder.aparenciaBtnInt(true, false);
+                        holder.participarDoChat(comunidadeAtual);
+                    }
+                });
+
+                holder.txtViewChatComunidade.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (interacaoEmAndamento) {
+                            ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.wait_a_moment), context);
+                            return;
+                        }
+                        holder.aparenciaBtnInt(true, false);
+                        holder.participarDoChat(comunidadeAtual);
                     }
                 });
 
@@ -139,13 +202,14 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
         private ImageView imgViewIncFotoUser, imgViewIncFundoUser;
         private View viewIncBackOpcoes;
         private TextView txtViewIncNomeUser;
-        private ImageButton imgBtnParticipantes, imgBtnIncOpcoes;
-        private TextView txtViewNrParticipantes;
+        private ImageButton imgBtnParticipantes, imgBtnIncOpcoes, imgBtnChatComunidade;
+        private TextView txtViewNrParticipantes, txtViewChatComunidade;
         private Button btnViewEntrarComunidade;
         private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
         private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         private DatabaseReference adicionarSeguidorRef, verificaConvitesRef;
         private ProgressBar progressBar;
+        private LinearLayout linearLayoutChatComunidade;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -160,21 +224,40 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
             btnViewEntrarComunidade = itemView.findViewById(R.id.btnViewEntrarComunidade);
             imgBtnIncOpcoes = itemView.findViewById(R.id.imgBtnIncOpcoes);
             progressBar = itemView.findViewById(R.id.progressBarParticipar);
+            imgBtnChatComunidade = itemView.findViewById(R.id.imgBtnChatComunidade);
+            txtViewChatComunidade = itemView.findViewById(R.id.txtViewChatComunidade);
+            linearLayoutChatComunidade = itemView.findViewById(R.id.linearLayoutChatComunidade);
             this.adicionarSeguidorRef = firebaseRef.child("comunidades");
             this.verificaConvitesRef = firebaseRef.child("convitesComunidade");
         }
 
-        private void aparenciaBtnInt(boolean desativarBotao) {
-            if (btnViewEntrarComunidade != null) {
-                if (desativarBotao) {
-                    btnViewEntrarComunidade.setEnabled(false);
-                    btnViewEntrarComunidade.setBackgroundTintList(ColorStateList.valueOf(corBotaoDesativado));
-                    interacaoEmAndamento = true;
-                    ProgressBarUtils.exibirProgressBar(progressBar, activity);
-                } else {
-                    ButtonUtils.ativarBotaoDegrade(btnViewEntrarComunidade);
-                    interacaoEmAndamento = false;
-                    ProgressBarUtils.ocultarProgressBar(progressBar, activity);
+        private void aparenciaBtnInt(boolean desativarBotao, boolean participarDaComunidade) {
+            if (participarDaComunidade) {
+                if (btnViewEntrarComunidade != null) {
+                    if (desativarBotao) {
+                        btnViewEntrarComunidade.setEnabled(false);
+                        btnViewEntrarComunidade.setBackgroundTintList(ColorStateList.valueOf(corBotaoDesativado));
+                        interacaoEmAndamento = true;
+                        ProgressBarUtils.exibirProgressBar(progressBar, activity);
+                    } else {
+                        ButtonUtils.ativarBotaoDegrade(btnViewEntrarComunidade);
+                        interacaoEmAndamento = false;
+                        ProgressBarUtils.ocultarProgressBar(progressBar, activity);
+                    }
+                }
+            }else{
+                if (imgBtnChatComunidade != null && txtViewChatComunidade != null) {
+                    if (desativarBotao) {
+                        imgBtnChatComunidade.setEnabled(false);
+                        txtViewChatComunidade.setEnabled(false);
+                        interacaoEmAndamento = true;
+                        ProgressBarUtils.exibirProgressBar(progressBar, activity);
+                    } else {
+                        ButtonUtils.ativarImgBtn(imgBtnChatComunidade);
+                        txtViewChatComunidade.setEnabled(true);
+                        interacaoEmAndamento = false;
+                        ProgressBarUtils.ocultarProgressBar(progressBar, activity);
+                    }
                 }
             }
         }
@@ -251,7 +334,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                         //Já participa
                         SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Você já faz parte dessa comunidade!");
                         btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
-                        aparenciaBtnInt(false);
+                        aparenciaBtnInt(false, true);
                     } else {
                         //Não participa
                         communityUtils.participarDaComunidade(idComunidade, new CommunityUtils.ParticiparDaComunidadeCallback() {
@@ -259,7 +342,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                             public void onConcluido() {
                                 SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Agora você faz parte dessa comunidade!");
                                 btnViewEntrarComunidade.setVisibility(View.INVISIBLE);
-                                aparenciaBtnInt(false);
+                                aparenciaBtnInt(false, true);
                                 int nrParticipantes = 1;
                                 if (comunidadeAlvo.getNrParticipantes() != -1) {
                                     nrParticipantes = (int) (comunidadeAlvo.getNrParticipantes() + 1);
@@ -270,7 +353,7 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                             @Override
                             public void onError(String message) {
                                 ToastCustomizado.toastCustomizadoCurto(String.format("%s %s %s", "Ocorreu um erro ao tentar participar da comunidade. Tente novamente.", "Code:", message), context);
-                                aparenciaBtnInt(false);
+                                aparenciaBtnInt(false, true);
                             }
                         });
                     }
@@ -279,7 +362,105 @@ public class HeaderAdapterPostagemComunidade extends RecyclerView.Adapter<Header
                 @Override
                 public void onError(String message) {
                     ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
-                    aparenciaBtnInt(false);
+                    aparenciaBtnInt(false, true);
+                }
+            });
+        }
+
+        private void participarDoChat(Comunidade comunidadeAlvo){
+            String idComunidade = comunidadeAlvo.getIdComunidade();
+            String idChat = comunidadeAlvo.getIdChatComunidade();
+            groupUtils.verificaSeEParticipante(idChat, idUsuarioLogado, new GroupUtils.VerificaParticipanteCallback() {
+                @Override
+                public void onParticipante(boolean participante) {
+                    if (participante) {
+                        //Já participa
+                        aparenciaBtnInt(false, false);
+                        VisitarPerfilSelecionado.visitarGrupoSelecionado(context, idChat, true);
+                    }else{
+                        communityUtils.verificaBlock(idUsuarioLogado, idComunidade, new CommunityUtils.VerificaBlockCallback() {
+                            @Override
+                            public void onBlock(boolean status) {
+                                if (status) {
+                                    //Usuário está bloqueado pela comunidade ou vice-versa.
+                                    SnackbarUtils.showSnackbar(imgBtnChatComunidade, "Chat indisponível!");
+                                    linearLayoutChatComunidade.setVisibility(View.GONE);
+                                    setExibirEntrarChat(false);
+                                    aparenciaBtnInt(false, false);
+                                }else{
+                                    HashMap<String, Object> dadosOperacao = new HashMap<>();
+                                    GroupUtils.ajustarDadoParaPesquisa(context, dadosOperacao, idChat, idUsuarioLogado, new GroupUtils.AjustarDadoParaPesquisaCallback() {
+                                        String caminhoGrupo = "/grupos/" + idChat + "/";
+                                        String caminhoFollowers = "/groupFollowers/" + idChat + "/" + idUsuarioLogado + "/";
+                                        String caminhoFollowing = "/groupFollowing/" + idUsuarioLogado + "/" + idChat + "/";
+                                        @Override
+                                        public void onConcluido(HashMap<String, Object> dadosOperacao) {
+                                            TimestampUtils.RecuperarTimestamp(context, new TimestampUtils.RecuperarTimestampCallback() {
+                                                @Override
+                                                public void onRecuperado(long timestampNegativo) {
+                                                    groupUtils.recuperarListaParticipantes(idChat, new GroupUtils.RecuperarListaParticipantesCallback() {
+                                                        @Override
+                                                        public void onConcluido(ArrayList<String> idsParticipantes) {
+                                                            if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                                                                idsParticipantes.add(idUsuarioLogado);
+                                                            }else if (idsParticipantes == null){
+                                                                idsParticipantes = new ArrayList<>();
+                                                            }
+                                                            dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(1));
+                                                            dadosOperacao.put(caminhoGrupo + "participantes", idsParticipantes);
+                                                            dadosOperacao.put(caminhoFollowers + "timestampinteracao", timestampNegativo);
+                                                            dadosOperacao.put(caminhoFollowers + "idParticipante", idUsuarioLogado);
+                                                            dadosOperacao.put(caminhoFollowers + "administrator", false);
+                                                            dadosOperacao.put(caminhoFollowing + "idGrupo", idChat);
+                                                            dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
+                                                            firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                                                @Override
+                                                                public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                                                    SnackbarUtils.showSnackbar(btnViewEntrarComunidade, "Agora você faz parte do chat!");
+                                                                    aparenciaBtnInt(false, false);
+                                                                    setJaParticipaDoGrupo(true);
+                                                                }
+                                                            });
+                                                        }
+
+                                                        @Override
+                                                        public void onError(String message) {
+                                                            ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                                            aparenciaBtnInt(false, false);
+                                                        }
+                                                    });
+                                                }
+
+                                                @Override
+                                                public void onError(String message) {
+                                                    ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                                    aparenciaBtnInt(false, false);
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                            aparenciaBtnInt(false, false);
+                                        }
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                                aparenciaBtnInt(false, false);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(String message) {
+                    ToastCustomizado.toastCustomizado(String.format("%s %s", context.getString(R.string.an_error_has_occurred), message), context);
+                    aparenciaBtnInt(false, false);
                 }
             });
         }

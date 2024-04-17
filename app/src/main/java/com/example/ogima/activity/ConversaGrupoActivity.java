@@ -231,6 +231,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     //Giphy
     private final GiphyUtils giphyUtils = new GiphyUtils();
     private GiphyDialogFragment gdl;
+    private boolean chatComunidade = false;
 
     @Override
     protected void onStart() {
@@ -323,6 +324,9 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         if (dados != null) {
             contatoDestinatario = (Contatos) dados.getSerializable("contato");
             grupoDestinatario = (Grupo) dados.getSerializable("grupo");
+            if (dados.containsKey("chatComunidade")) {
+                chatComunidade = dados.getBoolean("chatComunidade");
+            }
         }
 
         //Referências do usuário atual.
@@ -2340,6 +2344,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private void irParaDetalhesGrupo(){
         Intent intent = new Intent(getApplicationContext(), GroupDetailsActivity.class);
         intent.putExtra("idGrupo", grupoDestinatario.getIdGrupo());
+        intent.putExtra("chatComunidade", chatComunidade);
         startActivity(intent);
         finish();
     }

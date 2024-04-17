@@ -45,10 +45,12 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
     public ValueEventListener valueEventListenerLastMsg;
     public DatabaseReference verificaUltimaMsgRef;
     private List<Mensagem> listaMensagens = new ArrayList<>();
+    private boolean chatComunidade = false;
 
-    public AdapterChatGrupo(Context c, List<Grupo> listGrupos) {
+    public AdapterChatGrupo(Context c, List<Grupo> listGrupos, boolean chatComunidade) {
         this.context = c;
         this.listaGrupos = listGrupos;
+        this.chatComunidade = chatComunidade;
         emailUsuarioAtual = autenticacao.getCurrentUser().getEmail();
         idUsuarioLogado = Base64Custom.codificarBase64(emailUsuarioAtual);
     }
@@ -182,6 +184,7 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
         //**intent.putExtra("voltarChatFragment", "ChatInicioActivity.class");
         Intent intent = new Intent(context, GroupDetailsActivity.class);
         intent.putExtra("idGrupo", grupoSelecionado.getIdGrupo());
+        intent.putExtra("chatComunidade", chatComunidade);
         context.startActivity(intent);
     }
 }

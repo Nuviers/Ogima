@@ -44,6 +44,8 @@ public class Comunidade implements Serializable, Comparator<Comunidade> {
     private long nrAdms;
     private String idParticipante;
     private boolean administrator;
+    private String idChatComunidade;
+    private ArrayList<String> participantes;
 
     public Comunidade() {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -56,6 +58,22 @@ public class Comunidade implements Serializable, Comparator<Comunidade> {
     public Comunidade(boolean orderByTimestamp, boolean orderByName) {
         this.orderByTimestamp = orderByTimestamp;
         this.orderByName = orderByName;
+    }
+
+    public ArrayList<String> getParticipantes() {
+        return participantes;
+    }
+
+    public void setParticipantes(ArrayList<String> participantes) {
+        this.participantes = participantes;
+    }
+
+    public String getIdChatComunidade() {
+        return idChatComunidade;
+    }
+
+    public void setIdChatComunidade(String idChatComunidade) {
+        this.idChatComunidade = idChatComunidade;
     }
 
     public String getNomeComunidadePesquisa() {

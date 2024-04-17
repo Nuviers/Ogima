@@ -282,7 +282,7 @@ public class AdapterChatGroupList extends RecyclerView.Adapter<RecyclerView.View
         }
         recuperaPosicaoAnteriorListener.onPosicaoAnterior(posicao);
         VisitarPerfilSelecionado.visitarGrupoSelecionado(context,
-                idGrupoSelecionado);
+                idGrupoSelecionado, false);
         animacaoIntentListener.onExecutarAnimacao();
     }
 

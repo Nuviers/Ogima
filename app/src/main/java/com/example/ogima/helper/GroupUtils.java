@@ -505,7 +505,7 @@ public class GroupUtils {
         });
     }
 
-    private void recuperarListaParticipantes(String idGrupo, RecuperarListaParticipantesCallback callback) {
+    public void recuperarListaParticipantes(String idGrupo, RecuperarListaParticipantesCallback callback) {
         String idUsuario;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
         if (idUsuario == null || idGrupo == null

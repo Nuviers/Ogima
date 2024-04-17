@@ -104,7 +104,7 @@ public class ListagemGrupoFragment extends Fragment {
                     listaGruposPesquisa.clear();
                     hashMapGrupoPesquisa.clear();
                     pesquisarGrupos(dadoDigitadoFormatado);
-                    adapterChatGrupo = new AdapterChatGrupo(getContext(), listaGruposPesquisa);
+                    adapterChatGrupo = new AdapterChatGrupo(getContext(), listaGruposPesquisa, false);
                     recyclerChat.setAdapter(adapterChatGrupo);
                     //ToastCustomizado.toastCustomizadoCurto("Com filtro", getContext());
                 } else {
@@ -112,7 +112,7 @@ public class ListagemGrupoFragment extends Fragment {
                     listaGruposPesquisa.clear();
                     hashMapGrupoPesquisa.clear();
                     recuperarGrupos();
-                    adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos());
+                    adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos(), false);
                     recyclerChat.setAdapter(adapterChatGrupo);
                     adapterChatGrupo.notifyDataSetChanged();
                     //ToastCustomizado.toastCustomizadoCurto("Sem filtro", getContext());
@@ -174,7 +174,7 @@ public class ListagemGrupoFragment extends Fragment {
         if (adapterChatGrupo != null) {
 
         } else {
-            adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos());
+            adapterChatGrupo = new AdapterChatGrupo(getContext(), grupoDAO.listarGrupos(), false);
         }
         recyclerChat.setAdapter(adapterChatGrupo);
 

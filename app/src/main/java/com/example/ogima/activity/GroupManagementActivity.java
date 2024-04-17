@@ -138,6 +138,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     private boolean operacaoConcluida = false;
     private boolean trocarQueryUltimo = false, trocarQueryUltimoFiltro = false;
     private long timeUltimo = -1;
+    private boolean chatComunidade = false;
 
     private interface RecuperaUltimoElemento {
         void onRecuperado();
@@ -401,6 +402,9 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
         if (dados.containsKey("tipoGerenciamento")) {
             tipoGerenciamento = dados.getString("tipoGerenciamento");
         }
+        if (dados.containsKey("chatComunidade")) {
+            chatComunidade = dados.getBoolean("chatComunidade");
+        }
     }
 
     private void acompanharGerenciamento() {
@@ -412,6 +416,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                 if (snapshot.getValue() == null) {
                     Intent intent = new Intent(GroupManagementActivity.this, GroupDetailsActivity.class);
                     intent.putExtra("idGrupo", idGrupo);
+                    intent.putExtra("chatComunidade", chatComunidade);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finish();
@@ -1473,6 +1478,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                                                 Intent intent = new Intent(GroupManagementActivity.this, GroupDetailsActivity.class);
                                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                                 intent.putExtra("idGrupo", idGrupo);
+                                                intent.putExtra("chatComunidade", chatComunidade);
                                                 startActivity(intent);
                                                 finish();
                                             }
