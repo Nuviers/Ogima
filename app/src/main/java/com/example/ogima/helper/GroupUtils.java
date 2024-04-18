@@ -463,7 +463,7 @@ public class GroupUtils {
         });
     }
 
-    private void recuperarListaAdms(String idGrupo, RecuperarListaAdmsCallback callback) {
+    public void recuperarListaAdms(String idGrupo, RecuperarListaAdmsCallback callback) {
         String idUsuario;
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
         if (idUsuario == null || idGrupo == null
@@ -899,7 +899,7 @@ public class GroupUtils {
         });
     }
 
-    private void verificaAdm(String idGrupo, String idAlvo, VerificaAdmCallback callback) {
+    public void verificaAdm(String idGrupo, String idAlvo, VerificaAdmCallback callback) {
         if (idAlvo == null || idGrupo == null
                 || idAlvo.isEmpty() || idGrupo.isEmpty()) {
             callback.onError(context.getString(R.string.error_recovering_data));
@@ -1016,7 +1016,7 @@ public class GroupUtils {
         });
     }
 
-    private void ajustarIdGrupos(String idAlvo, String idGrupo, AjustarMeusGruposCallback callback) {
+    public void ajustarIdGrupos(String idAlvo, String idGrupo, AjustarMeusGruposCallback callback) {
         //Verificar se usuário selecionado tem o limite máximo de grupo ou não.
         UsuarioUtils.recuperarIdsGrupos(context, idAlvo, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
             @Override

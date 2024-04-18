@@ -14,8 +14,8 @@ import com.example.ogima.model.Usuario;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
@@ -53,14 +53,17 @@ public class CommunityUtils {
     public static final String ALL_COMMUNITIES = "Todas as comunidades";
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private int contTopicoRemocao = 0;
+    private GroupUtils groupUtils;
 
     public CommunityUtils(Activity activity, Context context) {
         this.activity = activity;
         this.context = context;
+        this.groupUtils = new GroupUtils(context);
     }
 
     public CommunityUtils(Context context) {
         this.context = context;
+        this.groupUtils = new GroupUtils(context);
     }
 
     public interface ConfigBundleCallback {
@@ -257,6 +260,14 @@ public class CommunityUtils {
         void onError(String message);
     }
 
+    public interface IdChatComunidadeCallback {
+        void onRecuperado(String idChatComunidade);
+
+        void onNaoExiste();
+
+        void onError(String message);
+    }
+
     public void configurarBundle(Bundle dados, ConfigBundleCallback callback) {
         if (dados != null) {
             if (dados.containsKey("edit")) {
@@ -340,7 +351,7 @@ public class CommunityUtils {
                     public void onConcluido(ArrayList<String> idsParticipantes) {
                         if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
                             idsParticipantes.add(idUsuario);
-                        }else{
+                        } else {
                             idsParticipantes = new ArrayList<>();
                             idsParticipantes.add(idUsuario);
                         }
@@ -494,7 +505,7 @@ public class CommunityUtils {
                                         }
                                     }
                                     dadosOperacao.put(caminhoComunidade + "/participantes/", idsParticipantes);
-                                    salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                                    sairDoChatComunidade(idAlvo, idComunidade, dadosOperacao, callback);
                                 }
 
                                 @Override
@@ -518,7 +529,7 @@ public class CommunityUtils {
                                         }
                                     }
                                     dadosOperacao.put(caminhoComunidade + "/participantes/", idsParticipantes);
-                                    salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                                    sairDoChatComunidade(idAlvo, idComunidade, dadosOperacao, callback);
                                 }
 
                                 @Override
@@ -587,6 +598,105 @@ public class CommunityUtils {
         });
     }
 
+    public void sairDoChatComunidade(String idAlvo, String idComunidade, HashMap<String, Object> dadosOperacao, SairDaComunidadeCallback callback) {
+        recuperarIdChatComunidade(idComunidade, new IdChatComunidadeCallback() {
+            @Override
+            public void onRecuperado(String idChatComunidade) {
+                groupUtils.verificaSeEParticipante(idChatComunidade, idAlvo, new GroupUtils.VerificaParticipanteCallback() {
+                    @Override
+                    public void onParticipante(boolean status) {
+                        if (status) {
+                            groupUtils.recuperarListaAdms(idChatComunidade, new GroupUtils.RecuperarListaAdmsCallback() {
+                                String caminhoFollowers = "/groupFollowers/" + idChatComunidade + "/" + idAlvo;
+                                String caminhoFollowing = "/groupFollowing/" + idAlvo + "/" + idChatComunidade;
+                                String caminhoGrupo = "/grupos/" + idChatComunidade + "/";
+                                String caminhoPesquisa = "/group_participants_by_name/" + idChatComunidade + "/" + idAlvo;
+
+                                @Override
+                                public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                                    dadosOperacao.put(caminhoFollowers, null);
+                                    dadosOperacao.put(caminhoFollowing, null);
+                                    dadosOperacao.put(caminhoPesquisa, null);
+                                    dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(-1));
+                                    if (usuarioAtualAdm) {
+                                        idsAdms.remove(idAlvo);
+                                        dadosOperacao.put(caminhoGrupo + "/admsGrupo/", idsAdms);
+                                        dadosOperacao.put(caminhoGrupo + "nrAdms", ServerValue.increment(-1));
+                                    }
+
+                                    groupUtils.recuperarListaParticipantes(idChatComunidade, new GroupUtils.RecuperarListaParticipantesCallback() {
+                                        @Override
+                                        public void onConcluido(ArrayList<String> idsParticipantes) {
+                                            if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                                                if (idsParticipantes.contains(idAlvo)) {
+                                                    idsParticipantes.remove(idAlvo);
+                                                }
+                                            }
+                                            dadosOperacao.put(caminhoGrupo + "/participantes/", idsParticipantes);
+                                            salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            callback.onError(message);
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onNaoExiste() {
+                                    dadosOperacao.put(caminhoFollowers, null);
+                                    dadosOperacao.put(caminhoFollowing, null);
+                                    dadosOperacao.put(caminhoPesquisa, null);
+                                    dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(-1));
+                                    groupUtils.recuperarListaParticipantes(idChatComunidade, new GroupUtils.RecuperarListaParticipantesCallback() {
+                                        @Override
+                                        public void onConcluido(ArrayList<String> idsParticipantes) {
+                                            if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                                                if (idsParticipantes.contains(idAlvo)) {
+                                                    idsParticipantes.remove(idAlvo);
+                                                }
+                                            }
+                                            dadosOperacao.put(caminhoGrupo + "/participantes/", idsParticipantes);
+                                            salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            callback.onError(message);
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
+                        } else {
+                            salvarHashmapSairDaComunidade(dadosOperacao, callback);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                salvarHashmapSairDaComunidade(dadosOperacao, callback);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
     public void salvarHashmapSairDaComunidade(HashMap<String, Object> dadosOperacao, SairDaComunidadeCallback callback) {
         firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
             @Override
@@ -640,12 +750,12 @@ public class CommunityUtils {
                                     idsComunidades.remove(idUsuario);
                                     dadosOperacao.put(caminhoComunidadesUsuario, idsComunidades);
                                 }
-                                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
+                                excluirChatComunidade(idComunidade, dadosOperacao, callback);
                             }
 
                             @Override
                             public void onNaoExiste() {
-                                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
+                                excluirChatComunidade(idComunidade, dadosOperacao, callback);
                             }
 
                             @Override
@@ -655,6 +765,35 @@ public class CommunityUtils {
                         });
                     }
                 }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void excluirChatComunidade(String idComunidade, HashMap<String, Object> dadosOperacao, ExcluirComunidadeCallback callback) {
+        recuperarIdChatComunidade(idComunidade, new IdChatComunidadeCallback() {
+            @Override
+            public void onRecuperado(String idGrupo) {
+                String caminhoFollowers = "/groupFollowers/" + idGrupo;
+                String caminhoGrupo = "/grupos/" + idGrupo;
+                String caminhoGrupoPublico = "/publicGroups/" + idGrupo;
+                String caminhoGrupoPrivado = "/privateGroups/" + idGrupo;
+                String caminhoPesquisa = "/group_participants_by_name/" + idGrupo;
+                dadosOperacao.put(caminhoGrupoPublico, null);
+                dadosOperacao.put(caminhoGrupoPrivado, null);
+                dadosOperacao.put(caminhoFollowers, null);
+                dadosOperacao.put(caminhoGrupo, null);
+                dadosOperacao.put(caminhoPesquisa, null);
+                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
+            }
+
+            @Override
+            public void onNaoExiste() {
+                salvarHashmapExlusaoComunidade(dadosOperacao, callback);
             }
 
             @Override
@@ -810,7 +949,7 @@ public class CommunityUtils {
                             listaPronta.add(idAlvo);
                             ToastCustomizado.toastCustomizadoCurto("ADD: " + idAlvo, context);
                             dadosOperacao.put(caminhoComunidade + "admsComunidade/", listaPronta);
-                            salvarHashmapPromocao(dadosOperacao, callback);
+                            promoverNoChat(idAlvo, idComunidade, dadosOperacao, callback);
                         }
 
                         @Override
@@ -818,7 +957,7 @@ public class CommunityUtils {
                             ToastCustomizado.toastCustomizadoCurto("NOVO ADD: " + idAlvo, context);
                             listaPronta.add(idAlvo);
                             dadosOperacao.put(caminhoComunidade + "admsComunidade/", listaPronta);
-                            salvarHashmapPromocao(dadosOperacao, callback);
+                            promoverNoChat(idAlvo, idComunidade, dadosOperacao, callback);
                         }
 
                         @Override
@@ -829,6 +968,67 @@ public class CommunityUtils {
                 } else {
                     callback.onNaoParticipa();
                 }
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void promoverNoChat(String idAlvo, String idComunidade, HashMap<String, Object> dadosOperacao, PromoverAdmCallback callback) {
+        recuperarIdChatComunidade(idComunidade, new IdChatComunidadeCallback() {
+            @Override
+            public void onRecuperado(String idGrupo) {
+                groupUtils.verificaSeEParticipante(idGrupo, idAlvo, new GroupUtils.VerificaParticipanteCallback() {
+                    String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idAlvo + "/";
+                    String caminhoGrupo = "/grupos/" + idGrupo + "/";
+                    ArrayList<String> listaPronta = new ArrayList<>();
+
+                    @Override
+                    public void onParticipante(boolean status) {
+                        if (status) {
+                            dadosOperacao.put(caminhoFollowers + "administrator", true);
+                            dadosOperacao.put(caminhoGrupo + "nrAdms", ServerValue.increment(1));
+                            groupUtils.recuperarListaAdms(idGrupo, new GroupUtils.RecuperarListaAdmsCallback() {
+                                @Override
+                                public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                                    listaPronta = idsAdms;
+                                    listaPronta.add(idAlvo);
+                                    ToastCustomizado.toastCustomizadoCurto("ADD: " + idAlvo, context);
+                                    dadosOperacao.put(caminhoGrupo + "admsGrupo/", listaPronta);
+                                    salvarHashmapPromocao(dadosOperacao, callback);
+                                }
+
+                                @Override
+                                public void onNaoExiste() {
+                                    ToastCustomizado.toastCustomizadoCurto("NOVO ADD: " + idAlvo, context);
+                                    listaPronta.add(idAlvo);
+                                    dadosOperacao.put(caminhoGrupo + "admsGrupo/", listaPronta);
+                                    salvarHashmapPromocao(dadosOperacao, callback);
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
+                        } else {
+                            salvarHashmapPromocao(dadosOperacao, callback);
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                salvarHashmapPromocao(dadosOperacao, callback);
             }
 
             @Override
@@ -887,16 +1087,7 @@ public class CommunityUtils {
                                         } else {
                                             dadosOperacao.put(caminhoComunidade + "admsComunidade/", idsAdms);
                                         }
-                                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
-                                            @Override
-                                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                                                if (error == null) {
-                                                    callback.onConcluido();
-                                                } else {
-                                                    callback.onError(String.valueOf(error.getCode()));
-                                                }
-                                            }
-                                        });
+                                        despromoverNoChat(idAlvo, idComunidade, dadosOperacao, callback);
                                     }
 
                                     @Override
@@ -930,6 +1121,97 @@ public class CommunityUtils {
             @Override
             public void onError(String message) {
                 callback.onError(message);
+            }
+        });
+    }
+
+    private void despromoverNoChat(String idAlvo, String idComunidade, HashMap<String, Object> dadosOperacao, DespromoverAdmCallback callback) {
+        recuperarIdChatComunidade(idComunidade, new IdChatComunidadeCallback() {
+            @Override
+            public void onRecuperado(String idGrupo) {
+                groupUtils.verificaSeEParticipante(idGrupo, idAlvo, new GroupUtils.VerificaParticipanteCallback() {
+                    String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idAlvo + "/";
+                    String caminhoGrupo = "/grupos/" + idGrupo + "/";
+
+                    @Override
+                    public void onParticipante(boolean status) {
+                        if (status) {
+                            groupUtils.verificaAdm(idGrupo, idAlvo, new GroupUtils.VerificaAdmCallback() {
+                                @Override
+                                public void onRecuperado(boolean adm) {
+                                    if (adm) {
+                                        //Usuário é realmente um dos adms.
+                                        dadosOperacao.put(caminhoFollowers + "administrator", false);
+                                        dadosOperacao.put(caminhoGrupo + "nrAdms", ServerValue.increment(-1));
+                                        groupUtils.recuperarListaAdms(idGrupo, new GroupUtils.RecuperarListaAdmsCallback() {
+                                            @Override
+                                            public void onConcluido(ArrayList<String> idsAdms, boolean usuarioAtualAdm) {
+                                                idsAdms.remove(idAlvo);
+                                                ToastCustomizado.toastCustomizado("DELL: " + idAlvo, context);
+                                                if (idsAdms.size() <= 0) {
+                                                    dadosOperacao.put(caminhoGrupo + "admsGrupo/", null);
+                                                } else {
+                                                    dadosOperacao.put(caminhoGrupo + "admsGrupo/", idsAdms);
+                                                }
+                                                salvarHashMapDespromover(dadosOperacao, callback);
+                                            }
+
+                                            @Override
+                                            public void onNaoExiste() {
+                                                ToastCustomizado.toastCustomizado("NÃO É ADM: " + idAlvo, context);
+                                                //Usuário não é mais o adm.
+                                                callback.onConcluido();
+                                            }
+
+                                            @Override
+                                            public void onError(String message) {
+                                                callback.onError(message);
+                                            }
+                                        });
+                                    } else {
+                                        //Usuário não é adm.
+                                        callback.onConcluido();
+                                    }
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                    callback.onError(message);
+                                }
+                            });
+                        } else {
+                            callback.onNaoParticipa();
+                        }
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                salvarHashMapDespromover(dadosOperacao, callback);
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void salvarHashMapDespromover(HashMap<String, Object> dadosOperacao, DespromoverAdmCallback callback) {
+        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if (error == null) {
+                    callback.onConcluido();
+                } else {
+                    callback.onError(String.valueOf(error.getCode()));
+                }
             }
         });
     }
@@ -1006,7 +1288,7 @@ public class CommunityUtils {
                                     despromoverAdm(idComunidade, idAlvo, new DespromoverAdmCallback() {
                                         @Override
                                         public void onConcluido() {
-                                            salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                            transferirFundadorChat(idAlvo, idComunidade, dadosOperacao, callback);
                                         }
 
                                         @Override
@@ -1021,7 +1303,7 @@ public class CommunityUtils {
                                     });
                                 } else {
                                     //Usuário não é adm.
-                                    salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                    transferirFundadorChat(idAlvo, idComunidade, dadosOperacao, callback);
                                 }
                             }
 
@@ -1034,7 +1316,7 @@ public class CommunityUtils {
 
                     @Override
                     public void onError(String message) {
-                         callback.onError(message);
+                        callback.onError(message);
                     }
                 });
             }
@@ -1093,6 +1375,80 @@ public class CommunityUtils {
                         callback.onError(message);
                     }
                 });
+            }
+
+            @Override
+            public void onError(String message) {
+                callback.onError(message);
+            }
+        });
+    }
+
+    private void transferirFundadorChat(String idAlvo, String idComunidade, HashMap<String, Object> dadosOperacao, TransferirFundadorCallback callback) {
+        recuperarIdChatComunidade(idComunidade, new IdChatComunidadeCallback() {
+            @Override
+            public void onRecuperado(String idGrupo) {
+                groupUtils.recuperarListaParticipantes(idGrupo, new GroupUtils.RecuperarListaParticipantesCallback() {
+                    String caminhoGrupo = "/grupos/" + idGrupo + "/";
+                    String caminhoFollowers = "/groupFollowers/" + idGrupo + "/" + idAlvo;
+
+                    @Override
+                    public void onConcluido(ArrayList<String> idsParticipantes) {
+                        if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                            if (idsParticipantes.contains(idAlvo)) {
+                                idsParticipantes.remove(idAlvo);
+                            }
+                        }
+
+                        dadosOperacao.put(caminhoFollowers, null);
+                        dadosOperacao.put(caminhoGrupo + "idSuperAdmGrupo", idAlvo);
+                        dadosOperacao.put(caminhoGrupo + "nrParticipantes", ServerValue.increment(-1));
+                        dadosOperacao.put(caminhoGrupo + "participantes", idsParticipantes);
+
+                        groupUtils.verificaAdm(idGrupo, idAlvo, new GroupUtils.VerificaAdmCallback() {
+                            @Override
+                            public void onRecuperado(boolean adm) {
+                                if (adm) {
+                                    //Usuário escolhido é adm.
+                                    groupUtils.despromoverAdm(idGrupo, idAlvo, new GroupUtils.DespromoverAdmCallback() {
+                                        @Override
+                                        public void onConcluido() {
+                                            salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                        }
+
+                                        @Override
+                                        public void onNaoParticipa() {
+                                            salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                        }
+
+                                        @Override
+                                        public void onError(String message) {
+                                            callback.onError(message);
+                                        }
+                                    });
+                                } else {
+                                    //Usuário não é adm.
+                                    salvarHashMapTransferirFundador(dadosOperacao, callback);
+                                }
+                            }
+
+                            @Override
+                            public void onError(String message) {
+                                callback.onError(message);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        callback.onError(message);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                salvarHashMapTransferirFundador(dadosOperacao, callback);
             }
 
             @Override
@@ -1533,6 +1889,28 @@ public class CommunityUtils {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 callback.onError(String.valueOf(error.getCode()));
+            }
+        });
+    }
+
+    public void recuperarIdChatComunidade(String idComunidade, IdChatComunidadeCallback callback) {
+        DatabaseReference grupoRecuperadoRef = FirebaseDatabase.getInstance().getReference("comunidades").child(idComunidade)
+                .child("idChatComunidade");
+        grupoRecuperadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    String idChatComunidade = snapshot.getValue(String.class);
+                    callback.onRecuperado(idChatComunidade);
+                } else {
+                    callback.onNaoExiste();
+                }
+                grupoRecuperadoRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
             }
         });
     }

@@ -341,19 +341,25 @@ public class GroupDetailsActivity extends AppCompatActivity {
                     }
 
                     if (grupo.getIdSuperAdmGrupo().equals(idUsuario)) {
-                        btnGerenciarUsuarios.setVisibility(View.VISIBLE);
                         btnEditarGrupo.setVisibility(View.VISIBLE);
-                        btnDeletarGrupo.setVisibility(View.VISIBLE);
-                        if (grupo.getNrParticipantes() < 1) {
+                        if (!chatComunidade) {
+                            btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+                            btnDeletarGrupo.setVisibility(View.VISIBLE);
+                        }
+                        if (grupo.getNrParticipantes() <= 1) {
                             btnDeletarGrupo.setText("Sair e excluir grupo");
                         } else {
                             btnSairDoGrupo.setText("Sair do grupo");
-                            btnSairDoGrupo.setVisibility(View.VISIBLE);
+                            if(!chatComunidade){
+                                btnSairDoGrupo.setVisibility(View.VISIBLE);
+                            }
                         }
                     } else if (grupo.getAdmsGrupo() != null
                             && !grupo.getAdmsGrupo().isEmpty()
                             && grupo.getAdmsGrupo().contains(idUsuario)) {
-                        btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+                        if(!chatComunidade){
+                            btnGerenciarUsuarios.setVisibility(View.VISIBLE);
+                        }
                         btnSairDoGrupo.setText("Sair do grupo");
                         btnSairDoGrupo.setVisibility(View.VISIBLE);
                     } else {
@@ -964,16 +970,20 @@ public class GroupDetailsActivity extends AppCompatActivity {
                 //Há participantes que não são adms e o limite ainda não foi atingido.
                 if (grupoAtual.getNrParticipantes() > grupoAtual.getNrAdms()
                         || grupoAtual.getNrAdms() <= 0) {
-                    btnViewPromoverUserGrupo.setVisibility(View.VISIBLE);
+                    if (!chatComunidade) {
+                        btnViewPromoverUserGrupo.setVisibility(View.VISIBLE);
+                    }
                 }
             }
             if (founder || administrator && grupoAtual.getNrAdms() > grupoAtual.getNrParticipantes()) {
                 //ADM e o fundador podem remover usuários, no caso de o usuário
                 //atual for um ADM ele só pode remover usuários que não são ADMS.
-                btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
+                if (!chatComunidade) {
+                    btnViewRemoverUserGrupo.setVisibility(View.VISIBLE);
+                }
             }
 
-            if (founder && grupoAtual.getNrAdms() > 0) {
+            if (founder && grupoAtual.getNrAdms() > 0 && !chatComunidade) {
                 btnViewDespromoverUserGrupo.setVisibility(View.VISIBLE);
             }
         }

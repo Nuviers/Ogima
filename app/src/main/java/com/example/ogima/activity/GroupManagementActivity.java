@@ -1235,7 +1235,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
         if (trocarQueryUltimo) {
             queryUltimoElemento = firebaseRef.child("groupFollowers")
                     .child(idGrupo).orderByChild("timestampinteracao")
-                    .endAt(timeUltimo)
+                    .endAt(timeUltimo - 1)
                     .limitToLast(1);
         }else{
             queryUltimoElemento = firebaseRef.child("groupFollowers")
