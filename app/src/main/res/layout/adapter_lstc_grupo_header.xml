@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/linearLayoutLstGrupoHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_8sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:orientation="horizontal"
+            android:padding="@dimen/_8sdp">
+
+            <ImageButton
+                android:id="@+id/imgBtnCadGrupo"
+                app:srcCompat="@drawable/ic_chat_comentarios_v1"
+                app:tint="#FFFFFF"
+                android:layout_width="@dimen/_40sdp"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@drawable/round_imagebackground"
+                android:scaleType="fitCenter" />
+
+            <Button
+                android:id="@+id/btnCadGrupo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_8sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="@string/create_group"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/_15ssp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

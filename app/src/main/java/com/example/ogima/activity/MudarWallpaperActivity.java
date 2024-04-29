@@ -3,6 +3,7 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -16,6 +17,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -59,7 +61,9 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     private String emailUsuario, idUsuario;
     private String wallpaperPlace;
     private ImageButton imgBtnSelecionarWallpaper, imgBtnBackWallpaper;
-    private TextView txtViewSelecionarWallpaper;
+    private Toolbar toolbarIncPadrao;
+    private TextView txtViewIncTituloToolbar;
+    private Button btnViewSelecionarWallpaper;
     private ImageView imgViewPreviewWallpaper;
     private DatabaseReference wallpaperPrivadoRef;
     private DatabaseReference wallpaperGlobalRef;
@@ -95,8 +99,11 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_mudar_wallpaper);
+        setContentView(R.layout.activity_set_wallpaper);
         inicializandoComponentes();
+        setSupportActionBar(toolbarIncPadrao);
+        setTitle("");
+        txtViewIncTituloToolbar.setText("Definir wallpaper");
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
@@ -154,7 +161,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
             }
         });
 
-        txtViewSelecionarWallpaper.setOnClickListener(new View.OnClickListener() {
+        btnViewSelecionarWallpaper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Passando a intenção de selecionar uma foto pela galeria
@@ -434,8 +441,10 @@ public class MudarWallpaperActivity extends AppCompatActivity {
 
     private void inicializandoComponentes() {
         imgBtnSelecionarWallpaper = findViewById(R.id.imgBtnSelecionarWallpaper);
-        imgBtnBackWallpaper = findViewById(R.id.imgBtnBackWallpaper);
-        txtViewSelecionarWallpaper = findViewById(R.id.txtViewSelecionarWallpaper);
+        btnViewSelecionarWallpaper = findViewById(R.id.btnViewSelecionarWallpaper);
         imgViewPreviewWallpaper = findViewById(R.id.imgViewPreviewWallpaper);
+        imgBtnBackWallpaper = findViewById(R.id.imgBtnIncBackBlack);
+        txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarBlack);
+        toolbarIncPadrao = findViewById(R.id.toolbarIncBlack);
     }
 }

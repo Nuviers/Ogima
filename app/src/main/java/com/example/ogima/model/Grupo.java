@@ -6,6 +6,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -36,6 +37,23 @@ public class Grupo implements Serializable, Comparator<Grupo> {
     private String nomeUsuarioPesquisa;
     private boolean indisponivel;
 
+    @Exclude
+    private boolean orderByTimestamp, orderByName;
+    @Exclude
+    public static final String PUBLIC_GROUP = "Grupos públicos";
+    @Exclude
+    public static final String GROUP_FOLLOWING = "Grupos que você segue";
+    @Exclude
+    public static final String MY_GROUP = "Seus grupos";
+    @Exclude
+    public static final String ALL_GROUPS = "Todos os grupos";
+    @Exclude
+    public static final String BLOCKED_GROUP = "Grupos bloqueados";
+    public Grupo(boolean orderByTimestamp, boolean orderByName) {
+        this.orderByTimestamp = orderByTimestamp;
+        this.orderByName = orderByName;
+    }
+
     public Grupo() {
 
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
@@ -43,6 +61,22 @@ public class Grupo implements Serializable, Comparator<Grupo> {
         DatabaseReference grupoRef = firebaseRef.child("grupos");
         String idRandomicoGrupo = grupoRef.push().getKey();
         setIdGrupo(idRandomicoGrupo);
+    }
+
+    public boolean isOrderByTimestamp() {
+        return orderByTimestamp;
+    }
+
+    public void setOrderByTimestamp(boolean orderByTimestamp) {
+        this.orderByTimestamp = orderByTimestamp;
+    }
+
+    public boolean isOrderByName() {
+        return orderByName;
+    }
+
+    public void setOrderByName(boolean orderByName) {
+        this.orderByName = orderByName;
     }
 
     public boolean isIndisponivel() {
@@ -183,7 +217,20 @@ public class Grupo implements Serializable, Comparator<Grupo> {
 
     @Override
     public int compare(Grupo g1, Grupo g2) {
-        return g1.getNomeGrupo().compareToIgnoreCase(g2.getNomeGrupo());
+        if (orderByTimestamp) {
+            return Long.compare(g1.getTimestampinteracao(), g2.getTimestampinteracao());
+        } else if(orderByName) {
+            // Comparação com base em outra propriedade
+            // Retorne o valor desejado de acordo com o critério de comparação
+            String nome1, nome2;
+
+            nome1 = g1.getNomeGrupo();
+            nome2 = g2.getNomeGrupo();
+
+            return nome1.compareToIgnoreCase(nome2);
+        }else{
+            return g1.getIdGrupo().compareToIgnoreCase(g2.getIdGrupo());
+        }
     }
 
     //Essencial para o funcionamento do DiffUtilCallback, sem ele a lógica sempre terá erro.

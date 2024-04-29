@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linearLayoutLstGrupoButton"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="@dimen/_4sdp"
+    android:layout_marginStart="@dimen/_8sdp"
+    android:layout_marginLeft="@dimen/_8sdp"
+    android:layout_marginRight="@dimen/_8sdp"
+    android:layout_marginEnd="@dimen/_8sdp">
+
+    <Button
+        android:id="@+id/btnViewSeeGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="@dimen/_8sdp"
+        android:layout_marginLeft="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:background="@drawable/estilo_background_random"
+        android:padding="@dimen/_10sdp"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_14ssp"
+        android:visibility="gone"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewVerTodosGrupos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="@dimen/_12sdp"
+        app:cardPreventCornerOverlap="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/_12sdp"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imgViewVerTodosGrupos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_comunidade_padrao" />
+
+            <Button
+                android:id="@+id/btnViewVerTodosGrupos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="@dimen/_4sdp"
+                android:background="@drawable/backtextblack"
+                android:backgroundTint="#039BE5"
+                android:padding="@dimen/_8sdp"
+                android:text="Ver todos os grupos"
+                android:fontFamily="@font/andada"
+                android:textAllCaps="false"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/_15ssp" />
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+</LinearLayout>

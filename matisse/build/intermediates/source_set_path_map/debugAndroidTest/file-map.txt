@@ -1,0 +1,11 @@
+com.zhihu.matisse.test.matisse-appcompat-1.1.0-0 C:\Users\ainzgown\.gradle\caches\transforms-3\16f1ff211ca11517cb032e012a8a91ec\transformed\appcompat-1.1.0\res
+com.zhihu.matisse.test.matisse-coordinatorlayout-1.0.0-1 C:\Users\ainzgown\.gradle\caches\transforms-3\22eaaeb3ca2a31332f2f7da49e65562c\transformed\coordinatorlayout-1.0.0\res
+com.zhihu.matisse.test.matisse-core-1.1.0-2 C:\Users\ainzgown\.gradle\caches\transforms-3\db37ace8d83d0bf8a2aa0a9bca98fec6\transformed\core-1.1.0\res
+com.zhihu.matisse.test.matisse-recyclerview-1.0.0-3 C:\Users\ainzgown\.gradle\caches\transforms-3\e0cef8620a1179b3ea5c75ee11b25206\transformed\recyclerview-1.0.0\res
+com.zhihu.matisse.test.matisse-jetified-appcompat-resources-1.1.0-4 C:\Users\ainzgown\.gradle\caches\transforms-3\fbd9b35bc119c0ad2505b6c26222bbfe\transformed\jetified-appcompat-resources-1.1.0\res
+com.zhihu.matisse.test.matisse-androidTest-5 C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\build\generated\res\resValues\androidTest\debug
+com.zhihu.matisse.test.matisse-androidTest-6 C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\build\generated\res\rs\androidTest\debug
+com.zhihu.matisse.test.matisse-mergeDebugAndroidTestResources-7 C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.zhihu.matisse.test.matisse-mergeDebugAndroidTestResources-8 C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.zhihu.matisse.test.matisse-merged_res-9 C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\build\intermediates\merged_res\debugAndroidTest
+com.zhihu.matisse.test.matisse-packaged_res-10 C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\build\intermediates\packaged_res\debug

@@ -38,5 +38,6 @@
     <color name="unread_messages_color">#4A1CC6</color>
     <color name="group_participants">#3F51B5</color>
 
+    <color name="group_super_adm">#00BCD4</color>
 
 </resources>

@@ -137,6 +137,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     private ArrayList<String> idsNovosParticipantes;
     private MidiaUtils midiaUtils;
     private boolean trocarQueryUltimo = false, trocarQueryUltimoFiltro = false;
+    private boolean grupoPublico = true;
 
     private interface VerificaExistenciaCallback {
         void onExistencia(boolean status, Contatos contatoAtualizado);
@@ -244,6 +245,10 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             idGrupo = dados.getString("idGrupo");
         }
 
+        if (dados != null && dados.containsKey("grupoPublico")) {
+            grupoPublico = dados.getBoolean("grupoPublico");
+        }
+
         setLoading(true);
         UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
             @Override
@@ -282,7 +287,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             Intent intent = new Intent(AddGroupUsersActivity.this, CreateGroupActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             intent.putExtra("idParticipantes", adapterSelection.getListaSelecao());
-                            intent.putExtra("grupoPublico", true);
+                            intent.putExtra("grupoPublico", grupoPublico);
                             intent.putExtra("edit", false);
                             startActivity(intent);
                             finish();

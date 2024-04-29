@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <include
+        android:id="@+id/inc_toolbar_black"
+        layout="@layout/inc_toolbar_black"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBtnSetWallpaper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/inc_toolbar_black"
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/black"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/imgBtnSelecionarWallpaper"
+                android:layout_width="@dimen/_45sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_galeria_postagem_vector" />
+
+            <Button
+                android:id="@+id/btnViewSelecionarWallpaper"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Selecionar papel de parede"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_14ssp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <androidx.constraintlayout.utils.widget.ImageFilterView
+        android:id="@+id/imageView8"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_450sdp"
+        android:layout_below="@id/linearLayoutBtnSetWallpaper"
+        android:layout_centerHorizontal="true"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/background_caixa_texto"/>
+
+    <androidx.constraintlayout.utils.widget.ImageFilterView
+        android:id="@+id/imgViewPreviewWallpaper"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_455sdp"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:layout_below="@id/linearLayoutBtnSetWallpaper"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_12sdp"
+        android:layout_marginLeft="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_12sdp"
+        android:layout_marginRight="@dimen/_12sdp"
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/wallpaperwaifutfour" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/imgViewPreviewWallpaper"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnViewMensagem1"
+            android:layout_width="@dimen/_120sdp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/estilo_background_remetente"
+            android:backgroundTint="#7EC2E1"
+            android:textAllCaps="false"
+            android:fontFamily="@font/andada"
+            android:paddingStart="@dimen/_4sdp"
+            android:paddingLeft="@dimen/_4sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_14ssp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginStart="@dimen/_20sdp"
+            android:layout_marginLeft="@dimen/_20sdp"
+            android:text="Mensagem 1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txtViewDataMensagem1"
+            android:layout_width="@dimen/_120sdp"
+            android:layout_height="@dimen/_14sdp"
+            android:gravity="center"
+            android:layout_gravity="start|left"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:layout_marginStart="@dimen/_20sdp"
+            android:layout_marginLeft="@dimen/_20sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:fontFamily="@font/arsenal"
+            android:paddingStart="@dimen/_4sdp"
+            android:paddingLeft="@dimen/_4sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_12ssp"
+            android:text="07/07/2024 17:22"
+            android:textStyle="bold"/>
+
+        <Button
+            android:id="@+id/btnViewMensagem2"
+            android:layout_width="@dimen/_120sdp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|end"
+            android:background="@drawable/estilo_background_remetente"
+            android:textAllCaps="false"
+            android:fontFamily="@font/andada"
+            android:paddingStart="@dimen/_4sdp"
+            android:paddingLeft="@dimen/_4sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_14ssp"
+            android:layout_marginTop="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_20sdp"
+            android:layout_marginEnd="@dimen/_20sdp"
+            android:text="Mensagem 2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txtViewDataMensagem2"
+            android:layout_width="@dimen/_120sdp"
+            android:layout_height="@dimen/_14sdp"
+            android:gravity="center"
+            android:layout_gravity="right|end"
+            android:layout_marginTop="@dimen/_2sdp"
+            android:layout_marginRight="@dimen/_20sdp"
+            android:layout_marginEnd="@dimen/_20sdp"
+            android:background="@drawable/background_caixa_texto"
+            android:fontFamily="@font/arsenal"
+            android:paddingStart="@dimen/_4sdp"
+            android:paddingLeft="@dimen/_4sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_12ssp"
+            android:text="07/07/2024 17:22"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</RelativeLayout>

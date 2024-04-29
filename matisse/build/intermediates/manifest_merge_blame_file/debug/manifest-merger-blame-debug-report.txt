@@ -1,0 +1,43 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<!--
+3  Copyright 2017 Zhihu Inc.
+4
+5  Licensed under the Apache License, Version 2.0 (the "License");
+6  you may not use this file except in compliance with the License.
+7  You may obtain a copy of the License at
+8
+9  http://www.apache.org/licenses/LICENSE-2.0
+10
+11  Unless required by applicable law or agreed to in writing, software
+12  distributed under the License is distributed on an "AS IS" BASIS,
+13  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+14  See the License for the specific language governing permissions and
+15  limitations under the License.
+16-->
+17<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+18    package="com.zhihu.matisse" >
+19
+20    <uses-sdk android:minSdkVersion="21" />
+20-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml
+21
+22    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+22-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:20:5-80
+22-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:20:22-78
+23    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+23-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:21:5-79
+23-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:21:22-77
+24
+25    <application>
+25-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:23:5-27:19
+26        <activity android:name="com.zhihu.matisse.ui.MatisseActivity" />
+26-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:24:9-72
+26-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:24:19-70
+27        <activity android:name="com.zhihu.matisse.internal.ui.AlbumPreviewActivity" />
+27-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:25:9-86
+27-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:25:19-84
+28        <activity android:name="com.zhihu.matisse.internal.ui.SelectedPreviewActivity" />
+28-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:26:9-89
+28-->C:\Users\ainzgown\AndroidStudioProjects\OgimaNew\matisse\src\main\AndroidManifest.xml:26:19-87
+29    </application>
+30
+31</manifest>

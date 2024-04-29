@@ -1731,14 +1731,30 @@ public class CommunityUtils {
                                 dadosOperacao.put(caminhoFollowing + "timestampinteracao", timestampNegativo);
                                 dadosOperacao.put(caminhoConvites, null);
 
-                                firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                recuperarListaParticipantes(idComunidade, new RecuperarListaParticipantesCallback() {
                                     @Override
-                                    public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                                        if (error == null) {
-                                            callback.onConcluido();
-                                        } else {
-                                            callback.onError(String.valueOf(error.getCode()));
+                                    public void onConcluido(ArrayList<String> idsParticipantes) {
+                                        if (idsParticipantes != null && !idsParticipantes.isEmpty()) {
+                                            if (idsParticipantes.contains(idUsuario)) {
+                                                idsParticipantes.remove(idUsuario);
+                                            }
                                         }
+                                        dadosOperacao.put(caminhoComunidade + "/participantes/", idsParticipantes);
+                                        firebaseRef.updateChildren(dadosOperacao, new DatabaseReference.CompletionListener() {
+                                            @Override
+                                            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                                                if (error == null) {
+                                                    callback.onConcluido();
+                                                } else {
+                                                    callback.onError(String.valueOf(error.getCode()));
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String message) {
+                                        callback.onError(message);
                                     }
                                 });
                             }

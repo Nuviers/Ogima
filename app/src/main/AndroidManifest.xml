@@ -476,7 +476,10 @@
             android:name=".activity.GroupParticipantsActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />
-
+        <activity
+            android:name=".activity.ListagemGruposActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

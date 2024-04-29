@@ -31,6 +31,12 @@ public class GroupUtils {
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private int contTopicoRemocao = 0;
 
+    public static final String PUBLIC_GROUPS = "Grupos públicos";
+    public static final String MY_GROUPS = "Seus grupos";
+    public static final String GROUPS_FOLLOWING = "Grupos que você segue";
+    public static final String ALL_GROUPS = "Todos os grupos";
+    public static final String BLOCKED_GROUPS = "Grupos que você bloqueou";
+
     public GroupUtils(Activity activity, Context context) {
         this.activity = activity;
         this.context = context;
