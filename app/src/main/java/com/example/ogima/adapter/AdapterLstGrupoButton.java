@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.CommunityActivity;
+import com.example.ogima.activity.GroupActivity;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GroupUtils;
 
@@ -58,25 +59,25 @@ public class AdapterLstGrupoButton extends RecyclerView.Adapter<RecyclerView.Vie
                 holderPrincipal.btnViewSeeGroup.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        holderPrincipal.verComunidades();
+                        holderPrincipal.verGrupos();
                     }
                 });
                 holderPrincipal.cardViewTodosGrupos.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        holderPrincipal.verComunidades();
+                        holderPrincipal.verGrupos();
                     }
                 });
                 holderPrincipal.btnViewVerTodosGrupos.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        holderPrincipal.verComunidades();
+                        holderPrincipal.verGrupos();
                     }
                 });
                 holderPrincipal.imgViewVerTodosGrupos.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        holderPrincipal.verComunidades();
+                        holderPrincipal.verGrupos();
                     }
                 });
             } else {
@@ -111,7 +112,7 @@ public class AdapterLstGrupoButton extends RecyclerView.Adapter<RecyclerView.Vie
                 return;
             }
 
-            if (!tipoTitulo.equals(GroupUtils.ALL_GROUPS)) {
+            if (!tipoTitulo.equals(GroupUtils.PUBLIC_GROUPS)) {
                 btnViewSeeGroup.setVisibility(View.VISIBLE);
             }else{
                 cardViewTodosGrupos.setVisibility(View.VISIBLE);
@@ -130,15 +131,12 @@ public class AdapterLstGrupoButton extends RecyclerView.Adapter<RecyclerView.Vie
                 case GroupUtils.BLOCKED_GROUPS:
                     titulo = context.getString(R.string.see_all_communities_following);
                     break;
-                case GroupUtils.ALL_GROUPS:
-                    titulo = context.getString(R.string.see_all_communities);
-                    break;
             }
             btnViewSeeGroup.setText(FormatarContadorUtils.abreviarTexto(titulo, 50));
         }
 
-        private void verComunidades() {
-            Intent intent = new Intent(context, CommunityActivity.class);
+        private void verGrupos() {
+            Intent intent = new Intent(context, GroupActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra("tipoGrupo", tipoTitulo);
             context.startActivity(intent);

@@ -229,6 +229,11 @@ public class AdapterGruposPublicosDiff extends RecyclerView.Adapter<AdapterGrupo
             }
 
             @Override
+            public void onSemDado() {
+
+            }
+
+            @Override
             public void onError(String mensagem) {
 
             }

@@ -243,7 +243,6 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
                 btnViewSalvar.setText(getString(R.string.create_group));
                 DatabaseReference gerarIdGrupoRef = firebaseRef.child("grupos");
                 idGrupo = FirebaseUtils.retornarIdRandom(gerarIdGrupoRef);
-                participantes.add(idUsuario);
                 caminhoGrupo = "/grupos/" + idGrupo + "/";
                 dadosGrupo.put(caminhoGrupo + "idGrupo", idGrupo);
                 callback.onConcluido();
@@ -618,6 +617,10 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
         dadosGrupo.put(caminhoGrupo + "topicos", topicosSelecionados);
         dadosGrupo.put(caminhoGrupo + "grupoPublico", grupoPublico);
 
+        String caminhoPesquisa = "/groups_by_name/" + idGrupo + "/";
+        dadosGrupo.put(caminhoPesquisa + "idGrupo", idGrupo);
+        dadosGrupo.put(caminhoPesquisa + "nomeGrupoPesquisa", FormatarNomePesquisaUtils.removeAcentuacao(nome).toUpperCase(Locale.ROOT));
+
         prepararSalvamento(new PrepararSalvamentoCallback() {
             @Override
             public void onConcluido() {
@@ -756,10 +759,10 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
                 if (!edicao) {
 
                     HashMap<String, Object> dadosOperacao = new HashMap<>();
-                    String caminhoGrupo = "/grupos/" + idGrupo + "/";
                     for (String idParticipante : participantes) {
                         GroupUtils.ajustarDadoParaPesquisa(getApplicationContext(),
                                 dadosOperacao, idGrupo, idParticipante, new GroupUtils.AjustarDadoParaPesquisaCallback() {
+                                    String caminhoGrupo = "/grupos/" + idGrupo + "/";
                                     @Override
                                     public void onConcluido(HashMap<String, Object> dadosOperacao) {
                                         groupUtils.verificaBlock(idParticipante, idGrupo, new GroupUtils.VerificaBlockCallback() {
@@ -782,58 +785,58 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
                                                         @Override
                                                         public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                                                             contadorParticipantes++;
-                                                        }
-                                                    });
-                                                }
 
-                                                if (contadorParticipantes == participantes.size()) {
-                                                    contadorParticipantes = 0;
+                                                            if (contadorParticipantes == participantes.size()) {
+                                                                contadorParticipantes = 0;
 
-                                                    if (idsARemover != null && !idsARemover.isEmpty()) {
-                                                        for (String idRemover : idsARemover) {
-                                                            contadorRemocao++;
-                                                            participantes.remove(idRemover);
-                                                            if (contadorRemocao == idsARemover.size()) {
-                                                                idsARemover.clear();
-                                                                contadorRemocao = 0;
+                                                                if (idsARemover != null && !idsARemover.isEmpty()) {
+                                                                    for (String idRemover : idsARemover) {
+                                                                        contadorRemocao++;
+                                                                        participantes.remove(idRemover);
+                                                                        if (contadorRemocao == idsARemover.size()) {
+                                                                            idsARemover.clear();
+                                                                            contadorRemocao = 0;
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                if (grupoPublico) {
+                                                                    dadosGrupo.put(caminhoGrupoPrivado, null);
+                                                                    dadosGrupo.put(caminhoGrupoPublico + "idGrupo", idGrupo);
+                                                                    dadosGrupo.put(caminhoGrupoPublico + "timestampinteracao", timestampNegativo);
+                                                                } else {
+                                                                    dadosGrupo.put(caminhoGrupoPublico, null);
+                                                                    dadosGrupo.put(caminhoGrupoPrivado + "idGrupo", idGrupo);
+                                                                    dadosGrupo.put(caminhoGrupoPrivado + "timestampinteracao", timestampNegativo);
+                                                                }
+                                                                dadosAlvo.put(caminhoGrupo + "timestampinteracao", timestampNegativo);
+                                                                dadosAlvo.put(caminhoGrupo + "idSuperAdmGrupo", idUsuario);
+                                                                dadosAlvo.put(caminhoGrupo + "participantes", participantes);
+
+                                                                UsuarioUtils.recuperarIdsGrupos(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
+                                                                    ArrayList<String> listaMeusGrupos = new ArrayList<>();
+
+                                                                    @Override
+                                                                    public void onRecuperado(ArrayList<String> idsGrupos) {
+                                                                        listaMeusGrupos = idsGrupos;
+                                                                        listaMeusGrupos.add(idGrupo);
+                                                                        dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
+                                                                        salvarHashmap(dadosAlvo);
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onNaoExiste() {
+                                                                        listaMeusGrupos.add(idGrupo);
+                                                                        dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
+                                                                        salvarHashmap(dadosAlvo);
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onError(String message) {
+                                                                        ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_group), getApplicationContext());
+                                                                    }
+                                                                });
                                                             }
-                                                        }
-                                                    }
-
-                                                    if (grupoPublico) {
-                                                        dadosGrupo.put(caminhoGrupoPrivado, null);
-                                                        dadosGrupo.put(caminhoGrupoPublico + "idGrupo", idGrupo);
-                                                        dadosGrupo.put(caminhoGrupoPublico + "timestampinteracao", timestampNegativo);
-                                                    } else {
-                                                        dadosGrupo.put(caminhoGrupoPublico, null);
-                                                        dadosGrupo.put(caminhoGrupoPrivado + "idGrupo", idGrupo);
-                                                        dadosGrupo.put(caminhoGrupoPrivado + "timestampinteracao", timestampNegativo);
-                                                    }
-                                                    dadosAlvo.put(caminhoGrupo + "timestampinteracao", timestampNegativo);
-                                                    dadosAlvo.put(caminhoGrupo + "idSuperAdmGrupo", idUsuario);
-                                                    dadosAlvo.put(caminhoGrupo + "participantes", participantes);
-
-                                                    UsuarioUtils.recuperarIdsGrupos(getApplicationContext(), idUsuario, new UsuarioUtils.RecuperarIdsMeusGruposCallback() {
-                                                        ArrayList<String> listaMeusGrupos = new ArrayList<>();
-
-                                                        @Override
-                                                        public void onRecuperado(ArrayList<String> idsGrupos) {
-                                                            listaMeusGrupos = idsGrupos;
-                                                            listaMeusGrupos.add(idGrupo);
-                                                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
-                                                            salvarHashmap(dadosAlvo);
-                                                        }
-
-                                                        @Override
-                                                        public void onNaoExiste() {
-                                                            listaMeusGrupos.add(idGrupo);
-                                                            dadosAlvo.put("/usuarios/" + idUsuario + "/idMeusGrupos/", listaMeusGrupos);
-                                                            salvarHashmap(dadosAlvo);
-                                                        }
-
-                                                        @Override
-                                                        public void onError(String message) {
-                                                            ToastCustomizado.toastCustomizadoCurto(getString(R.string.error_saving_group), getApplicationContext());
                                                         }
                                                     });
                                                 }

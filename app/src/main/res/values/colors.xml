@@ -39,5 +39,6 @@
     <color name="group_participants">#3F51B5</color>
 
     <color name="group_super_adm">#00BCD4</color>
+    <color name="group_blocked">#535252</color>
 
 </resources>

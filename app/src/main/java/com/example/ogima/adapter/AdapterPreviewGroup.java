@@ -29,6 +29,7 @@ import com.example.ogima.helper.GroupDiffCallback;
 import com.example.ogima.helper.SnackbarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -123,13 +124,33 @@ public class AdapterPreviewGroup extends RecyclerView.Adapter<RecyclerView.ViewH
         Grupo grupo = listaGrupos.get(position);
         String idGroup = listaGrupos.get(position).getIdGrupo();
         Grupo dadosGroup = (Grupo) listaDadosGrupo.get(idGroup);
-        if (!payloads.isEmpty()) {
-            for (Object payload : payloads) {
-                if (payload instanceof Bundle) {
-                    Bundle bundle = (Bundle) payload;
+        if (dadosGroup != null) {
+            if (!payloads.isEmpty()) {
+                for (Object payload : payloads) {
+                    if (payload instanceof Bundle) {
+                        Bundle bundle = (Bundle) payload;
+                        if (bundle.containsKey("nomeGrupo")) {
+                            String nomeGrupo = bundle.getString("nomeGrupo");
+                            grupo.setNomeGrupo(nomeGrupo);
+                            dadosGroup.setNomeGrupo(nomeGrupo);
+                        } else if (bundle.containsKey("descricaoGrupo")) {
+                            String descricaoGrupo = bundle.getString("descricaoGrupo");
+                            grupo.setDescricaoGrupo(descricaoGrupo);
+                            dadosGroup.setDescricaoGrupo(descricaoGrupo);
+                        } else if (bundle.containsKey("fotoGrupo")) {
+                            String fotoGrupo = bundle.getString("fotoGrupo");
+                            grupo.setFotoGrupo(fotoGrupo);
+                            dadosGroup.setFotoGrupo(fotoGrupo);
+                        }else if (bundle.containsKey("topicosGrupo")) {
+                            ArrayList<String> topicosGrupo = bundle.getStringArrayList("topicosGrupo");
+                            grupo.setTopicos(topicosGrupo);
+                            dadosGroup.setTopicos(topicosGrupo);
+                        }
+                    }
                 }
             }
         }
+
         if (holder instanceof ViewHolder) {
             ViewHolder holderPrincipal = (ViewHolder) holder;
             if (dadosGroup != null) {
@@ -147,6 +168,11 @@ public class AdapterPreviewGroup extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 if (dadosGroup.getTopicos() != null
                         && dadosGroup.getTopicos().size() > 0) {
+
+                    if (holderPrincipal.linearLayoutTopicos != null) {
+                        holderPrincipal.linearLayoutTopicos.removeAllViews();
+                    }
+
                     //Otimizar pois desse jeito dá umas travadas.
                     if (holderPrincipal.linearLayoutTopicos.getChildCount() == 0) {
                         //Evita que os chips sejam recriados mais de uma vez,
@@ -259,10 +285,8 @@ public class AdapterPreviewGroup extends RecyclerView.Adapter<RecyclerView.ViewH
         FirebaseRecuperarUsuario.recoverGroup(grupo.getIdGrupo(), new FirebaseRecuperarUsuario.RecoverGroupCallback() {
             @Override
             public void onGrupoRecuperado(Grupo grupoAtual) {
-                Intent intent = new Intent(context, ComunidadePostagensActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("idGrupo", grupoAtual.getIdGrupo());
-                context.startActivity(intent);
+                VisitarPerfilSelecionado.visitarGrupoSelecionado(context,
+                        grupo.getIdGrupo(), false);
                 recuperaPosicaoAnteriorListener.onPosicaoAnterior(position);
                 animacaoIntentListener.onExecutarAnimacao();
             }

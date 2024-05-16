@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.model.Grupo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public class GrupoDiffDAO {
         this.adapter = adapterRecebido;
     }
 
-    public interface RetornaBundleCallback{
+    public interface RetornaBundleCallback {
         void onBundleRecuperado(int index, Bundle bundleRecup);
     }
 
@@ -68,6 +69,38 @@ public class GrupoDiffDAO {
         if (index != -1) {
             if (tipoPayload != null && !tipoPayload.isEmpty()) {
                 switch (tipoPayload) {
+                    case "nomeGrupo":
+                        String nomeGrupo = "";
+                        if (grupo.getNomeGrupo() != null && !grupo.getNomeGrupo().isEmpty()) {
+                            nomeGrupo = grupo.getNomeGrupo();
+                        }
+                        listaGrupo.get(index).setNomeGrupo(nomeGrupo);
+                        callback.onBundleRecuperado(index, createPayloadString(tipoPayload, nomeGrupo));
+                        break;
+                    case "descricaoGrupo":
+                        String descricaoGrupo = "";
+                        if (grupo.getDescricaoGrupo() != null && !grupo.getDescricaoGrupo().isEmpty()) {
+                            descricaoGrupo = grupo.getDescricaoGrupo();
+                        }
+                        listaGrupo.get(index).setDescricaoGrupo(descricaoGrupo);
+                        callback.onBundleRecuperado(index, createPayloadString(tipoPayload, descricaoGrupo));
+                        break;
+                    case "fotoGrupo":
+                        String fotoGrupo = "";
+                        if (grupo.getFotoGrupo() != null && !grupo.getFotoGrupo().isEmpty()) {
+                            fotoGrupo = grupo.getFotoGrupo();
+                        }
+                        listaGrupo.get(index).setFotoGrupo(fotoGrupo);
+                        callback.onBundleRecuperado(index, createPayloadString(tipoPayload, fotoGrupo));
+                        break;
+                    case "topicosGrupo":
+                        ArrayList<String> topicosGrupo = new ArrayList<>();
+                        if (grupo.getTopicos() != null && !grupo.getTopicos().isEmpty()) {
+                            topicosGrupo = grupo.getTopicos();
+                        }
+                        listaGrupo.get(index).setTopicos(topicosGrupo);
+                        callback.onBundleRecuperado(index, createPayloadArrayListString(tipoPayload, topicosGrupo));
+                        break;
                 }
             }
             Log.d("Atualiza Grupo", "Grupo atualizado com sucesso: ");
@@ -114,6 +147,12 @@ public class GrupoDiffDAO {
     public void limparListaGrupos() {
         listaGrupo.clear();
         adapter.notifyDataSetChanged();
+    }
+
+    private Bundle createPayloadArrayListString(String key, ArrayList<String> dado) {
+        Bundle payload = new Bundle();
+        payload.putStringArrayList(key, dado);
+        return payload;
     }
 
     private Bundle createPayloadLong(String key, long dado) {

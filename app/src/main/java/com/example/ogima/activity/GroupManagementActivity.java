@@ -1273,14 +1273,14 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
 
     private void ultimoElementoFiltro(String nome, RecuperaUltimoElemento callback) {
         if (trocarQueryUltimoFiltro) {
-            queryUltimoElementoFiltro = firebaseRef.child("group_by_name")
+            queryUltimoElementoFiltro = firebaseRef.child("groups_by_name")
                     .child(idGrupo)
-                    .orderByChild("nomeUsuarioPesquisa")
+                    .orderByChild("nomeGrupoPesquisa")
                     .startAfter(nome).endAt(nome + "\uf8ff").limitToLast(1);
         }else{
-            queryUltimoElementoFiltro = firebaseRef.child("group_by_name")
+            queryUltimoElementoFiltro = firebaseRef.child("groups_by_name")
                     .child(idGrupo)
-                    .orderByChild("nomeUsuarioPesquisa")
+                    .orderByChild("nomeGrupoPesquisa")
                     .startAt(nome).endAt(nome + "\uf8ff").limitToLast(1);
         }
 

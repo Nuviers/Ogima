@@ -26,9 +26,8 @@ import com.denzcoskun.imageslider.interfaces.ItemClickListener;
 import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.ogima.R;
 import com.example.ogima.activity.FindPeopleActivity;
-import com.example.ogima.activity.GruposPublicosActivity;
 import com.example.ogima.activity.ListaComunidadesActivityNEW;
-import com.example.ogima.activity.ListaComunidadesActivityOLD;
+import com.example.ogima.activity.ListagemGruposActivity;
 import com.example.ogima.activity.LobbyChatRandomActivity;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.DialogUtils;
@@ -392,22 +391,27 @@ public class SocialFragment extends Fragment{
         imgViewProcurarGrupos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                irParaGruposPublicos();
+                irParaGruposPreview();
             }
         });
 
         btnProcurarGrupos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                irParaGruposPublicos();
+                irParaGruposPreview();
             }
         });
     }
 
-    private void irParaGruposPublicos() {
+    private void irParaGruposPreview() {
+        Intent intent = new Intent(requireContext(), ListagemGruposActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+      /*
         Intent intent = new Intent(getActivity(), GruposPublicosActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);
+       */
     }
 
     private void dadosUserLogado(DadosUserAtualCallback callback) {

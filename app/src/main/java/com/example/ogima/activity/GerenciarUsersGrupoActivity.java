@@ -374,6 +374,11 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onSemDado() {
+
+            }
+
+            @Override
             public void onError(String mensagem) {
 
             }
@@ -417,6 +422,11 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
                         }
                     });
                 }
+            }
+
+            @Override
+            public void onSemDado() {
+
             }
 
             @Override

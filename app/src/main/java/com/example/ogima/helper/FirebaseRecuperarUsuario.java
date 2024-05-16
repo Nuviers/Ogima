@@ -37,6 +37,7 @@ public class FirebaseRecuperarUsuario {
 
     public interface RecuperaGrupoCallback {
         void onGrupoRecuperado(Grupo grupoAtual);
+        void onSemDado();
 
         void onError(String mensagem);
     }
@@ -192,6 +193,8 @@ public class FirebaseRecuperarUsuario {
                 if (snapshot.getValue() != null) {
                     Grupo grupoRecuperado = snapshot.getValue(Grupo.class);
                     callback.onGrupoRecuperado(grupoRecuperado);
+                }else{
+                    callback.onSemDado();
                 }
                 grupoRecuperadoRef.removeEventListener(this);
             }
