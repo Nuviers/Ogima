@@ -1037,7 +1037,7 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onConcluido(ArrayList<String> topicosAnteriores) {
                 for (String interesseRemover : topicosAnteriores) {
-                    String caminhoInteresses = "/groupInterests/" + interesseRemover + "/" + idGrupo;
+                    String caminhoInteresses = configurarCaminhoInteresses() + interesseRemover + "/" + idGrupo;
                     interessesAnteriores.put(caminhoInteresses, null);
                     interessesConcluidos++;
                     if (interessesConcluidos == topicosAnteriores.size()) {
@@ -1068,7 +1068,7 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onConcluido(long timestamp) {
                 for (String interesseAtual : topicosSelecionados) {
-                    String caminhoInteresses = "/groupInterests/" + interesseAtual + "/" + idGrupo + "/";
+                    String caminhoInteresses = configurarCaminhoInteresses() + interesseAtual + "/" + idGrupo + "/";
                     dadosGrupo.put(caminhoInteresses + "idGrupo", idGrupo);
                     dadosGrupo.put(caminhoInteresses + "timestampinteracao", timestamp);
                     interessesConcluidos++;
@@ -1092,6 +1092,14 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
 
     public void setStatusEpilepsia(boolean statusEpilepsia) {
         this.statusEpilepsia = statusEpilepsia;
+    }
+
+    private String configurarCaminhoInteresses(){
+        if (grupoPublico) {
+            return "/groupInterests/";
+        }else{
+           return  "/groupInterestsPrivate/";
+        }
     }
 
     private void inicializarComponentes() {

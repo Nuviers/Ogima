@@ -2,6 +2,8 @@ package com.example.ogima.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -21,7 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.ogima.R;
+import com.example.ogima.adapter.AdapterPreviewCommunity;
 import com.example.ogima.adapter.AdapterPreviewGroup;
+import com.example.ogima.helper.CommunityFiltersFragment;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.FirebaseUtils;
@@ -32,6 +36,7 @@ import com.example.ogima.helper.GrupoDiffDAO;
 import com.example.ogima.helper.ProgressBarUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.model.Comunidade;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -51,7 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class GroupActivity extends AppCompatActivity implements AdapterPreviewGroup.RecuperaPosicaoAnterior, AdapterPreviewGroup.RemoverGrupoListener, AdapterPreviewGroup.AnimacaoIntent {
+public class GroupActivity extends AppCompatActivity implements AdapterPreviewGroup.RecuperaPosicaoAnterior, AdapterPreviewGroup.RemoverGrupoListener, AdapterPreviewGroup.AnimacaoIntent, CommunityFiltersFragment.RecuperarFiltrosCallback {
 
     private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
     private String idUsuario = "";
@@ -123,6 +128,10 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
     private int controleRemocao = 0;
     private int posicaoChanged = -1;
     private int aosFiltros = 0;
+    private CommunityFiltersFragment bottomSheetDialogFragment;
+    private ArrayList<String> topicosSelecionados;
+    private boolean filtroPorTopico = false;
+    private long lastTimeTopico = -1;
 
     @Override
     public void onStop() {
@@ -187,6 +196,52 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
     @Override
     public void onExecutarAnimacao() {
         overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+    }
+
+    @Override
+    public void onRecuperado(ArrayList<String> listaFiltrosRecuperados) {
+        topicosSelecionados = listaFiltrosRecuperados;
+        if (searchView != null) {
+            atualizandoLista = true;
+            limparFiltragem(true);
+        }
+        if (bottomSheetDialogFragment != null) {
+            bottomSheetDialogFragment.dismiss();
+        }
+        exibirProgress();
+        chip = new Chip(linearLayoutTopico.getContext());
+        linearLayoutTopico.addView(chip);
+        chip.setText(topicosSelecionados.get(0));
+        chip.setChipBackgroundColor(ColorStateList.valueOf(getApplicationContext().getResources().getColor(R.color.friends_color)));
+        chip.setTextColor(ColorStateList.valueOf(Color.WHITE));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(8, 4, 8, 4); // Define o espaçamento entre os chips
+        chip.setTextSize(17);
+        chip.setLayoutParams(params);
+        chip.setClickable(false);
+        setLoading(true);
+        setFiltroPorTopico(true);
+        dadoInicialPorTopico();
+        for (String conteudo : topicosSelecionados) {
+            ToastCustomizado.toastCustomizadoCurto("Filtro: " + conteudo, getApplicationContext());
+        }
+    }
+
+    @Override
+    public void onSemFiltros() {
+        setFiltroPorTopico(false);
+        ToastCustomizado.toastCustomizado("É necessário selecionar pelo menos um tópico para filtrar os grupos.", getApplicationContext());
+    }
+
+    public boolean isFiltroPorTopico() {
+        return filtroPorTopico;
+    }
+
+    public void setFiltroPorTopico(boolean filtroPorTopico) {
+        this.filtroPorTopico = filtroPorTopico;
     }
 
     private interface VerificaExistenciaCallback {
@@ -261,14 +316,13 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
                         setPesquisaAtivada(false);
                         configRecycler(epilepsia);
                         configSearchView();
+                        clickListeners();
                         grupoDiffDAO = new GrupoDiffDAO(listaGrupo, adapterPreviewGroup);
                         grupoDAOFiltrado = new GrupoDiffDAO(listaFiltrada, adapterPreviewGroup);
                         progressDialog = new ProgressDialog(GroupActivity.this, ProgressDialog.THEME_DEVICE_DEFAULT_DARK);
                         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                         progressDialog.setCancelable(false);
                         linearLayoutTopico.setVisibility(View.GONE);
-                        chip = new Chip(linearLayoutTopico.getContext());
-                        linearLayoutTopico.addView(chip);
                         recuperarDadosIniciais();
                         configPaginacao();
                     }
@@ -292,6 +346,32 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
                 ToastCustomizado.toastCustomizadoCurto(message, getApplicationContext());
             }
         });
+    }
+
+    private void clickListeners() {
+        imgBtnIncBackBlack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        imgBtnExibirFiltros.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showBottomSheetDialog();
+            }
+        });
+    }
+
+    private void showBottomSheetDialog() {
+        if (linearLayoutTopico != null && isFiltroPorTopico()) {
+            linearLayoutTopico.removeAllViews();
+            ToastCustomizado.toastCustomizado("Remove pelo show", getApplicationContext());
+        }
+        limparFiltragem(false);
+        bottomSheetDialogFragment = new CommunityFiltersFragment(this);
+        bottomSheetDialogFragment.show(getSupportFragmentManager(), bottomSheetDialogFragment.getTag());
     }
 
     private void configSearchView() {
@@ -362,9 +442,24 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
             public boolean onQueryTextChange(String newText) {
                 if (isPesquisaAtivada() && newText.isEmpty()) {
                     atualizandoLista = true;
+                    if (linearLayoutTopico != null && isFiltroPorTopico()) {
+                        linearLayoutTopico.removeAllViews();
+                        ToastCustomizado.toastCustomizadoCurto("Remove pelo onQueryTextChange", getApplicationContext());
+                    }
                     limparFiltragem(true);
                 }
                 return true;
+            }
+        });
+
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus && isFiltroPorTopico()) {
+                    ToastCustomizado.toastCustomizadoCurto("Remover pelo focus", getApplicationContext());
+                    linearLayoutTopico.setVisibility(View.GONE);
+                    limparFiltragem(false);
+                }
             }
         });
     }
@@ -420,7 +515,9 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
                                 int totalItemCount = linearLayoutManager.getItemCount();
                                 if (lastVisibleItemPosition == totalItemCount - 1) {
                                     setLoading(true);
-                                    if (isPesquisaAtivada()) {
+                                    if (isFiltroPorTopico()) {
+                                        carregarMaisDadosPorTopico();
+                                    } else if (isPesquisaAtivada()) {
                                         carregarMaisDadosFiltrados(nomePesquisado, new RecuperarIdsFiltroCallback() {
                                             @Override
                                             public void onRecuperado(Set<Grupo> listaIdsRecuperados) {
@@ -1019,7 +1116,7 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
             recuperaDadosGrupo(idGrupo, new RecuperaGrupo() {
                 @Override
                 public void onRecuperado(Grupo dadosGrupo) {
-                    for(Grupo grupo : newGrupos){
+                    for (Grupo grupo : newGrupos) {
                         if (grupo.getIdGrupo().equals(dadosGrupo.getIdGrupo())) {
                             newGrupos.remove(grupo);
                             grupo.setNomeGrupo(dadosGrupo.getNomeGrupoPesquisa());
@@ -1192,6 +1289,8 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
             idsFiltrados.clear();
         }
         setPesquisaAtivada(false);
+        setFiltroPorTopico(false);
+        lastTimeTopico = -1;
         nomePesquisado = "";
         ocultarProgress();
         if (grupoDAOFiltrado != null) {
@@ -1764,6 +1863,7 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
                         .orderByChild("idSuperAdmGrupo").equalTo(idUsuario).limitToFirst(1);
                 break;
             case GroupUtils.PUBLIC_GROUPS:
+                imgBtnExibirFiltros.setVisibility(View.VISIBLE);
                 if (trocarQueryInicial) {
                     queryInicial = firebaseRef.child("publicGroups")
                             .orderByChild("timestampinteracao")
@@ -1807,7 +1907,7 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
         }
     }
 
-    private void ajustarQueryLast(){
+    private void ajustarQueryLast() {
         switch (tipoGrupo) {
             case GroupUtils.MY_GROUPS:
                 queryUltimoElemento = firebaseRef.child("grupos")
@@ -1823,6 +1923,171 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
                         .child(idUsuario).orderByChild("timestampinteracao")
                         .limitToLast(1);
                 break;
+        }
+    }
+
+    private void dadoInicialPorTopico() {
+        queryInicialFiltro = firebaseRef.child("groupInterests")
+                .child(topicosSelecionados.get(0))
+                .orderByChild("timestampinteracao")
+                .limitToFirst(1);
+        queryInicialFiltro.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    linearLayoutTopico.setVisibility(View.VISIBLE);
+                    for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
+                        Grupo grupoPorTopico = snapshotChildren.getValue(Grupo.class);
+                        if (grupoPorTopico != null && grupoPorTopico.getIdGrupo() != null
+                                && !grupoPorTopico.getIdGrupo().isEmpty()) {
+                            lastTimeTopico = grupoPorTopico.getTimestampinteracao();
+                            adicionarGrupoPorTopico(grupoPorTopico);
+                        }
+                    }
+                } else {
+                    linearLayoutTopico.setVisibility(View.GONE);
+                    ToastCustomizado.toastCustomizado(String.format("%s %s", "Não existem grupos no momento que tenham o seguinte interesse:", topicosSelecionados.get(0)), getApplicationContext());
+                    ocultarProgress();
+                }
+                queryInicialFiltro.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                ocultarProgress();
+                lastTimeTopico = -1;
+            }
+        });
+    }
+
+    private void adicionarGrupoPorTopico(Grupo grupoAlvo) {
+        if (listaFiltrada != null && !listaFiltrada.isEmpty()) {
+            ocultarProgress();
+            setLoading(false);
+            return;
+        }
+        FirebaseRecuperarUsuario.recoverGroup(grupoAlvo.getIdGrupo(), new FirebaseRecuperarUsuario.RecoverGroupCallback() {
+            @Override
+            public void onGrupoRecuperado(Grupo dadosGrupo) {
+                grupoDAOFiltrado.adicionarGrupo(dadosGrupo);
+                grupoDAOFiltrado.adicionarIdAoSet(idsFiltrados, dadosGrupo.getIdGrupo());
+                adapterPreviewGroup.updateGrupoList(listaFiltrada, new AdapterPreviewGroup.ListaAtualizadaCallback() {
+                    @Override
+                    public void onAtualizado() {
+                        listaDadosGrupo.put(dadosGrupo.getIdGrupo(), dadosGrupo);
+                        if (idsListeners != null && !idsListeners.isEmpty()
+                                && !idsListeners.contains(dadosGrupo.getIdGrupo())
+                                || idsListeners != null && idsListeners.isEmpty()) {
+                            idsListeners.add(dadosGrupo.getIdGrupo());
+                        }
+                        ocultarProgress();
+                        setLoading(false);
+                    }
+                });
+            }
+
+            @Override
+            public void onNaoExiste() {
+                ocultarProgress();
+            }
+
+            @Override
+            public void onError(String mensagem) {
+                ocultarProgress();
+            }
+        });
+    }
+
+    private void carregarMaisDadosPorTopico() {
+        queryLoadMoreFiltro = firebaseRef.child("groupInterests")
+                .child(topicosSelecionados.get(0))
+                .orderByChild("timestampinteracao")
+                .startAt(lastTimeTopico)
+                .limitToFirst(PAGE_SIZE);
+        ajustarQueryMore();
+        queryLoadMoreFiltro.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
+                        Grupo grupoMore = snapshotChildren.getValue(Grupo.class);
+                        if (grupoMore == null) {
+                            if (queryLoadMoreFiltro != null) {
+                                queryLoadMoreFiltro.removeEventListener(this);
+                            }
+                            ocultarProgress();
+                            return;
+                        }
+                        if (grupoMore.getIdGrupo() != null
+                                && !grupoMore.getIdGrupo().isEmpty()) {
+                            List<Grupo> newGrupo = new ArrayList<>();
+                            long key = grupoMore.getTimestampinteracao();
+                            if (lastTimeTopico != -1 && key != -1) {
+                                if (key != lastTimeTopico || !listaFiltrada.isEmpty() &&
+                                        !grupoMore.getIdGrupo().equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdGrupo())) {
+                                    newGrupo.add(grupoMore);
+                                    lastTimeTopico = key;
+                                }
+                            }
+                            // Remove a última chave usada
+                            if (newGrupo.size() > PAGE_SIZE) {
+                                newGrupo.remove(0);
+                            }
+                            if (lastTimeTopico != -1) {
+                                adicionarMaisDadosPorTopico(newGrupo, grupoMore.getIdGrupo());
+                            }
+                        }
+                    }
+                } else {
+                    ocultarProgress();
+                }
+                queryLoadMoreFiltro.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                ocultarProgress();
+                lastTimeTopico = -1;
+            }
+        });
+    }
+
+    private void adicionarMaisDadosPorTopico(List<Grupo> newGrupo, String idGrupo) {
+        if (newGrupo != null && !newGrupo.isEmpty()) {
+            grupoDAOFiltrado.carregarMaisGrupo(newGrupo, idsFiltrados);
+            grupoDAOFiltrado.adicionarIdAoSet(idsFiltrados, idGrupo);
+            //*Usuario usuarioComparator = new Usuario(true, false);
+            //*Collections.sort(listaViewers, usuarioComparator);
+            FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
+                @Override
+                public void onGrupoRecuperado(Grupo dadosGrupo) {
+                    adapterPreviewGroup.updateGrupoList(listaFiltrada, new AdapterPreviewGroup.ListaAtualizadaCallback() {
+                        @Override
+                        public void onAtualizado() {
+                            ocultarProgress();
+                            listaDadosGrupo.put(dadosGrupo.getIdGrupo(), dadosGrupo);
+                            if (idsListeners != null && !idsListeners.isEmpty()
+                                    && !idsListeners.contains(dadosGrupo.getIdGrupo())
+                                    || idsListeners != null && idsListeners.isEmpty()) {
+                                idsListeners.add(dadosGrupo.getIdGrupo());
+                            }
+                            setLoading(false);
+                        }
+                    });
+                }
+
+                @Override
+                public void onNaoExiste() {
+                    ocultarProgress();
+                }
+
+                @Override
+                public void onError(String mensagem) {
+                    ocultarProgress();
+                }
+            });
+        } else {
+            ocultarProgress();
         }
     }
 

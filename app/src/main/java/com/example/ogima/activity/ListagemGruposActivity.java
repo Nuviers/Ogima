@@ -542,7 +542,11 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
                     adapterMeuGrupo.updateGrupoList(listaGrupoAlvo, new AdapterPreviewGroup.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
-
+                            if(listaMeusGrupos != null && listaMeusGrupos.isEmpty()){
+                                adapterTitleMeuGrupo.setExistemGrupos(false);
+                                adapterButtonMeuGrupo.setExistemGrupos(false);
+                                adapterButtonMeuGrupo.notifyItemRemoved(0);
+                            }
                         }
                     });
                     break;
@@ -558,7 +562,11 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
                     adapterGrupoBloqueado.updateGrupoList(listaGrupoAlvo, new AdapterPreviewGroup.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
-
+                            if(listaGruposBloqueados != null && listaGruposBloqueados.isEmpty()){
+                                adapterTitleBloqueado.setExistemGrupos(false);
+                                adapterButtonBloqueado.setExistemGrupos(false);
+                                adapterButtonBloqueado.notifyItemRemoved(0);
+                            }
                         }
                     });
                     break;
@@ -574,7 +582,11 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
                     adapterGrupoSeguindo.updateGrupoList(listaGrupoAlvo, new AdapterPreviewGroup.ListaAtualizadaCallback() {
                         @Override
                         public void onAtualizado() {
-
+                           if(listaGruposSeguindo != null && listaDadosGruposSeguindo.isEmpty()){
+                               adapterTitleSeguindo.setExistemGrupos(false);
+                               adapterButtonSeguindo.setExistemGrupos(false);
+                               adapterButtonSeguindo.notifyItemRemoved(0);
+                           }
                         }
                     });
                     break;
