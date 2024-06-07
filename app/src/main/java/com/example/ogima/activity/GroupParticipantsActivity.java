@@ -905,7 +905,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElemento = snapshot1.getValue(Grupo.class).getIdParticipante();
                     setLoading(false);
-                    if (callback != null && listaUsuarios != null && listaUsuarios.isEmpty()) {
+                    if (callback != null && listaUsuarios != null) {
                         callback.onRecuperado();
                     }
                 }
@@ -914,7 +914,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaUsuarios != null && listaUsuarios.isEmpty()) {
+                if (callback != null && listaUsuarios != null) {
                     callback.onRecuperado();
                 }
             }
@@ -933,7 +933,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdParticipante();
                     setLoading(false);
-                    if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                    if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                         callback.onRecuperado();
                     }
                 }
@@ -942,7 +942,7 @@ public class GroupParticipantsActivity extends AppCompatActivity implements Adap
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                     callback.onRecuperado();
                 }
             }

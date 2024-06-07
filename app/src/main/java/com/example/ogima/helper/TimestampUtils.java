@@ -16,6 +16,12 @@ public class TimestampUtils {
         void onError(String message);
     }
 
+    public interface RecuperarTimestampComDataCallback {
+        void onRecuperado(long timestampNegativo, String dataFormatada);
+
+        void onError(String message);
+    }
+
     public interface RecuperarHoraTimestampCallback{
         void onConcluido(String horaMinuto);
         void onError(String message);
@@ -66,5 +72,31 @@ public class TimestampUtils {
         // Convertendo o objeto Date para uma string no formato desejado
         String horaMinuto = sdf.format(date);
         callback.onConcluido(horaMinuto);
+    }
+
+    public static void RecuperarTimestampComData(Context context, RecuperarTimestampComDataCallback callback){
+        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
+        ntpTimestampRepository.getNtpTimestamp(context, new NtpTimestampRepository.NtpTimestampCallback() {
+            @Override
+            public void onSuccess(long timestamps, String dataFormatada) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long timestampNegativo = -1 * timestamps;
+                        callback.onRecuperado(timestampNegativo, dataFormatada);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(String errorMessage) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onError(errorMessage);
+                    }
+                });
+            }
+        });
     }
 }

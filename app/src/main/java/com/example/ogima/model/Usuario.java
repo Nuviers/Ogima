@@ -75,13 +75,18 @@ public class Usuario implements Serializable, Comparator<Usuario> {
     private String privacidadePostagens;
 
     private long timeStampView;
+    private long timestampValidity;
     private long timestampinteracao;
     private String dataView;
     private boolean viewLiberada;
 
     private int nrAdsVisualizadas;
-    private int ogimaCoins;
+    private long ogimaCoins;
     private long timeStampResetarLimiteAds;
+
+    private long timestampLastAd;
+
+    private long timestampRevealed;
 
     @Exclude
     private boolean orderByTimeStampView, orderByName;
@@ -167,6 +172,30 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         }else{
             usuario.setValue(this);
         }
+    }
+
+    public long getTimestampRevealed() {
+        return timestampRevealed;
+    }
+
+    public void setTimestampRevealed(long timestampRevealed) {
+        this.timestampRevealed = timestampRevealed;
+    }
+
+    public long getTimestampLastAd() {
+        return timestampLastAd;
+    }
+
+    public void setTimestampLastAd(long timestampLastAd) {
+        this.timestampLastAd = timestampLastAd;
+    }
+
+    public long getTimestampValidity() {
+        return timestampValidity;
+    }
+
+    public void setTimestampValidity(long timestampValidity) {
+        this.timestampValidity = timestampValidity;
     }
 
     public String getIdGrupo() {
@@ -466,11 +495,11 @@ public class Usuario implements Serializable, Comparator<Usuario> {
         this.timeStampResetarLimiteAds = timeStampResetarLimiteAds;
     }
 
-    public int getOgimaCoins() {
+    public long getOgimaCoins() {
         return ogimaCoins;
     }
 
-    public void setOgimaCoins(int ogimaCoins) {
+    public void setOgimaCoins(long ogimaCoins) {
         this.ogimaCoins = ogimaCoins;
     }
 

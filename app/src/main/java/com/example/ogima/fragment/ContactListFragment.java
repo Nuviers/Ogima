@@ -1854,7 +1854,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElemento = snapshot1.getValue(Contatos.class).getIdContato();
                     setLoading(false);
-                    if (callback != null && listaContatos != null && listaContatos.isEmpty()) {
+                    if (callback != null && listaContatos != null) {
                         callback.onRecuperado();
                     }
                 }
@@ -1862,7 +1862,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaContatos != null && listaContatos.isEmpty()) {
+                if (callback != null && listaContatos != null) {
                     callback.onRecuperado();
                 }
             }
@@ -1880,7 +1880,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
                     setLoading(false);
-                    if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                    if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                         callback.onRecuperado();
                     }
                 }
@@ -1888,7 +1888,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                     callback.onRecuperado();
                 }
             }

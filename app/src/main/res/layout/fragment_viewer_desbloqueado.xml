@@ -1,34 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.ViewerDesbloqueadoFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
 
-    <FrameLayout
-        android:id="@+id/frameLayoutView"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true">
+        android:layout_height="@dimen/_50sdp"
+        android:orientation="vertical"
+        android:background="@android:color/black">
 
-        <include
-            android:id="@+id/inc_toolbar_padrao"
-            layout="@layout/inc_toolbar_padrao"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_45sdp" />
+            android:layout_height="@dimen/_40sdp"
+            android:layout_margin="@dimen/_8sdp">
 
-        <com.miguelcatalan.materialsearchview.MaterialSearchView
-            android:id="@+id/materialSearchViewer"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_45sdp" />
-    </FrameLayout>
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchViewViewers"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                app:queryHint="@string/hintSearchViewPeople" />
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewDesbloqueados"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/frameLayoutView"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true" />
-</RelativeLayout>
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/inc_progress_recycler"
+            layout="@layout/inc_progress_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewViewers"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+</LinearLayout>

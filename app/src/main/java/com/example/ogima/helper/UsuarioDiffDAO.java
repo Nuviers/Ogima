@@ -20,6 +20,10 @@ public class UsuarioDiffDAO {
         this.adapter = adapterRecebido;
     }
 
+    public interface RetornaBundleCallback {
+        void onBundleRecuperado(int index, Bundle bundleRecup);
+    }
+
     public void adicionarUsuario(Usuario usuario) {
 
         // Verifica se o Usuario já está na lista
@@ -73,17 +77,6 @@ public class UsuarioDiffDAO {
             //do item ele será notificado.
             //* listaUsuario.get(index).setEdicaoEmAndamento(usuario.getEdicaoEmAndamento());
             //
-
-            if (dadoAlvo != null) {
-                if (dadoAlvo.equals("viewLiberada")) {
-                    //FUNCIONA COM PAYLOAD
-                    if (usuario.isViewLiberada()) {
-                        //FUNCIONA COM PAYLOAD
-                        listaUsuario.get(index).setViewLiberada(usuario.isViewLiberada());
-                        adapter.notifyItemChanged(index, createPayloadViewLiberada(usuario.isViewLiberada()));
-                    }
-                }
-            }
 
             /*
             Collections.sort(listaUsuario, new Comparator<Usuario>() {
@@ -140,15 +133,39 @@ public class UsuarioDiffDAO {
         }
     }
 
+    public void atualizarUsuarioPorPayload(Usuario usuarioAlvo, String tipoPayload, RetornaBundleCallback callback) {
+        int index = -1;
+        for (int i = 0; i < listaUsuario.size(); i++) {
+            if (listaUsuario.get(i).getIdUsuario().equals(usuarioAlvo.getIdUsuario())) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            if (tipoPayload != null && !tipoPayload.isEmpty()) {
+                switch (tipoPayload) {
+                    case "viewLiberada":
+                        boolean statusView = false;
+                        statusView = usuarioAlvo.isViewLiberada();
+                        listaUsuario.get(index).setViewLiberada(statusView);
+                        callback.onBundleRecuperado(index, createPayloadBoolean(tipoPayload, statusView));
+                        break;
+                }
+            }
+            Log.d("Atualiza Usuario", "Usuario atualizado com sucesso: ");
+        } else {
+            Log.e("Atualiza Usuario", "Erro ao atualizar Usuario: Usuario nao encontrado na lista");
+        }
+    }
+
     public void limparListaUsuarios() {
         listaUsuario.clear();
         adapter.notifyDataSetChanged();
     }
 
-    private Bundle createPayloadViewLiberada(boolean newViewLiberada) {
-        //Criar uma utils para vários tipos de bundle.
+    private Bundle createPayloadBoolean(String key, boolean dado) {
         Bundle payload = new Bundle();
-        payload.putBoolean("viewLiberada", newViewLiberada);
+        payload.putBoolean(key, dado);
         return payload;
     }
 }

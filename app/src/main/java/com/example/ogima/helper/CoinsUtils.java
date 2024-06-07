@@ -23,6 +23,11 @@ public class CoinsUtils {
         void onError(String message);
     }
 
+    public interface RecuperarCoinsCallback{
+        void onRecuperado(long coins);
+        void onError(String message);
+    }
+
     public static void verificaTimeAd(Context context, String idUsuarioAtual, CoinsListener coinsListener) {
 
         //Verifica se o primeiro anúncio visto anteriormente já passou de 12 horas.
@@ -95,6 +100,28 @@ public class CoinsUtils {
                         recupTimeStampCallback.onError(errorMessage);
                     }
                 });
+            }
+        });
+    }
+
+    public static void recuperaCoins(String idAlvo, RecuperarCoinsCallback callback){
+        DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+        DatabaseReference recuperaCoinsRef = firebaseRef.child("usuarios")
+                .child(idAlvo).child("ogimaCoins");
+        recuperaCoinsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    callback.onRecuperado(dataSnapshot.getValue(Long.class));
+                }else{
+                    callback.onRecuperado(0);
+                }
+                recuperaCoinsRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                callback.onError(databaseError.getMessage());
             }
         });
     }

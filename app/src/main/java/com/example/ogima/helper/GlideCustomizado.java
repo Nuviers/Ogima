@@ -666,6 +666,46 @@ public class GlideCustomizado {
         }
     }
 
+    public static void loadUrlBITMAPCircular(Context contexto, String arquivo, final OnBitmapLoadedListener listener) {
+        try {
+            //Verifica a extensão do arquivo na URL
+            String extension = MimeTypeMap.getFileExtensionFromUrl(arquivo);
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+
+            if (mimeType != null && mimeType.startsWith("image")) {
+                RequestOptions options = new RequestOptions()
+                        .encodeQuality(100)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL);
+
+                getSharedGlideInstance(contexto)
+                        .asBitmap()
+                        .load(arquivo)
+                        .circleCrop()
+                        .apply(options)
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                if (listener != null) {
+                                    listener.onBitmapLoaded(resource);
+                                }
+                            }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                if (listener != null) {
+                                    listener.onBitmapLoaded(null);
+                                }
+                            }
+                        });
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            if (listener != null) {
+                listener.onBitmapLoaded(null);
+            }
+        }
+    }
+
     public static void loadUrlComListener(Context contexto, String arquivo, ImageView componente, int placeholder,
                                String tipoCorte, boolean isRecycler, boolean epilepsia, ListenerLoadUrlCallback callback) {
         try {

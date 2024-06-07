@@ -1758,7 +1758,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             } else {
                                 idUltimoElemento = snapshot1.getValue(Contatos.class).getIdContato();
                                 setLoading(false);
-                                if (callback != null && listaContatos != null && listaContatos.isEmpty()) {
+                                if (callback != null && listaContatos != null) {
                                     callback.onRecuperado();
                                 }
                             }
@@ -1774,7 +1774,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaContatos != null && listaContatos.isEmpty()) {
+                if (callback != null && listaContatos != null) {
                     callback.onRecuperado();
                 }
             }
@@ -1809,7 +1809,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             } else {
                                 idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
                                 setLoading(false);
-                                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                                     callback.onRecuperado();
                                 }
                             }
@@ -1825,7 +1825,7 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                     callback.onRecuperado();
                 }
             }

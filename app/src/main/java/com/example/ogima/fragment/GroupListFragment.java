@@ -1791,7 +1791,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElemento = snapshot1.getValue(Usuario.class).getIdGrupo();
                     setLoading(false);
-                    if (callback != null && listaChat != null && listaChat.isEmpty()) {
+                    if (callback != null && listaChat != null) {
                         callback.onRecuperado();
                     }
                 }
@@ -1799,7 +1799,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaChat != null && listaChat.isEmpty()) {
+                if (callback != null && listaChat != null) {
                     callback.onRecuperado();
                 }
             }
@@ -1817,7 +1817,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdGrupo();
                     setLoading(false);
-                    if (callback != null && listaChat != null && listaChat.isEmpty()) {
+                    if (callback != null && listaChat != null && !listaChat.isEmpty()) {
                         callback.onRecuperado();
                     }
                 }
@@ -1825,7 +1825,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                     callback.onRecuperado();
                 }
             }

@@ -31,6 +31,7 @@ import com.example.ogima.helper.FriendsUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.SeguindoUtils;
+import com.example.ogima.helper.TimestampUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -128,55 +129,41 @@ public class PersonProfileActivity extends AppCompatActivity {
                     public void onRecuperado() {
                         recuperarDadosDonoPerfil(this);
                         recuperarNrSeguidores();
-
-                        verificaVisualizacoes(new VerificarView() {
-                            HashMap<String, Object> dadosView = new HashMap<>();
-
-                            DatabaseReference salvarViewRef = firebaseRef
-                                    .child("profileViews").child(idDonoDoPerfil)
-                                    .child(idVisitante);
-
-                            DatabaseReference salvarViewNoPerfilRef = firebaseRef.child("usuarios")
-                                    .child(idDonoDoPerfil).child("viewsPerfil");
-
+                        verificaBlockUserVisitante();
+                        verificaBlock();
+                        verificaSeguindo();
+                        verificarRelacionamento();
+                        TimestampUtils.RecuperarTimestampComData(getApplicationContext(), new TimestampUtils.RecuperarTimestampComDataCallback() {
                             @Override
-                            public void onSalvarView() {
-                                dadosView.put("idUsuario", idVisitante);
-                                dadosView.put("viewLiberada", false);
-                                recuperarTimeStampNegativo(this);
-                            }
-
-                            @Override
-                            public void onTimeStampRecuperado(long timeStamp, String dataFormatada) {
-                                dadosView.put("timeStampView", timeStamp);
-                                dadosView.put("dataView", dataFormatada);
-                                salvarViewRef.setValue(dadosView).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            public void onRecuperado(long timestampNegativo, String dataFormatada) {
+                                verificaVisualizacoes(timestampNegativo, new VerificarView() {
                                     @Override
-                                    public void onSuccess(Void unused) {
-                                        atualizarContador.acrescentarContador(salvarViewNoPerfilRef, new AtualizarContador.AtualizarContadorCallback() {
-                                            @Override
-                                            public void onSuccess(int contadorAtualizado) {
-                                                salvarViewNoPerfilRef.setValue(contadorAtualizado);
-                                            }
+                                    public void onConcluido(Boolean viewerJaExiste) {
+                                        if (!viewerJaExiste) {
+                                            long timestampPositivo = Math.abs(timestampNegativo);
+                                            long twelveHoursInMillis = 12 * 60 * 60 * 1000;
+                                            long timestamp12Horas = timestampPositivo + twelveHoursInMillis;
+                                            HashMap<String, Object> dadosView = new HashMap<>();
+                                            String caminhoView = "/profileViews/" + idDonoDoPerfil + "/" + idVisitante + "/";
+                                            dadosView.put(caminhoView + "idUsuario", idVisitante);
+                                            dadosView.put(caminhoView + "viewLiberada", false);
+                                            dadosView.put(caminhoView + "timeStampView", timestampNegativo);
+                                            dadosView.put(caminhoView + "timestampValidity", timestamp12Horas);
+                                            dadosView.put(caminhoView + "dataView", dataFormatada);
+                                            firebaseRef.updateChildren(dadosView);
+                                        }
+                                    }
 
-                                            @Override
-                                            public void onError(String errorMessage) {
-
-                                            }
-                                        });
+                                    @Override
+                                    public void onError(String message) {
                                     }
                                 });
                             }
 
                             @Override
                             public void onError(String message) {
-
                             }
                         });
-                        verificaBlockUserVisitante();
-                        verificaBlock();
-                        verificaSeguindo();
-                        verificarRelacionamento();
                     }
 
                     @Override
@@ -259,9 +246,13 @@ public class PersonProfileActivity extends AppCompatActivity {
     }
 
     private interface VerificarView {
-        void onSalvarView();
+        void onConcluido(Boolean viewerJaExiste);
 
-        void onTimeStampRecuperado(long timeStamp, String dataFormatada);
+        void onError(String message);
+    }
+
+    private interface RemoverViewsCallback {
+        void onConcluido();
 
         void onError(String message);
     }
@@ -540,29 +531,51 @@ public class PersonProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void verificaVisualizacoes(VerificarView callback) {
-
-        //Verifica se usuário visitante já visualizou o perfil selecionado.
-
-        DatabaseReference verificaViewRef = firebaseRef
-                .child("profileViews").child(idDonoDoPerfil)
-                .child(idVisitante);
-
-        verificaViewRef.addListenerForSingleValueEvent(new ValueEventListener() {
+    private void verificaVisualizacoes(long timestampAtual, VerificarView callback) {
+        removerViewsDe1Mes(timestampAtual, new RemoverViewsCallback() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    //Usuário atual já visualizou esse perfil
-                } else {
-                    //Salvar visualização.
-                    callback.onSalvarView();
-                }
-                verificaViewRef.removeEventListener(this);
+            public void onConcluido() {
+                DatabaseReference salvarViewRef = firebaseRef
+                        .child("profileViews").child(idDonoDoPerfil)
+                        .child(idVisitante);
+                salvarViewRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                       callback.onConcluido(snapshot.getValue() != null);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        callback.onError(databaseError.getMessage());
+                    }
+                });
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                callback.onError(error.getMessage());
+            public void onError(String message) {
+                 callback.onError(message);
+            }
+        });
+    }
+
+    private void removerViewsDe1Mes(long timestampAtual, RemoverViewsCallback callback){
+        long cutoff = Math.abs(timestampAtual) - (30L * 24 * 60 * 60 * 1000); // 30 dias em milissegundos
+        Query verificaViewRef = firebaseRef
+                .child("profileViews").child(idDonoDoPerfil)
+                .orderByChild("timestampValidity").endAt(cutoff);
+        verificaViewRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot snapshotChildren : snapshot.getChildren()){
+                    snapshotChildren.getRef().removeValue();
+                    ToastCustomizado.toastCustomizado("Excluído view anterior", getApplicationContext());
+                }
+                callback.onConcluido();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                callback.onError(databaseError.getMessage());
             }
         });
     }
@@ -874,7 +887,7 @@ public class PersonProfileActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void verificaBlockUserVisitante(){
+    private void verificaBlockUserVisitante() {
         //Caso o usuário visitante seja bloqueado pelo dono do perfil,
         //o usuário visitante será automaticamente expulso do perfil.
         if (idVisitante == null || idVisitante.isEmpty() ||
@@ -1279,35 +1292,6 @@ public class PersonProfileActivity extends AppCompatActivity {
 
         //Exibir imageButton desejado
         imageButton.setVisibility(View.VISIBLE);
-    }
-
-    private void recuperarTimeStampNegativo(VerificarView callback) {
-        NtpTimestampRepository ntpTimestampRepository = new NtpTimestampRepository();
-        ntpTimestampRepository.getNtpTimestamp(this, new NtpTimestampRepository.NtpTimestampCallback() {
-            @Override
-            public void onSuccess(long timestamps, String dataFormatada) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        long timestampNegativo = -1 * timestamps;
-                        //ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timeStampNegativo, getApplicationContext());
-
-                        callback.onTimeStampRecuperado(timestampNegativo, dataFormatada);
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String errorMessage) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastCustomizado.toastCustomizadoCurto("A connection error occurred: " + errorMessage, getApplicationContext());
-                        callback.onError(errorMessage);
-                    }
-                });
-            }
-        });
     }
 
     private void inicializandoComponentes() {

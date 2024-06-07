@@ -1797,7 +1797,7 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElemento = snapshot1.getValue(Grupo.class).getIdGrupo();
                     setLoading(false);
-                    if (callback != null && listaGrupo != null && listaGrupo.isEmpty()) {
+                    if (callback != null && listaGrupo != null) {
                         callback.onRecuperado();
                     }
                 }
@@ -1805,7 +1805,7 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaGrupo != null && listaGrupo.isEmpty()) {
+                if (callback != null && listaGrupo != null) {
                     callback.onRecuperado();
                 }
             }
@@ -1822,7 +1822,7 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElementoFiltro = snapshot1.getValue(Grupo.class).getIdGrupo();
                     setLoading(false);
-                    if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                    if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                         callback.onRecuperado();
                     }
                 }
@@ -1830,7 +1830,7 @@ public class GroupActivity extends AppCompatActivity implements AdapterPreviewGr
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                     callback.onRecuperado();
                 }
             }

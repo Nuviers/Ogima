@@ -87,7 +87,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
     private ChildEventListener childListenerInicioFiltro,
             childEventListenerChat, childListenerMoreFiltro,
             childListenerInicio, childEventListenerNewData;
-    private HashMap<String, Object> listaAmigos = new HashMap<>();
     private AdapterChatList adapterChatList;
     private boolean trocarQueryInicial = false;
     private Chat chatComparator;
@@ -410,7 +409,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                             if (chat != null
                                     && chat.getIdUsuario() != null
                                     && !chat.getIdUsuario().isEmpty()) {
-                                idPrimeiroDado = chat.getIdUsuario();
                                 if (travar == 0) {
                                     lastTimestamp = chat.getTimestampLastMsg();
                                     adicionarChat(chat, false);
@@ -1183,9 +1181,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
         if (listaDadosUser != null) {
             listaDadosUser.clear();
         }
-        if (listaAmigos != null) {
-            listaAmigos.clear();
-        }
         if (idsUsuarios != null) {
             idsUsuarios.clear();
         }
@@ -1895,7 +1890,7 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElemento = snapshot1.getValue(Usuario.class).getIdUsuario();
                     setLoading(false);
-                    if (callback != null && listaChat != null && listaChat.isEmpty()) {
+                    if (callback != null && listaChat != null) {
                         callback.onRecuperado();
                     }
                 }
@@ -1903,7 +1898,7 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaChat != null && listaChat.isEmpty()) {
+                if (callback != null && listaChat != null) {
                     callback.onRecuperado();
                 }
             }
@@ -1921,7 +1916,7 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 for (DataSnapshot snapshot1 : snapshot.getChildren()) {
                     idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
                     setLoading(false);
-                    if (callback != null && listaChat != null && listaChat.isEmpty()) {
+                    if (callback != null && listaChat != null && !listaChat.isEmpty()) {
                         callback.onRecuperado();
                     }
                 }
@@ -1929,7 +1924,7 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                     callback.onRecuperado();
                 }
             }

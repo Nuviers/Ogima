@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/estilo_background_inicio">
+
+    <ImageView
+        android:id="@+id/imgViewIncHiddenFundoProfile"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_215sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/placeholderuniverse" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgViewIncHiddenFundoProfileOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_215sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        android:scaleType="centerCrop"/>
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinKitLoadBackground"
+        style="@style/SpinKitView.DoubleBounce"
+        android:layout_width="@dimen/_60sdp"
+        android:layout_height="@dimen/_60sdp"
+        android:layout_marginRight="@dimen/_8sdp"
+        android:layout_marginEnd="@dimen/_8sdp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignEnd="@+id/imgViewIncHiddenFundoProfile"
+        android:layout_alignBottom="@+id/imgViewIncHiddenFundoProfile"
+        android:background="@drawable/background_caixa_texto"
+        app:SpinKit_Color="#4C4B4B"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/imgViewIncHiddenFotoProfile"
+        android:layout_width="@dimen/_150sdp"
+        android:layout_height="@dimen/_150sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_130sdp"
+        android:background="@drawable/circle"
+        android:padding="@dimen/_2sdp" />
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinKitLoadPhoto"
+        style="@style/SpinKitView.DoubleBounce"
+        android:layout_width="@dimen/_45sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_alignStart="@+id/imgViewIncHiddenFotoProfile"
+        android:layout_alignTop="@+id/imgViewIncHiddenFotoProfile"
+        android:layout_alignEnd="@+id/imgViewIncHiddenFotoProfile"
+        android:layout_alignBottom="@+id/imgViewIncHiddenFotoProfile"
+        android:background="@drawable/background_caixa_texto_redondo"
+        android:padding="@dimen/_50sdp"
+        app:SpinKit_Color="#4C4B4B"
+        android:visibility="gone" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/txtViewHiddenNameProfile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imgViewIncHiddenFotoProfile"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:gravity="center"
+        android:maxLines="3"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingLeft="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_22ssp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/txtViewTempoDaView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewHiddenNameProfile"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="@dimen/_4sdp"
+        android:layout_marginLeft="@dimen/_4sdp"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:layout_marginEnd="@dimen/_4sdp"
+        android:layout_marginRight="@dimen/_4sdp"
+        android:gravity="center"
+        android:maxLines="3"
+        android:paddingStart="@dimen/_8sdp"
+        android:paddingLeft="@dimen/_8sdp"
+        android:layout_marginBottom="@dimen/_4sdp"
+        android:paddingEnd="@dimen/_8sdp"
+        android:paddingRight="@dimen/_8sdp"
+        android:textColor="@android:color/white"
+        android:background="@drawable/background_caixa_texto"
+        android:textSize="@dimen/_18ssp" />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutDesbloquearViewer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/txtViewTempoDaView"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/backgroundbuttonviewer"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/imageButton4"
+                android:layout_width="@dimen/_50sdp"
+                android:layout_height="@dimen/_50sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_ogima_coin" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtViewCusto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/_4sdp"
+                android:layout_marginLeft="@dimen/_4sdp"
+                android:layout_marginEnd="@dimen/_4sdp"
+                android:layout_marginRight="@dimen/_4sdp"
+                android:gravity="start|left"
+                android:background="@drawable/background_caixa_texto"
+                android:layout_gravity="center"
+                android:maxLines="3"
+                android:text="125"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingEnd="@dimen/_8sdp"
+                android:paddingRight="@dimen/_8sdp"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_17ssp" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnDesbloquearViewer"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_45sdp"
+                android:fontFamily="@font/allerta"
+                android:background="@android:color/transparent"
+                android:text="Desbloquear visualização"
+                android:paddingStart="@dimen/_8sdp"
+                android:paddingLeft="@dimen/_8sdp"
+                android:paddingRight="@dimen/_8sdp"
+                android:paddingEnd="@dimen/_8sdp"
+                android:textAllCaps="false"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_16ssp" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>

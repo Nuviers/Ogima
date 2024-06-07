@@ -198,12 +198,15 @@ dependencies {
 
     implementation 'io.github.lucksiege:pictureselector:v3.11.1'
 
-
-
     implementation 'com.github.microshow:RxFFmpeg:4.9.0-lite'
 
     implementation 'com.google.android.gms:play-services-ads:22.2.0'
 
+    //Blur - (Apache License, Version 2.0) - https://github.com/wasabeef/Blurry
+    implementation 'jp.wasabeef:blurry:4.0.1'
+
+    //ThreeTenABP - (Apache License, Version 2.0) - Configurações de data sem os problemas do Joda-Time.
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.4.7'
 
     //QRCode generator e scaner
     implementation 'com.king.zxing:zxing-lite:1.1.9-androidx'

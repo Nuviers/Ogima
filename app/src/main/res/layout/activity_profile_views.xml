@@ -6,14 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".activity.ProfileViewsActivity">
 
-    <include
-        android:id="@+id/inc_toolbar_padrao"
-        layout="@layout/inc_toolbar_padrao"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:visibility="gone"
-        android:layout_centerHorizontal="true" />
 
 
     <com.ogaclejapan.smarttablayout.SmartTabLayout

@@ -23,7 +23,10 @@ import android.widget.TextView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterProfileViews;
+import com.example.ogima.fragment.ChatListNewFragment;
+import com.example.ogima.fragment.ContactListFragment;
 import com.example.ogima.fragment.FriendsFragment;
+import com.example.ogima.fragment.GroupListFragment;
 import com.example.ogima.fragment.ViewerBloqueadoFragment;
 import com.example.ogima.fragment.ViewerDesbloqueadoFragment;
 import com.example.ogima.helper.AtualizarContador;
@@ -34,6 +37,7 @@ import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.NtpTimestampRepository;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioDiffDAO;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Postagem;
 import com.example.ogima.model.Usuario;
@@ -67,26 +71,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ProfileViewsActivity extends AppCompatActivity{
+public class ProfileViewsActivity extends AppCompatActivity {
 
-    private String idUsuario, emailUsuario;
-    private FirebaseAuth autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
-    private DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
+    private String idUsuario = "";
     private String irParaProfile = null;
-
-    private Toolbar toolbarIncPadrao;
-    private ImageButton imgBtnIncBackPadrao;
-    private TextView txtViewIncTituloToolbar;
-
-    private SmartTabLayout smartTabLayout;
+    private SmartTabLayout smartTab;
     private ViewPager viewPager;
     private FragmentPagerItemAdapter fragmentPagerItemAdapter;
-    private String fragmentDesejado;
 
     @Override
     protected void onStart() {
         super.onStart();
-
         //Remove possíveis fragment deixados em segundo plano.
         for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
             getSupportFragmentManager().popBackStack();
@@ -95,8 +90,6 @@ public class ProfileViewsActivity extends AppCompatActivity{
 
     @Override
     public void onBackPressed() {
-
-
         if (irParaProfile != null) {
             Intent intent = new Intent(getApplicationContext(), NavigationDrawerActivity.class);
             intent.putExtra("irParaProfile", "irParaProfile");
@@ -105,60 +98,47 @@ public class ProfileViewsActivity extends AppCompatActivity{
         } else {
             finish();
         }
-
         super.onBackPressed();
+    }
+
+    public ProfileViewsActivity() {
+        this.idUsuario = UsuarioUtils.recuperarIdUserAtual();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_views);
-        setSupportActionBar(toolbarIncPadrao);
         inicializarComponentes();
         setTitle("");
-        txtViewIncTituloToolbar.setText("Visualizações no perfil");
-
-        emailUsuario = autenticacao.getCurrentUser().getEmail();
-        idUsuario = Base64Custom.codificarBase64(emailUsuario);
-
         Bundle dados = getIntent().getExtras();
-
         if (dados != null) {
             if (dados.containsKey("irParaProfile")) {
                 irParaProfile = dados.getString("irParaProfile");
             }
         }
+        configAbas();
+    }
 
-        imgBtnIncBackPadrao.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
-
-        //Configurando abas
+    private void configAbas() {
+        if (idUsuario.isEmpty()) {
+            ToastCustomizado.toastCustomizado(getString(R.string.error_retrieving_user_data), getApplicationContext());
+            onBackPressed();
+            return;
+        }
         fragmentPagerItemAdapter = new FragmentPagerItemAdapter(
-                getSupportFragmentManager(), FragmentPagerItems.with(this)
-                .add("Bloqueados", ViewerBloqueadoFragment.class)
-                .add("Desbloqueados", ViewerDesbloqueadoFragment.class)
+                getSupportFragmentManager(), FragmentPagerItems.with(ProfileViewsActivity.this)
+                .add("Ocultas", ViewerBloqueadoFragment.class)
+                .add("Reveladas", ViewerDesbloqueadoFragment.class)
                 .create());
 
         viewPager.setAdapter(fragmentPagerItemAdapter);
-        smartTabLayout.setViewPager(viewPager);
-    }
-
-    private long validade5MinutesTest(long timestampAlvo) {
-        //Usado negativo por causa que se trata de um timestamp negativo
-        return timestampAlvo - (5 * 60 * 1000);
+        viewPager.setOffscreenPageLimit(1);
+        smartTab.setViewPager(viewPager);
     }
 
     private void inicializarComponentes() {
-        //inc_toolbar_padrao
-        toolbarIncPadrao = findViewById(R.id.toolbarIncPadrao);
-        imgBtnIncBackPadrao = findViewById(R.id.imgBtnIncBackPadrao);
-        txtViewIncTituloToolbar = findViewById(R.id.txtViewIncTituloToolbarPadrao);
-
-        smartTabLayout = findViewById(R.id.smartTabViewers);
+        smartTab = findViewById(R.id.smartTabViewers);
         viewPager = findViewById(R.id.viewpagerViewers);
     }
 }

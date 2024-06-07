@@ -1254,7 +1254,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                     }else{
                         idUltimoElemento = snapshot1.getValue(Grupo.class).getIdParticipante();
                         setLoading(false);
-                        if (callback != null && listaUsuarios != null && listaUsuarios.isEmpty()) {
+                        if (callback != null && listaUsuarios != null) {
                             callback.onRecuperado();
                         }
                     }
@@ -1264,7 +1264,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaUsuarios != null && listaUsuarios.isEmpty()) {
+                if (callback != null && listaUsuarios != null) {
                     callback.onRecuperado();
                 }
             }
@@ -1295,7 +1295,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                     }else{
                         idUltimoElementoFiltro = snapshot1.getValue(Usuario.class).getIdUsuario();
                         setLoading(false);
-                        if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                        if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                             callback.onRecuperado();
                         }
                     }
@@ -1305,7 +1305,7 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                if (callback != null && listaFiltrada != null && listaFiltrada.isEmpty()) {
+                if (callback != null && listaFiltrada != null && !listaFiltrada.isEmpty()) {
                     callback.onRecuperado();
                 }
             }

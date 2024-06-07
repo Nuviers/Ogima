@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/estilo_background_inicio_v2">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgViewBannerAdViewers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/linearLayouQntCoins"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/teste_ad_background_v4" />
+
+    <com.github.ybq.android.spinkit.SpinKitView
+        android:id="@+id/spinKitAdViewer"
+        style="@style/SpinKitView.Pulse"
+        android:layout_width="@dimen/_60sdp"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/imgViewBannerAdViewers"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/estilo_background_inicio_v2"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/btnVerAdsPorView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_45sdp"
+        android:layout_below="@id/imgViewBannerAdViewers"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/backtextblackfriends"
+        android:backgroundTint="#FF9800"
+        android:fontFamily="@font/adamina"
+        android:text="Assistir 0/5"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_14ssp"
+        android:textStyle="bold"
+        android:visibility="invisible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/txtViewTitleLiberarViews"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/imgViewBannerAdViewers"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/_2sdp"
+        android:fontFamily="@font/amaranth"
+        android:gravity="center"
+        android:text="Veja anúncios e seja recompensado com Ogima Coins"
+        android:textColor="#FFFFFF"
+        android:textSize="@dimen/_27ssp" />
+
+    <LinearLayout
+        android:id="@+id/linearLayouQntCoins"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_39sdp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/backtextblackfriends"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/imgBtnCoin"
+                android:layout_width="@dimen/_55sdp"
+                android:layout_height="@dimen/_38sdp"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/_2sdp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_ogima_coin" />
+
+            <TextView
+                android:id="@+id/txtViewQntCoins"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:fontFamily="@font/amaranth"
+                android:gravity="start|left|center_vertical"
+                android:text="7.000"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/_18ssp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <include
+        layout="@layout/inc_perfil_cabecalho"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnVerAdsPorView"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone" />
+
+</RelativeLayout>
