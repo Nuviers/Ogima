@@ -2,10 +2,10 @@ package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +18,10 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.airbnb.lottie.parser.ColorParser;
 import com.example.ogima.R;
+import com.example.ogima.activity.ConversaActivity;
+import com.example.ogima.activity.ConversationActivity;
+import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.ChatDiffCallback;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
@@ -32,13 +34,8 @@ import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-
-import q.rorbin.badgeview.Badge;
-import q.rorbin.badgeview.QBadgeView;
 
 public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -200,7 +197,7 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
             holderPrincipal.relativeLayoutPreview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    visitarPerfil(dadoUser, position);
+                    abrirChat(dadoUser, position);
                 }
             });
         }
@@ -279,7 +276,7 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private void visitarPerfil(Usuario usuarioAlvo, int posicao) {
+    private void abrirChat(Usuario usuarioAlvo, int posicao) {
         String idDonoPerfil = usuarioAlvo.getIdUsuario();
         if (idDonoPerfil != null
                 && !idDonoPerfil.isEmpty()
@@ -288,9 +285,24 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return;
         }
         recuperaPosicaoAnteriorListener.onPosicaoAnterior(posicao);
-        VisitarPerfilSelecionado.visitarPerfilSelecionadoPerson(context,
-                idDonoPerfil);
+        intentNew(usuarioAlvo);
         animacaoIntentListener.onExecutarAnimacao();
+    }
+
+    private void intentOld(Usuario usuarioAlvo){
+        Intent intent = new Intent(context, ConversaActivity.class);
+        intent.putExtra("usuario", usuarioAlvo);
+        intent.putExtra("onBack", "ChatInteractionsActivity");
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    private void intentNew(Usuario usuarioAlvo){
+        Intent intent = new Intent(context, ConversationActivity.class);
+        intent.putExtra("usuarioDestinatario", usuarioAlvo);
+        intent.putExtra("onBack", "ChatInteractionsActivity");
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     public int findPositionInList(String userId) {

@@ -95,7 +95,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             //Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
     private Activity activity;
-    private String filtrarSomenteTexto;
+    private boolean filtrarSomenteTexto = false;
     private List<Mensagem> listaSelecionados = new ArrayList<>();
     private Boolean chatGrupo;
 
@@ -105,6 +105,15 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private int corPadraoMensagemDestinatario = Color.parseColor("#7EC2E1");
     private int corPadraoNome = Color.WHITE;
     private Grupo grupoRecebido;
+
+    public boolean isFiltrarSomenteTexto() {
+        return filtrarSomenteTexto;
+    }
+
+    public void setFiltrarSomenteTexto(boolean filtrarSomenteTexto) {
+        this.filtrarSomenteTexto = filtrarSomenteTexto;
+        notifyDataSetChanged();
+    }
 
     public AdapterMensagem(Context c, @NonNull FirebaseRecyclerOptions<Mensagem> options, Activity activityRecebida, Boolean chatGrupo, Grupo grupoAtual) {
         super(options);
@@ -202,21 +211,19 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 holder.txtViewNomeRemetenteGrupo.setVisibility(View.GONE);
             }
 
-            if (filtrarSomenteTexto != null) {
-                if (filtrarSomenteTexto.equals("sim")) {
-                    if (mensagemAtual.getTipoMensagem().equals("texto")) {
-                        holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
-                        holder.txtViewMensagem.setVisibility(View.VISIBLE);
-                        holder.constraintThumbVideo.setVisibility(View.GONE);
-                        holder.imgViewMensagem.setVisibility(View.GONE);
-                        holder.imgViewGifMensagem.setVisibility(View.GONE);
-                        holder.linearDocumentoChat.setVisibility(View.GONE);
-                        holder.linearMusicaChat.setVisibility(View.GONE);
-                        holder.linearAudioChat.setVisibility(View.GONE);
-                        holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
-                    } else {
-                        holder.linearLayoutMensagem.setVisibility(View.GONE);
-                    }
+            if (filtrarSomenteTexto) {
+                if (mensagemAtual.getTipoMensagem().equals("texto")) {
+                    holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
+                    holder.txtViewMensagem.setVisibility(View.VISIBLE);
+                    holder.constraintThumbVideo.setVisibility(View.GONE);
+                    holder.imgViewMensagem.setVisibility(View.GONE);
+                    holder.imgViewGifMensagem.setVisibility(View.GONE);
+                    holder.linearDocumentoChat.setVisibility(View.GONE);
+                    holder.linearMusicaChat.setVisibility(View.GONE);
+                    holder.linearAudioChat.setVisibility(View.GONE);
+                    holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
+                } else {
+                    holder.linearLayoutMensagem.setVisibility(View.GONE);
                 }
             } else {
                 holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
@@ -1284,18 +1291,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     @Override
     public void updateOptions(@NonNull FirebaseRecyclerOptions<Mensagem> options) {
         super.updateOptions(options);
-    }
-
-    public void verificarFiltragem(String verificaFiltragem) {
-        //Quando a lista está filtrada o adapter será sinalizado
-        //por essa string recebida pelo parâmetro.
-        if (verificaFiltragem != null) {
-            if (verificaFiltragem.equals("comFiltro")) {
-                filtrarSomenteTexto = "sim";
-            } else {
-                filtrarSomenteTexto = null;
-            }
-        }
     }
 
     private void copiarTexto(Mensagem mensagem, TextView textView, Dialog dialog) {

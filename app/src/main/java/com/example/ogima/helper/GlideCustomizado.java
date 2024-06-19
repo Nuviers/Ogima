@@ -349,6 +349,21 @@ public class GlideCustomizado {
                 .into(imageView);
     }
 
+    public static void loadDrawableImageWallpaper(Context context, Drawable drawable, ImageView imageView, int placeholder) {
+        RequestOptions options = new RequestOptions()
+                .placeholder(placeholder)
+                .encodeQuality(100)
+                .error(android.R.color.transparent)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                .centerCrop();
+
+        getSharedGlideInstance(context)
+                .load(drawable)
+                .apply(options)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .into(imageView);
+    }
+
     public static void loadDrawableImageEpilepsia(Context context, int drawable, ImageView imageView, int placeholder) {
         RequestOptions options = new RequestOptions()
                 .placeholder(placeholder)

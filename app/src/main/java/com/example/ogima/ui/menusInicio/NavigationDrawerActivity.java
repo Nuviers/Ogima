@@ -342,7 +342,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
                     break;
                 }
                 case R.id.nav_chat: {
-                    Intent intent = new Intent(getApplicationContext(), ChatInicioActivity.class);
+                    Intent intent = new Intent(getApplicationContext(), ChatInteractionsActivity.class);
                     startActivity(intent);
                     finish();
                     //selectedFragment = new ChatFragment();

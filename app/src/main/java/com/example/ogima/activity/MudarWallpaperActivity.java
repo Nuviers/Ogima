@@ -413,12 +413,12 @@ public class MudarWallpaperActivity extends AppCompatActivity {
 
                         if (tipoWallpaper.equals("privado")) {
                             if (grupoDestinatario != null) {
-                                dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + grupoDestinatario.getIdGrupo() + File.separator + "wallpaperPrivado");
+                                dirAnterior = new File(getFilesDir(), "wallpaperPrivado" + File.separator + grupoDestinatario.getIdGrupo());
                             } else if (usuarioDestinatario != null) {
-                                dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + usuarioDestinatario.getIdUsuario() + File.separator + "wallpaperPrivado");
+                                dirAnterior = new File(getFilesDir(), "wallpaperPrivado" + File.separator + usuarioDestinatario.getIdUsuario());
                             }
                         } else if (tipoWallpaper.equals("global")) {
-                            dirAnterior = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + "wallpaperGlobal");
+                            dirAnterior = new File(getFilesDir(), "wallpaperGlobal");
                         }
 
                         if (dirAnterior.exists()) {

@@ -1640,7 +1640,8 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
         //igualmente ao que está no banco de dados.
 
         filtrarSomenteTexto = "comFiltro";
-        adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
+        adapterMensagem.setFiltrarSomenteTexto(true);
+        //****adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
         queryRecuperaMensagemFiltrada = firebaseRef.child("conversas")
                 .child(grupoDestinatario.getIdGrupo()).orderByChild("conteudoMensagem")
@@ -1659,7 +1660,8 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
     private void conversaSemFiltragem() {
 
         filtrarSomenteTexto = "semFiltro";
-        adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
+        adapterMensagem.setFiltrarSomenteTexto(false);
+        //****adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
         queryRecuperaMensagem = firebaseRef.child("conversas")
                 .child(grupoDestinatario.getIdGrupo());

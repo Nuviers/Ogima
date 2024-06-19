@@ -55,9 +55,8 @@ public class TimestampUtils {
 
     public static void RecuperarHoraDoTimestamp(Context context, boolean converterParaPositivo, long timestampAlvo, RecuperarHoraTimestampCallback callback){
         if (converterParaPositivo) {
-            timestampAlvo = timestampAlvo * -1;
+            timestampAlvo = Math.abs(timestampAlvo);
         }
-        timestampAlvo = timestampAlvo * 1000L; // Convertendo para milissegundos
 
         // Criando um objeto Date com o timestamp
         Date date = new Date(timestampAlvo);

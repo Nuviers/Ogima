@@ -1912,7 +1912,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
         //igualmente ao que está no banco de dados.
 
         filtrarSomenteTexto = "comFiltro";
-        adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
+        adapterMensagem.setFiltrarSomenteTexto(true);
+        //****adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
         queryRecuperaMensagemFiltrada = firebaseRef.child("conversas").child(idUsuario)
                 .child(usuarioDestinatario.getIdUsuario()).orderByChild("conteudoMensagem")
@@ -1931,7 +1932,8 @@ public class ConversaActivity extends AppCompatActivity implements View.OnFocusC
     private void conversaSemFiltragem() {
 
         filtrarSomenteTexto = "semFiltro";
-        adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
+        adapterMensagem.setFiltrarSomenteTexto(false);
+        //****adapterMensagem.verificarFiltragem(filtrarSomenteTexto);
 
         queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
                 .child(usuarioDestinatario.getIdUsuario());

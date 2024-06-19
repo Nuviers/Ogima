@@ -119,9 +119,9 @@ public class SalvarArquivoLocalmente {
                 File file = salvarBitmapEmFile(bitmap, nomeDoArquivo + ".jpg");
 
                 if (tipoWallpaper.equals("privado")) {
-                    dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + idDestinatario + File.separator + caminhoWallpaper);
+                    dir = new File(context.getFilesDir(), "wallpaperPrivado" + File.separator + idDestinatario);
                 } else if (tipoWallpaper.equals("global")) {
-                    dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), File.separator + "Ogima" + File.separator + caminhoWallpaper);
+                    dir = new File(context.getFilesDir(), "wallpaperGlobal");
                 }
 
                 if (!dir.exists()) {

@@ -29,6 +29,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
 import com.example.ogima.activity.ConversaActivity;
+import com.example.ogima.activity.ConversationActivity;
 import com.example.ogima.activity.NotificationsTesteActivity;
 import com.example.ogima.activity.SplashActivity;
 import com.example.ogima.model.MessageNotificacao;
@@ -173,8 +174,8 @@ public class NotificationsReceiver extends FirebaseMessagingService {
                 @Override
                 public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
 
-                    Intent intent = new Intent(NotificationsReceiver.this.getApplicationContext(), ConversaActivity.class);
-                    intent.putExtra("usuario", usuarioAtual);
+                    Intent intent = new Intent(NotificationsReceiver.this.getApplicationContext(), ConversationActivity.class);
+                    intent.putExtra("usuarioDestinatario", usuarioAtual);
                     intent.putExtra("notificacao", "conversa");
                     intent.putExtra("idNotificacao", 0);
                     //**intent.putExtra(KEY_EXTRA_STRING, minhaString);
