@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgPreviewTeste1"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_150sdp"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/aihoshino" />
+
+        <ImageView
+            android:id="@+id/imgPreviewTeste2"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_150sdp"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/animegirl_muitoapaixonada_37" />
+
+        <ImageView
+            android:id="@+id/imgPreviewTeste3"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_150sdp"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/animegirl_seria_58" />
+
+        <ImageView
+            android:id="@+id/imgPreviewTeste4"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_150sdp"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/tb4" />
+
+    </LinearLayout>
+</RelativeLayout>

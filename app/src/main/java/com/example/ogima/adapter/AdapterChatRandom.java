@@ -30,6 +30,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Grupo;
@@ -136,7 +137,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
         holder.imgViewRemetenteGrupo.setVisibility(View.GONE);
         holder.txtViewNomeRemetenteGrupo.setVisibility(View.GONE);
 
-        if (mensagemAtual.getTipoMensagem().equals("texto")) {
+        if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.TEXT)) {
             holder.txtViewMensagem.setVisibility(View.VISIBLE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
             holder.imgViewMensagem.setVisibility(View.GONE);
@@ -145,7 +146,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.GONE);
             holder.txtViewMensagem.setText(FormatarNomePesquisaUtils.formatarNomeParaPesquisa(mensagemAtual.getConteudoMensagem()));
-        } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
+        } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.GIF)) {
             holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
             holder.imgViewMensagem.setVisibility(View.GONE);
             holder.constraintThumbVideo.setVisibility(View.GONE);
@@ -157,7 +158,7 @@ public class AdapterChatRandom extends FirebaseRecyclerAdapter<Mensagem, Adapter
                     mensagemAtual.getConteudoMensagem(),
                     holder.imgViewGifMensagem, android.R.color.transparent,
                     GlideCustomizado.CENTER_INSIDE, false, isStatusEpilepsia());
-        } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
+        } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
             holder.linearMusicaChat.setVisibility(View.GONE);
             holder.linearDocumentoChat.setVisibility(View.GONE);
             holder.linearAudioChat.setVisibility(View.VISIBLE);

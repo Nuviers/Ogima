@@ -10,6 +10,7 @@ import android.widget.ImageButton;
 import com.example.ogima.R;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.model.Mensagem;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -73,10 +74,10 @@ public class FotoVideoExpandidoActivity extends AppCompatActivity {
         if (dados != null) {
             mensagem = (Mensagem) dados.getSerializable("mensagem");
 
-            if (mensagem.getTipoMensagem().equals("imagem")) {
+            if (mensagem.getTipoMensagem().equals(MidiaUtils.IMAGE)) {
                 //Exibe foto expandida e com zoom implementado.
                 exibirFoto();
-            } else if (mensagem.getTipoMensagem().equals("video")) {
+            } else if (mensagem.getTipoMensagem().equals(MidiaUtils.VIDEO)) {
                 //Exibe o video em tela cheia.
                 exibirVideo();
             }

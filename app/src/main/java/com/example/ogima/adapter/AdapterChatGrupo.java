@@ -21,6 +21,7 @@ import com.example.ogima.activity.GroupDetailsActivity;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
@@ -133,7 +134,7 @@ public class AdapterChatGrupo extends RecyclerView.Adapter<AdapterChatGrupo.MyVi
                         listaMensagens.add(mensagemCompleta);
 
                         String tipoMidiaUltimaMensagem = listaMensagens.get(listaMensagens.size() - 1).getTipoMensagem();
-                        if (!tipoMidiaUltimaMensagem.equals("texto")) {
+                        if (!tipoMidiaUltimaMensagem.equals(MidiaUtils.TEXT)) {
                             holder.txtViewLastMensagemChat.setTextColor(Color.BLUE);
                             holder.txtViewLastMensagemChat.setText("Mídia - " + tipoMidiaUltimaMensagem);
                         } else {

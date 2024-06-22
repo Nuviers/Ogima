@@ -24,6 +24,7 @@ import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterShareMessage;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.SalvarArquivoLocalmente;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Contatos;
@@ -357,7 +358,7 @@ public class ShareMessageActivity extends AppCompatActivity {
 
         caminhoImagem = mensagemCompartilhada.getConteudoMensagem();
 
-        if (mensagemCompartilhada.getTipoMensagem().equals("imagem")) {
+        if (mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.IMAGE)) {
             salvarArquivoLocalmente.transformarImagemEmFile(caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
                 @Override
                 public void onFileSaved(File file) {
@@ -372,8 +373,8 @@ public class ShareMessageActivity extends AppCompatActivity {
                     ToastCustomizado.toastCustomizadoCurto("Falha ao compartilhar o arquivo, tente novamente", getApplicationContext());
                 }
             });
-        } else if (!mensagemCompartilhada.getTipoMensagem().equals("gif")
-                && !mensagemCompartilhada.getTipoMensagem().equals("imagem")) {
+        } else if (!mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.GIF)
+                && !mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.IMAGE)) {
             salvarArquivoLocalmente.transformarMidiaEmFile(caminhoImagem, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
                 @Override
                 public void onFileSaved(File file) {
@@ -387,14 +388,14 @@ public class ShareMessageActivity extends AppCompatActivity {
                 }
             });
 
-        } else if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+        } else if (mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.GIF)) {
             funcoesCompartilhamento(null);
         }
     }
 
     private void fazerUploadDoArquivo(String idDestinatario, File arquivoTemporario) {
 
-        if (!mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+        if (!mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.GIF)) {
             nomeArquivo = arquivoTemporario.getName();
             duracao = formatarTimer(obterDuracaoAudio(arquivoTemporario));
         }
@@ -403,35 +404,35 @@ public class ShareMessageActivity extends AppCompatActivity {
         dadosMensagem.put("idRemetente", idUsuario);
         dadosMensagem.put("idDestinatario", idDestinatario);
         switch (mensagemCompartilhada.getTipoMensagem()) {
-            case "imagem":
+            case MidiaUtils.IMAGE:
                 storageArquivoRef = storageRef.child("mensagens").child("fotos").child(idUsuario).child(idDestinatario).child("foto" + nomeRandomico + ".jpeg");
                 extensaoArquivo = ".jpg";
                 break;
-            case "gif":
+            case MidiaUtils.GIF:
                 //Gif não é upada no storage, continuar assim.
                 extensaoArquivo = ".gif";
                 break;
-            case "video":
+            case MidiaUtils.VIDEO:
                 storageArquivoRef = storageRef.child("mensagens").child("videos").child(idUsuario).child(idDestinatario).child("video" + nomeRandomico + ".mp4");
                 extensaoArquivo = ".mp4";
                 break;
-            case "documento":
+            case MidiaUtils.DOCUMENT:
                 storageArquivoRef = storageRef.child("mensagens").child("documentos").child(idUsuario).child(idDestinatario).child(nomeArquivo);
                 dadosMensagem.put("nomeDocumento", nomeArquivo);
                 dadosMensagem.put("tipoArquivo", getMimeType(arquivoTemporario));
                 break;
-            case "musica":
+            case MidiaUtils.MUSIC:
                 storageArquivoRef = storageRef.child("mensagens").child("musicas").child(idUsuario).child(idDestinatario).child(nomeArquivo);
                 dadosMensagem.put("nomeDocumento", nomeArquivo);
                 dadosMensagem.put("duracaoMusica", duracao);
                 break;
-            case "audio":
+            case MidiaUtils.AUDIO:
                 storageArquivoRef = storageRef.child("mensagens").child("audios").child(idUsuario).child(idDestinatario).child(nomeArquivo);
                 dadosMensagem.put("duracaoMusica", duracao);
                 break;
         }
 
-        if (!mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+        if (!mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.GIF)) {
             UploadTask uploadTask = storageArquivoRef.putFile(Uri.fromFile(arquivoTemporario));
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
@@ -476,10 +477,10 @@ public class ShareMessageActivity extends AppCompatActivity {
             String dataNome = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
             String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
 
-            if (mensagemCompartilhada.getTipoMensagem().equals("audio")) {
+            if (mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
                 dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
-            } else if (!mensagemCompartilhada.getTipoMensagem().equals("musica")
-                    && !mensagemCompartilhada.getTipoMensagem().equals("documento")) {
+            } else if (!mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.MUSIC)
+                    && !mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.DOCUMENT)) {
                 dadosMensagem.put("nomeDocumento", replaceAll + extensaoArquivo);
             }
 
@@ -493,10 +494,10 @@ public class ShareMessageActivity extends AppCompatActivity {
             String dataNome = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
             String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
 
-            if (mensagemCompartilhada.getTipoMensagem().equals("audio")) {
+            if (mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
                 dadosMensagem.put("nomeDocumento", "audio" + replaceAll + ".mp3");
-            } else if (!mensagemCompartilhada.getTipoMensagem().equals("musica")
-                    && !mensagemCompartilhada.getTipoMensagem().equals("documento")) {
+            } else if (!mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.MUSIC)
+                    && !mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.DOCUMENT)) {
                 dadosMensagem.put("nomeDocumento", replaceAll + extensaoArquivo);
             }
         }
@@ -523,12 +524,12 @@ public class ShareMessageActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isComplete()) {
-                            if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+                            if (mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.GIF)) {
                                 ToastCustomizado.toastCustomizadoCurto("Compartilhado com sucesso" , getApplicationContext());
                             }
                             finish();
                         }else{
-                            if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+                            if (mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.GIF)) {
                                 ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro a compartilhar, tente novamente mais tarde" , getApplicationContext());
                             }
                             finish();
@@ -638,7 +639,7 @@ public class ShareMessageActivity extends AppCompatActivity {
                 String idDestinatario = usuarioDestinatario.getIdUsuario();
                 nomeRandomico = UUID.randomUUID().toString();
                 //Faz o upload e o envio da mensagem
-                if (mensagemCompartilhada.getTipoMensagem().equals("gif")) {
+                if (mensagemCompartilhada.getTipoMensagem().equals(MidiaUtils.GIF)) {
                     fazerUploadDoArquivo(idDestinatario, null);
                 }else{
                     fazerUploadDoArquivo(idDestinatario, file);

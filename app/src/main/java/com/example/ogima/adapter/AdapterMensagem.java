@@ -43,6 +43,7 @@ import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.CoresRandomicas;
 import com.example.ogima.helper.DadosUserPadrao;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.SolicitaPermissoes;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Grupo;
@@ -212,7 +213,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             }
 
             if (filtrarSomenteTexto) {
-                if (mensagemAtual.getTipoMensagem().equals("texto")) {
+                if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
                     holder.txtViewMensagem.setVisibility(View.VISIBLE);
                     holder.constraintThumbVideo.setVisibility(View.GONE);
@@ -227,7 +228,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 }
             } else {
                 holder.linearLayoutMensagem.setVisibility(View.VISIBLE);
-                if (mensagemAtual.getTipoMensagem().equals("texto")) {
+                if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     holder.txtViewMensagem.setVisibility(View.VISIBLE);
                     holder.constraintThumbVideo.setVisibility(View.GONE);
                     holder.imgViewMensagem.setVisibility(View.GONE);
@@ -236,7 +237,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     holder.linearMusicaChat.setVisibility(View.GONE);
                     holder.linearAudioChat.setVisibility(View.GONE);
                     holder.txtViewMensagem.setText(mensagemAtual.getConteudoMensagem());
-                } else if (mensagemAtual.getTipoMensagem().equals("imagem")) {
+                } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.IMAGE)) {
                     holder.imgViewMensagem.setVisibility(View.VISIBLE);
                     holder.constraintThumbVideo.setVisibility(View.GONE);
                     holder.txtViewMensagem.setVisibility(View.GONE);
@@ -246,7 +247,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     holder.linearAudioChat.setVisibility(View.GONE);
                     GlideCustomizado.loadUrl(context, mensagemAtual.getConteudoMensagem(),
                             holder.imgViewMensagem, android.R.color.transparent, GlideCustomizado.CENTER_INSIDE, false, true);
-                } else if (mensagemAtual.getTipoMensagem().equals("gif")) {
+                } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.GIF)) {
                     holder.imgViewGifMensagem.setVisibility(View.VISIBLE);
                     holder.imgViewMensagem.setVisibility(View.GONE);
                     holder.constraintThumbVideo.setVisibility(View.GONE);
@@ -281,7 +282,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     });
                     //GlideCustomizado.montarGlideMensagem(context, mensagem.getConteudoMensagem(),
                     // holder.imgViewMensagem, android.R.color.transparent);
-                } else if (mensagemAtual.getTipoMensagem().equals("video")) {
+                } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.VIDEO)) {
                     holder.constraintThumbVideo.setVisibility(View.VISIBLE);
                     holder.imgViewMensagem.setVisibility(View.GONE);
                     holder.txtViewMensagem.setVisibility(View.GONE);
@@ -294,7 +295,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                             holder.imgViewVideoMensagem,
                             android.R.color.transparent,
                             GlideCustomizado.CENTER_CROP, false, true);
-                } else if (mensagemAtual.getTipoMensagem().equals("documento")) {
+                } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.DOCUMENT)) {
                     holder.linearDocumentoChat.setVisibility(View.VISIBLE);
                     holder.linearMusicaChat.setVisibility(View.GONE);
                     holder.imgViewGifMensagem.setVisibility(View.GONE);
@@ -303,7 +304,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     holder.txtViewMensagem.setVisibility(View.GONE);
                     holder.linearAudioChat.setVisibility(View.GONE);
                     holder.txtViewNomeDocumentoChat.setText(mensagemAtual.getNomeDocumento());
-                } else if (mensagemAtual.getTipoMensagem().equals("musica")) {
+                } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.MUSIC)) {
                     holder.linearMusicaChat.setVisibility(View.VISIBLE);
                     holder.linearDocumentoChat.setVisibility(View.GONE);
                     holder.linearAudioChat.setVisibility(View.GONE);
@@ -313,7 +314,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     holder.txtViewMensagem.setVisibility(View.GONE);
                     holder.txtViewMusicaChat.setText(mensagemAtual.getNomeDocumento());
                     holder.txtViewDuracaoMusicaChat.setText(mensagemAtual.getDuracaoMusica());
-                } else if (mensagemAtual.getTipoMensagem().equals("audio")) {
+                } else if (mensagemAtual.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
                     holder.linearMusicaChat.setVisibility(View.GONE);
                     holder.linearDocumentoChat.setVisibility(View.GONE);
                     holder.linearAudioChat.setVisibility(View.VISIBLE);
@@ -698,7 +699,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             }
         }
 
-        if (mensagem.getTipoMensagem().equals("texto")) {
+        if (mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
             shareLinearLayout.setVisibility(View.GONE);
             copiarTextoLinearLayout.setVisibility(View.VISIBLE);
         } else {
@@ -706,8 +707,8 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             shareLinearLayout.setVisibility(View.VISIBLE);
         }
 
-        if (mensagem.getTipoMensagem().equals("texto")
-                || mensagem.getTipoMensagem().equals("gif")) {
+        if (mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)
+                || mensagem.getTipoMensagem().equals(MidiaUtils.GIF)) {
             uploadLinearLayout.setVisibility(View.GONE);
         } else {
             uploadLinearLayout.setVisibility(View.VISIBLE);
@@ -771,7 +772,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             public void onClick(View view) {
                 mBottomSheetDialog.dismiss();
                 mBottomSheetDialog.cancel();
-                if (!mensagem.getTipoMensagem().equals("texto")) {
+                if (!mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
                     builder.setCancelable(true);
                     builder.setTitle("Excluir mensagem para mim");
@@ -789,7 +790,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     });
                     AlertDialog dialog = builder.create();
                     dialog.show();
-                } else if (mensagem.getTipoMensagem().equals("texto")) {
+                } else if (mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     deleteMessageForMe(mensagem, position, "não");
                 }
             }
@@ -800,7 +801,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             public void onClick(View view) {
                 mBottomSheetDialog.dismiss();
                 mBottomSheetDialog.cancel();
-                if (!mensagem.getTipoMensagem().equals("texto")) {
+                if (!mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
                     builder.setCancelable(true);
                     builder.setTitle("Excluir mensagem para mim");
@@ -818,7 +819,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     });
                     AlertDialog dialog = builder.create();
                     dialog.show();
-                } else if (mensagem.getTipoMensagem().equals("texto")) {
+                } else if (mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     deleteMessageForMe(mensagem, position, "não");
                 }
             }
@@ -830,7 +831,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             public void onClick(View view) {
                 mBottomSheetDialog.dismiss();
                 mBottomSheetDialog.cancel();
-                if (!mensagem.getTipoMensagem().equals("texto")) {
+                if (!mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
                     builder.setCancelable(true);
                     builder.setTitle("Excluir mensagem para todos");
@@ -848,7 +849,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     });
                     AlertDialog dialog = builder.create();
                     dialog.show();
-                } else if (mensagem.getTipoMensagem().equals("texto")) {
+                } else if (mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     deleteMessageForAll(mensagem, position, "não");
                 }
             }
@@ -859,7 +860,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             public void onClick(View view) {
                 mBottomSheetDialog.dismiss();
                 mBottomSheetDialog.cancel();
-                if (!mensagem.getTipoMensagem().equals("texto")) {
+                if (!mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(view.getRootView().getContext());
                     builder.setCancelable(true);
                     builder.setTitle("Excluir mensagem para todos");
@@ -877,7 +878,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                     });
                     AlertDialog dialog = builder.create();
                     dialog.show();
-                } else if (mensagem.getTipoMensagem().equals("texto")) {
+                } else if (mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                     deleteMessageForAll(mensagem, position, "não");
                 }
             }
@@ -945,7 +946,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             }
 
 
-            if (!mensagem.getTipoMensagem().equals("texto")) {
+            if (!mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                 if (excluirLocalmente.equals("sim")) {
                     excluirArquivoLocal(mensagem);
                 }
@@ -962,17 +963,17 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
         nomePasta = null;
 
-        if (mensagem.getTipoMensagem().equals("imagem")) {
+        if (mensagem.getTipoMensagem().equals(MidiaUtils.IMAGE)) {
             nomePasta = "imagens";
-        } else if (mensagem.getTipoMensagem().equals("gif")) {
+        } else if (mensagem.getTipoMensagem().equals(MidiaUtils.GIF)) {
             nomePasta = "gifs";
-        } else if (mensagem.getTipoMensagem().equals("video")) {
+        } else if (mensagem.getTipoMensagem().equals(MidiaUtils.VIDEO)) {
             nomePasta = "videos";
-        } else if (mensagem.getTipoMensagem().equals("musica")) {
+        } else if (mensagem.getTipoMensagem().equals(MidiaUtils.MUSIC)) {
             nomePasta = "musicas";
-        } else if (mensagem.getTipoMensagem().equals("audio")) {
+        } else if (mensagem.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
             nomePasta = "audios";
-        } else if (mensagem.getTipoMensagem().equals("documento")) {
+        } else if (mensagem.getTipoMensagem().equals(MidiaUtils.DOCUMENT)) {
             nomePasta = "documentos";
         }
 
@@ -1009,23 +1010,23 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private void deleteMessageForAll(Mensagem mensagem, int position, String excluirLocalmente) {
         try {
 
-            if (mensagem.getTipoMensagem().equals("imagem")) {
+            if (mensagem.getTipoMensagem().equals(MidiaUtils.IMAGE)) {
                 nomePasta = "fotos";
-            } else if (mensagem.getTipoMensagem().equals("gif")) {
+            } else if (mensagem.getTipoMensagem().equals(MidiaUtils.GIF)) {
                 nomePasta = "gifs";
-            } else if (mensagem.getTipoMensagem().equals("video")) {
+            } else if (mensagem.getTipoMensagem().equals(MidiaUtils.VIDEO)) {
                 nomePasta = "videos";
-            } else if (mensagem.getTipoMensagem().equals("musica")) {
+            } else if (mensagem.getTipoMensagem().equals(MidiaUtils.MUSIC)) {
                 nomePasta = "musicas";
-            } else if (mensagem.getTipoMensagem().equals("audio")) {
+            } else if (mensagem.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
                 nomePasta = "audios";
-            } else if (mensagem.getTipoMensagem().equals("documento")) {
+            } else if (mensagem.getTipoMensagem().equals(MidiaUtils.DOCUMENT)) {
                 nomePasta = "documentos";
             }
 
 
-            if (!mensagem.getTipoMensagem().equals("gif")
-                    && !mensagem.getTipoMensagem().equals("texto")) {
+            if (!mensagem.getTipoMensagem().equals(MidiaUtils.GIF)
+                    && !mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                 //Remover primeiro do storage
                 removerArquivoRef = storageRef.child("mensagens")
                         .child(nomePasta)
@@ -1151,7 +1152,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 }
             });
 
-            if (!mensagem.getTipoMensagem().equals("texto")) {
+            if (!mensagem.getTipoMensagem().equals(MidiaUtils.TEXT)) {
                 if (excluirLocalmente.equals("sim")) {
                     excluirArquivoLocal(mensagem);
                 }
@@ -1184,7 +1185,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
 
     private void baixarPeloSheet(Mensagem mensagem) {
         switch (mensagem.getTipoMensagem()) {
-            case "imagem": {
+            case MidiaUtils.IMAGE: {
                 ToastCustomizado.toastCustomizadoCurto("Imagem", context);
                 solicitaPermissoes("imagem");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -1204,7 +1205,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 break;
             }
              */
-            case "video": {
+            case MidiaUtils.VIDEO: {
                 ToastCustomizado.toastCustomizadoCurto("Video", context);
                 solicitaPermissoes("video");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -1214,7 +1215,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 }
                 break;
             }
-            case "musica": {
+            case MidiaUtils.MUSIC: {
                 ToastCustomizado.toastCustomizadoCurto("Musica", context);
                 solicitaPermissoes("musica");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -1224,7 +1225,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 }
                 break;
             }
-            case "audio": {
+            case MidiaUtils.AUDIO: {
                 ToastCustomizado.toastCustomizadoCurto("Audio", context);
                 solicitaPermissoes("audio");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
@@ -1234,7 +1235,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 }
                 break;
             }
-            case "documento": {
+            case MidiaUtils.DOCUMENT: {
                 ToastCustomizado.toastCustomizadoCurto("Documento", context);
                 solicitaPermissoes("documento");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {

@@ -4,13 +4,10 @@ import android.Manifest;
 import android.app.FragmentManager;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -21,9 +18,7 @@ import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -35,7 +30,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -44,7 +38,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.adapter.AdapterMensagem;
-import com.example.ogima.helper.AtualizarContador;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FcmUtils;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
@@ -52,8 +45,11 @@ import com.example.ogima.helper.FirebaseUtils;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.FormatarNomePesquisaUtils;
 import com.example.ogima.helper.GlideCustomizado;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.NtpSyncService;
-import com.example.ogima.helper.TimestampUtils;
+import com.example.ogima.helper.PermissionUtils;
+import com.example.ogima.helper.RecuperarUriUtils;
+import com.example.ogima.helper.SizeUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Mensagem;
@@ -61,8 +57,6 @@ import com.example.ogima.model.MessageNotificacao;
 import com.example.ogima.model.Usuario;
 import com.example.ogima.model.Wallpaper;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -71,6 +65,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
+import com.jaiselrahman.filepicker.model.MediaFile;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.miguelcatalan.materialsearchview.MaterialSearchView;
 
@@ -78,16 +74,15 @@ import org.threeten.bp.Instant;
 import org.threeten.bp.LocalDateTime;
 import org.threeten.bp.ZoneId;
 import org.threeten.bp.format.DateTimeFormatter;
-import org.threeten.bp.format.FormatStyle;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.UUID;
 
 public class ConversationActivity extends AppCompatActivity implements View.OnFocusChangeListener {
 
@@ -144,8 +139,14 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     private static final int MIN_DURATION = 3000; // 3 segundos em milissegundos
     private TextView txtViewDialogOnlyChat, txtViewDialogAllChats;
     private FragmentManager fm = getFragmentManager();
-
     private ZoneId zoneId;
+    private RecuperarUriUtils recuperarUriUtils;
+    private String tipoMidiaPermissao = "";
+    private ArrayList<Uri> urisSelecionadas = new ArrayList<>();
+    private ArrayList<String> urlMidiaUpada = new ArrayList<>();
+    private StorageReference storageRef;
+    private MidiaUtils midiaUtils;
+    private static final String TAG = "ConversationActivity";
 
     public ConversationActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -210,6 +211,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         inicializarComponentes();
         AndroidThreeTen.init(this);
         NtpSyncService.startSync(this);
+        storageRef = ConfiguracaoFirebase.getFirebaseStorage();
+        midiaUtils = new MidiaUtils(ConversationActivity.this, getApplicationContext());
+        recuperarUriUtils = new RecuperarUriUtils(ConversationActivity.this, getApplicationContext());
         configInicial(new ConfigInicialCallback() {
             @Override
             public void onConcluido() {
@@ -287,6 +291,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
         clickListeners();
 
+        configMenuMidias();
+
         //Limpar msgs perdidas pois já foram visualizadas nesse chat atualmente.
         limparMensagensPerdidas();
     }
@@ -354,69 +360,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Este método será chamado se ocorrer um erro ao carregar os dados
-
-            }
-        });
-    }
-
-    private void recuperarMensagensOLD() {
-
-        recuperarMensagensRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
-        childEventListenerMensagens = recuperarMensagensRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                if (rolarMsgs) {
-                    recyclerMensagensChat.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                        @Override
-                        public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                                   int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                            if (adapterMensagem.getItemCount() > 0) {
-                                recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
-                            }
-                            ToastCustomizado.toastCustomizadoCurto("Scroll: " + adapterMensagem.getItemCount(), getApplicationContext());
-                            rolarMsgs = false;
-                            recyclerMensagensChat.removeOnLayoutChangeListener(this);
-                        }
-                    });
-                } else {
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            novaMensagem = true;
-                            if (isActivityActive() && !rolarMsgs && novaMensagem) {
-                                // Verifica se o usuário está vendo os últimos 4 itens
-                                if (isLastFourItemsVisible()) {
-                                    // O usuário está vendo os últimos 4 itens
-                                    recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
-                                } else {
-                                    // O usuário não está vendo os últimos 4 itens
-                                    // Faça outra coisa, se necessário
-                                }
-                                novaMensagem = false;
-                            }
-                        }
-                    }, 100);
-                }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
@@ -821,6 +764,13 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 enviarMsgTexto();
             }
         });
+
+        imgButtonEnviarFotoChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMenuMidias.show();
+            }
+        });
     }
 
     private void atualizarStatusOnline() {
@@ -857,23 +807,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
             return false;
         }
         return true;
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_AUDIO_PERMISSION) {
-            if (grantResults.length > 0) {
-                boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                if (permissionToRecord) {
-                    ToastCustomizado.toastCustomizadoCurto("Permissão concedida", getApplicationContext());
-                    funcoesAudio();
-                } else {
-                    ToastCustomizado.toastCustomizadoCurto("Permissão negada", getApplicationContext());
-                }
-            }
-        }
     }
 
     private void funcoesAudio() {
@@ -1140,6 +1073,53 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         salvarViewEmConversaRef.setValue(false);
     }
 
+    private void configMenuMidias() {
+        //Seleção de envio de arquivos - foto/camêra/gif/música/documento
+        popupMenuMidias = new PopupMenu(getApplicationContext(), imgButtonEnviarFotoChat);
+        popupMenuMidias.getMenuInflater().inflate(R.menu.popup_menu_anexo, popupMenuMidias.getMenu());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            popupMenuMidias.setForceShowIcon(true);
+        }
+        popupMenuMidias.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.anexoCamera:
+                        tipoMidiaPermissao = MidiaUtils.CAMERA;
+                        checkPermissions();
+                        ToastCustomizado.toastCustomizado("Camera", getApplicationContext());
+                        return true;
+                    case R.id.anexoGaleria:
+                        tipoMidiaPermissao = MidiaUtils.GALLERY;
+                        checkPermissions();
+                        ToastCustomizado.toastCustomizado("Galeria", getApplicationContext());
+                        return true;
+                    case R.id.anexoMusica:
+                        tipoMidiaPermissao = MidiaUtils.MUSIC;
+                        checkPermissions();
+                        ToastCustomizado.toastCustomizado("Musica", getApplicationContext());
+                        return true;
+                    case R.id.anexoDocumento:
+                        tipoMidiaPermissao = MidiaUtils.DOCUMENT;
+                        checkPermissions();
+                        ToastCustomizado.toastCustomizado("Documento", getApplicationContext());
+                        return true;
+                    case R.id.anexoVideo:
+                        tipoMidiaPermissao = MidiaUtils.VIDEO;
+                        checkPermissions();
+                        ToastCustomizado.toastCustomizado("Video", getApplicationContext());
+                        return true;
+                    case R.id.anexoGif:
+                        tipoMidiaPermissao = MidiaUtils.GIF;
+                        selecionadoGif();
+                        ToastCustomizado.toastCustomizado("Gif", getApplicationContext());
+                        return true;
+                }
+                return false;
+            }
+        });
+    }
+
     private void limparMensagensPerdidas() {
         HashMap<String, Object> hashMapMsgsPerdidas = new HashMap<>();
         String caminhoContador = "/detalhesChat/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/";
@@ -1155,8 +1135,18 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         if (edtTextMensagemChat.getText().toString().isEmpty()) {
             return;
         }
+        String conteudoMensagem = edtTextMensagemChat.getText().toString().trim();
+        configPadraoMensagem(MidiaUtils.TEXT, conteudoMensagem, null, null);
+    }
+
+    private void configPadraoMensagem(String tipoMidia, String conteudoMensagem, String nomeDocumento, MediaFile mediaFileDoc) {
+
+        if (tipoMidia == null || tipoMidia.isEmpty() || conteudoMensagem == null || conteudoMensagem.isEmpty()) {
+            return;
+        }
         verificaViewConversa(new VerificaViewConversaCallback() {
             HashMap<String, Object> dadosMsg = new HashMap<>();
+
             @Override
             public void onStatus(boolean statusViewConversa) {
                 long timestampNegativo = -1 * NtpSyncService.getAdjustedCurrentTime();
@@ -1165,8 +1155,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestampPositivo), zoneId);
                 // Formatar a data de acordo com o local do usuário
                 String dataMsg = getFormattedDateForLocale(localDateTime, Locale.getDefault());
-                String conteudoMensagem = edtTextMensagemChat.getText().toString().trim();
-                edtTextMensagemChat.setText("");
+                if (tipoMidia.equals(MidiaUtils.TEXT)) {
+                    edtTextMensagemChat.setText("");
+                }
+
                 String idBaseAtual = retornarIdConversa("atual");
                 String idBaseDestinatario = retornarIdConversa("destinatario");
                 String idConversa = generateChatId(idBaseAtual, idBaseDestinatario);
@@ -1174,8 +1166,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 //-> CaminhoDetalhes
                 String caminhoDetalhesAtual = "/detalhesChat/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/";
                 String caminhoDetalhesDestinatario = "/detalhesChat/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/";
-                configurarHashMapDetalhes(dadosMsg, caminhoDetalhesAtual, "atual", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem);
-                configurarHashMapDetalhes(dadosMsg, caminhoDetalhesDestinatario, "destinatario", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem);
+                configurarHashMapDetalhes(dadosMsg, caminhoDetalhesAtual, "atual", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem, tipoMidia);
+                configurarHashMapDetalhes(dadosMsg, caminhoDetalhesDestinatario, "destinatario", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem, tipoMidia);
 
                 if (statusViewConversa) {
                     dadosMsg.put(caminhoDetalhesDestinatario + "totalMsgNaoLida", 0);
@@ -1186,8 +1178,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 //-> Conversas
                 String caminhoConversaUserAtual = "/conversas/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/" + idConversa + "/";
                 String caminhoConversaUserDestinatario = "/conversas/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/" + idConversa + "/";
-                configurarHashMapConversa(dadosMsg, caminhoConversaUserAtual, "atual", idConversa, conteudoMensagem, timestampNegativo, dataMsg);
-                configurarHashMapConversa(dadosMsg, caminhoConversaUserDestinatario, "destinatario", idConversa, conteudoMensagem, timestampNegativo, dataMsg);
+                configurarHashMapConversa(dadosMsg, caminhoConversaUserAtual, "atual", idConversa, conteudoMensagem, timestampNegativo, dataMsg, tipoMidia, nomeDocumento, mediaFileDoc);
+                configurarHashMapConversa(dadosMsg, caminhoConversaUserDestinatario, "destinatario", idConversa, conteudoMensagem, timestampNegativo, dataMsg, tipoMidia, nomeDocumento, mediaFileDoc);
 
                 //-> ContadorTotalMsg
                 String caminhoTotalMsgAtual = "/contadorMensagens/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/";
@@ -1198,7 +1190,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
                 if (statusViewConversa) {
                     dadosMsg.put(caminhoTotalMsgDestinatario + "mensagensPerdidas", 0);
-                }else{
+                } else {
                     dadosMsg.put(caminhoTotalMsgDestinatario + "mensagensPerdidas", ServerValue.increment(1));
                 }
 
@@ -1206,8 +1198,15 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                     @Override
                     public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
                         if (statusViewConversa) {
-                            enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                    timestampPositivo, "texto", conteudoMensagem);
+                            if (tipoMidia.equals(MidiaUtils.DOCUMENT) || tipoMidia.equals(MidiaUtils.MUSIC) || tipoMidia.equals(MidiaUtils.AUDIO)) {
+                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                        timestampPositivo, tipoMidia, "Você possui novas mensagens");
+                            } else {
+                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
+                                        timestampPositivo, tipoMidia, conteudoMensagem);
+                            }
+                        } else {
+                            limparUriEOcultarProgress();
                         }
                     }
                 });
@@ -1215,12 +1214,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         });
     }
 
-    private void configurarHashMapDetalhes(HashMap<String, Object> dadosMsg, String caminhoAlvo, String tipoUsuario, String idConversa, long timestampNegativo, String dataMsg, boolean viewConversa, String conteudoMensagem) {
+    private void configurarHashMapDetalhes(HashMap<String, Object> dadosMsg, String caminhoAlvo, String tipoUsuario, String idConversa, long timestampNegativo, String dataMsg, boolean viewConversa, String conteudoMensagem, String tipoMidia) {
         dadosMsg.put(caminhoAlvo + "idConversa", idConversa);
         dadosMsg.put(caminhoAlvo + "conteudoLastMsg", conteudoMensagem);
         dadosMsg.put(caminhoAlvo + "timestampLastMsg", timestampNegativo);
         dadosMsg.put(caminhoAlvo + "idUsuario", idUsuarioDetalhes(tipoUsuario));
-        dadosMsg.put(caminhoAlvo + "tipoMidiaLastMsg", "text");
+        dadosMsg.put(caminhoAlvo + "tipoMidiaLastMsg", tipoMidia);
         dadosMsg.put(caminhoAlvo + "totalMsg", ServerValue.increment(1));
         dadosMsg.put(caminhoAlvo + "dateLastMsg", dataMsg);
     }
@@ -1232,19 +1231,31 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         return idUsuario;
     }
 
-    private void configurarHashMapConversa(HashMap<String, Object> dadosMsg, String caminhoAlvo, String tipoUsuario, String idConversa, String conteudoMensagem, long timestampNegativo, String dataMsg) {
+    private void configurarHashMapConversa(HashMap<String, Object> dadosMsg, String caminhoAlvo, String tipoUsuario, String idConversa, String conteudoMensagem, long timestampNegativo, String dataMsg, String tipoMidia, String nomeDocumento, MediaFile mediaFile) {
         dadosMsg.put(caminhoAlvo + "idConversa", idConversa);
-        dadosMsg.put(caminhoAlvo + "tipoMensagem", "texto");
+        dadosMsg.put(caminhoAlvo + "tipoMensagem", tipoMidia);
         dadosMsg.put(caminhoAlvo + "idRemetente", idUsuario);
         dadosMsg.put(caminhoAlvo + "idDestinatario", usuarioDestinatario.getIdUsuario());
         dadosMsg.put(caminhoAlvo + "conteudoMensagem", conteudoMensagem);
-        dadosMsg.put(caminhoAlvo + "conteudoMensagemPesquisa", conteudoMensagem.toUpperCase(Locale.ROOT));
+        if (tipoMidia.equals(MidiaUtils.TEXT)) {
+            dadosMsg.put(caminhoAlvo + "conteudoMensagemPesquisa", conteudoMensagem.toUpperCase(Locale.ROOT));
+        }
+        if (tipoMidia.equals(MidiaUtils.MUSIC)) {
+            String duracao = recuperarUriUtils.formatarTimer(mediaFile.getDuration());
+            dadosMsg.put(caminhoAlvo + "duracaoMusica", duracao);
+        }
         dadosMsg.put(caminhoAlvo + "timestampinteracao", timestampNegativo);
         dadosMsg.put(caminhoAlvo + "dataMensagem", dataMsg);
+        if (nomeDocumento != null) {
+            dadosMsg.put(caminhoAlvo + "nomeDocumento", nomeDocumento);
+        }
+        if (mediaFile != null) {
+            dadosMsg.put(caminhoAlvo + "tipoArquivo", mediaFile.getMimeType());
+        }
     }
 
-    private void configurarHashMapTotalMsg(HashMap<String, Object> dadosMsg, String caminhoAlvo, boolean statusViewConversa){
-       dadosMsg.put(caminhoAlvo + "totalMensagens", ServerValue.increment(1));
+    private void configurarHashMapTotalMsg(HashMap<String, Object> dadosMsg, String caminhoAlvo, boolean statusViewConversa) {
+        dadosMsg.put(caminhoAlvo + "totalMensagens", ServerValue.increment(1));
     }
 
     private String generateChatId(String user1Id, String user2Id) {
@@ -1317,24 +1328,25 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                         tipoOperacao, messageNotificacao, new FcmUtils.NotificacaoCallback() {
                             @Override
                             public void onEnviado() {
+                                limparUriEOcultarProgress();
                                 ToastCustomizado.toastCustomizadoCurto("Enviado", getApplicationContext());
                             }
 
                             @Override
                             public void onError(String message) {
-
+                                limparUriEOcultarProgress();
                             }
                         });
             }
 
             @Override
             public void onSemDados() {
-
+                limparUriEOcultarProgress();
             }
 
             @Override
             public void onError(String mensagem) {
-
+                limparUriEOcultarProgress();
             }
         });
     }
@@ -1353,6 +1365,348 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                     imgButtonEnviarMensagemChat.setVisibility(View.GONE);
                 }
                 break;
+        }
+    }
+
+    private void checkPermissions() {
+        if (tipoMidiaPermissao == null || tipoMidiaPermissao.isEmpty()) {
+            return;
+        }
+        boolean galleryPermissionsGranted = PermissionUtils.requestGalleryPermissions(ConversationActivity.this);
+        if (galleryPermissionsGranted) {
+            // Permissões da galeria já concedidas.
+            switch (tipoMidiaPermissao) {
+                case MidiaUtils.VIDEO:
+                    selecionadoVideo();
+                    break;
+                case MidiaUtils.GALLERY:
+                    selecionadoGaleria();
+                    break;
+                case MidiaUtils.CAMERA:
+                    boolean cameraPermissionsGranted = PermissionUtils.requestCameraPermissions(ConversationActivity.this);
+                    if (cameraPermissionsGranted) {
+                        selecionadoCamera();
+                    }
+                    break;
+                case MidiaUtils.DOCUMENT:
+                    selecionadoDocumento();
+                    break;
+                case MidiaUtils.MUSIC:
+                    selecionadoMusica();
+                    break;
+            }
+        }
+    }
+
+    private void selecionadoGaleria() {
+        limparLista();
+        recuperarUriUtils.selecionadoGaleriaMultiple(false);
+    }
+
+    private void selecionadoCamera() {
+        limparLista();
+        recuperarUriUtils.selecionadoCamera(false);
+    }
+
+    private void selecionadoDocumento() {
+        limparLista();
+        recuperarUriUtils.selecionadoDocumentoMultiple();
+    }
+
+    private void selecionadoMusica() {
+        limparLista();
+        recuperarUriUtils.selecionadoMusicaMultiple();
+    }
+
+    private void selecionadoVideo() {
+        limparLista();
+        recuperarUriUtils.selecionadoVideo(progressDialog, new RecuperarUriUtils.UriRecuperadaCallback() {
+            @Override
+            public void onRecuperado(Uri uriRecuperada) {
+                limparLista();
+                exibirProgressDialog();
+                if (uriRecuperada != null) {
+                    String timestamp = String.valueOf(System.currentTimeMillis());
+                    String nomeRandomico = UUID.randomUUID().toString();
+                    String nomeArquivo = String.format("%s%s%s%s", "video", timestamp, nomeRandomico, ".mp4");
+
+                    StorageReference mensagemRef = storageRef.child("mensagens")
+                            .child("videos")
+                            .child(idUsuario)
+                            .child(usuarioDestinatario.getIdUsuario())
+                            .child(nomeArquivo);
+                    midiaUtils.uparFotoNoStorage(mensagemRef, uriRecuperada, new MidiaUtils.UparNoStorageCallback() {
+                        @Override
+                        public void onConcluido(String urlUpada) {
+                            ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
+                            configPadraoMensagem(MidiaUtils.VIDEO, urlUpada, nomeArquivo, null);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            limparUriEOcultarProgress();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelado() {
+                limparUriEOcultarProgress();
+            }
+
+            @Override
+            public void onError(String message) {
+                limparUriEOcultarProgress();
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+            }
+        });
+    }
+
+    private void limparUriEOcultarProgress() {
+        recuperarUriUtils.limparUri();
+        if (urisSelecionadas != null && !urisSelecionadas.isEmpty()) {
+            urisSelecionadas.clear();
+        }
+        if (urlMidiaUpada != null && !urlMidiaUpada.isEmpty()) {
+            urlMidiaUpada.clear();
+        }
+        recuperarUriUtils.ocultarProgressDialog(progressDialog);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_AUDIO_PERMISSION) {
+            if (grantResults.length > 0) {
+                boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                if (permissionToRecord) {
+                    ToastCustomizado.toastCustomizadoCurto("Permissão concedida", getApplicationContext());
+                    funcoesAudio();
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Permissão negada", getApplicationContext());
+                }
+            }
+        } else if (requestCode == PermissionUtils.PERMISSION_REQUEST_CODE) {
+            if (PermissionUtils.checkPermissionResult(grantResults)) {
+                // Permissões concedidas.
+                if (tipoMidiaPermissao != null) {
+                    // Permissões da galeria já concedidas.
+                    switch (tipoMidiaPermissao) {
+                        case MidiaUtils.VIDEO:
+                            selecionadoVideo();
+                            break;
+                        case MidiaUtils.GALLERY:
+                            selecionadoGaleria();
+                            break;
+                        case MidiaUtils.CAMERA:
+                            selecionadoCamera();
+                            break;
+                        case MidiaUtils.DOCUMENT:
+                            selecionadoDocumento();
+                            break;
+                        case MidiaUtils.MUSIC:
+                            selecionadoMusica();
+                            break;
+                    }
+                }
+            } else {
+                // Permissões negadas.
+                PermissionUtils.openAppSettings(ConversationActivity.this, getApplicationContext());
+            }
+        }
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        recuperarUriUtils.handleActivityResultPhoto(requestCode, resultCode, data, new RecuperarUriUtils.UriRecuperadaCallback() {
+            @Override
+            public void onRecuperado(Uri uriRecuperada) {
+                limparLista();
+                exibirProgressDialog();
+
+                if (uriRecuperada != null) {
+                    String timestamp = String.valueOf(System.currentTimeMillis());
+                    String nomeRandomico = UUID.randomUUID().toString();
+                    String nomeArquivo = String.format("%s%s%s%s", "foto", timestamp, nomeRandomico, ".jpeg");
+
+                    StorageReference mensagemRef = storageRef.child("mensagens")
+                            .child("fotos")
+                            .child(idUsuario)
+                            .child(usuarioDestinatario.getIdUsuario())
+                            .child(nomeArquivo);
+
+                    midiaUtils.uparFotoNoStorage(mensagemRef, uriRecuperada, new MidiaUtils.UparNoStorageCallback() {
+                        @Override
+                        public void onConcluido(String urlUpada) {
+                            ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
+                            configPadraoMensagem(MidiaUtils.IMAGE, urlUpada, nomeArquivo, null);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            limparUriEOcultarProgress();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelado() {
+                limparUriEOcultarProgress();
+            }
+
+            @Override
+            public void onError(String message) {
+                limparUriEOcultarProgress();
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+            }
+        });
+
+        recuperarUriUtils.handleActivityResultDoc(requestCode, resultCode, data, new RecuperarUriUtils.MediaFileRecuperadoCallback() {
+            @Override
+            public void onRecuperado(MediaFile mediaFileDoc) {
+                String nomeDoc = mediaFileDoc.getName();
+                limparLista();
+                exibirProgressDialog();
+
+                StorageReference mensagemRef = storageRef.child("mensagens")
+                        .child("documentos")
+                        .child(idUsuario)
+                        .child(usuarioDestinatario.getIdUsuario())
+                        .child(nomeDoc);
+                midiaUtils.uparFotoNoStorage(mensagemRef, mediaFileDoc.getUri(), new MidiaUtils.UparNoStorageCallback() {
+                    @Override
+                    public void onConcluido(String urlUpada) {
+                        ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
+                        enviarMsgDoc(mediaFileDoc, urlUpada);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        limparUriEOcultarProgress();
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelado() {
+                limparUriEOcultarProgress();
+            }
+
+            @Override
+            public void onOversized() {
+                limparUriEOcultarProgress();
+            }
+
+            @Override
+            public void onError(String message) {
+                limparUriEOcultarProgress();
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+            }
+        });
+
+        recuperarUriUtils.handleActivityResultMusic(requestCode, resultCode, data, new RecuperarUriUtils.MediaFileRecuperadoCallback() {
+            @Override
+            public void onRecuperado(MediaFile mediaFileMusic) {
+                String nomeMusic = mediaFileMusic.getName();
+                limparLista();
+                exibirProgressDialog();
+
+                StorageReference mensagemRef = storageRef.child("mensagens")
+                        .child("musicas")
+                        .child(idUsuario)
+                        .child(usuarioDestinatario.getIdUsuario())
+                        .child(nomeMusic);
+                midiaUtils.uparFotoNoStorage(mensagemRef, mediaFileMusic.getUri(), new MidiaUtils.UparNoStorageCallback() {
+                    @Override
+                    public void onConcluido(String urlUpada) {
+                        ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
+                        enviarMsgMusica(mediaFileMusic, urlUpada);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        limparUriEOcultarProgress();
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelado() {
+                limparUriEOcultarProgress();
+            }
+
+            @Override
+            public void onOversized() {
+                limparUriEOcultarProgress();
+            }
+
+            @Override
+            public void onError(String message) {
+                limparUriEOcultarProgress();
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+            }
+        });
+    }
+
+    private void enviarMsgDoc(MediaFile mediaFileDoc, String urlUpada) {
+        configPadraoMensagem(MidiaUtils.DOCUMENT, urlUpada, mediaFileDoc.getName(), mediaFileDoc);
+    }
+
+    private void enviarMsgMusica(MediaFile mediaFileMusic, String urlUpada) {
+        configPadraoMensagem(MidiaUtils.MUSIC, urlUpada, mediaFileMusic.getName(), mediaFileMusic);
+    }
+
+    private void selecionadoGif() {
+        recuperarUriUtils.selecionadoGif(ConversationActivity.this.getSupportFragmentManager(), TAG, SizeUtils.MEDIUM_GIF, new RecuperarUriUtils.GifRecuperadaCallback() {
+            @Override
+            public void onRecuperado(String urlGif) {
+                exibirProgressDialog();
+                enviarMsgGif(urlGif);
+            }
+
+            @Override
+            public void onCancelado() {
+                limparUriEOcultarProgress();
+            }
+
+            @Override
+            public void onError(String message) {
+                limparUriEOcultarProgress();
+                ToastCustomizado.toastCustomizadoCurto(String.format("%s %s", getString(R.string.an_error_has_occurred), message), getApplicationContext());
+            }
+        });
+    }
+
+    private void enviarMsgGif(String conteudoMensagem) {
+        String dataNome = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+        String replaceAll = dataNome.replaceAll("[\\-\\+\\.\\^:,]", "");
+        String nomeDocumento = replaceAll + ".gif";
+        configPadraoMensagem(MidiaUtils.GIF, conteudoMensagem, nomeDocumento, null);
+    }
+
+    private void limparLista() {
+        if (urisSelecionadas != null && !urisSelecionadas.isEmpty()) {
+            urisSelecionadas.clear();
+        }
+
+        if (urlMidiaUpada != null && !urlMidiaUpada.isEmpty()) {
+            urlMidiaUpada.clear();
+        }
+
+        if (recuperarUriUtils != null) {
+            recuperarUriUtils.limparUri();
+        }
+    }
+
+    private void exibirProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.setMessage("Enviando mensagem, por favor aguarde...");
+            progressDialog.show();
         }
     }
 

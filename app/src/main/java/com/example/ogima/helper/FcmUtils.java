@@ -332,7 +332,7 @@ public class FcmUtils {
             String fotoRemetente = messageNotificacao.getFotoRemetente();
             String nomeRemetente = messageNotificacao.getNomeRemetente();
 
-            if (tipoMensagem.equals("texto")) {
+            if (tipoMensagem.equals(MidiaUtils.TEXT)) {
                 body = messageNotificacao.getConteudoMensagem();
             } else {
                 body = messageNotificacao.getConteudoMensagem();

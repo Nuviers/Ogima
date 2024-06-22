@@ -23,6 +23,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
+import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.Permissao;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
@@ -234,9 +235,9 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
 
     private String executarMusica(Mensagem mensagemRecebida) {
 
-        if (mensagemRecebida.getTipoMensagem().equals("musica")) {
+        if (mensagemRecebida.getTipoMensagem().equals(MidiaUtils.MUSIC)) {
             caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemRecebida.getIdDestinatario() + File.separator + "musicas");
-        } else if (mensagemRecebida.getTipoMensagem().equals("audio")) {
+        } else if (mensagemRecebida.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
             caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemRecebida.getIdDestinatario() + File.separator + "audios");
         }
         File file = new File(caminhoDestino, mensagemRecebida.getNomeDocumento());

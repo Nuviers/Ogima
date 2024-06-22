@@ -17,11 +17,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.PostagemActivity;
-import com.example.ogima.model.Postagem;
 import com.giphy.sdk.ui.views.GiphyDialogFragment;
-import com.github.ybq.android.spinkit.SpinKitView;
-import com.google.android.datatransport.runtime.backends.CreationContextFactory_Factory;
+import com.jaiselrahman.filepicker.activity.FilePickerActivity;
+import com.jaiselrahman.filepicker.config.Configurations;
+import com.jaiselrahman.filepicker.model.MediaFile;
 import com.luck.picture.lib.basic.PictureSelector;
 import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.SelectMimeType;
@@ -56,6 +55,9 @@ public class RecuperarUriUtils {
     private static final String VELOCIDADE = "superfast";
     private final GiphyUtils giphyUtils;
     private GiphyDialogFragment gdl;
+    private static final int SELECAO_DOCUMENTO = 500;
+    private static final int SELECAO_MUSICA = 600;
+    private VerificaTamanhoArquivo verificaTamanhoArquivo;
 
     public interface UriRecuperadaCallback {
         void onRecuperado(Uri uriRecuperada);
@@ -65,15 +67,28 @@ public class RecuperarUriUtils {
         void onError(String message);
     }
 
+    public interface MediaFileRecuperadoCallback {
+        void onRecuperado(MediaFile mediaFileDoc);
+
+        void onCancelado();
+
+        void onOversized();
+
+        void onError(String message);
+    }
+
     public interface GifRecuperadaCallback {
         void onRecuperado(String urlGif);
+
         void onCancelado();
+
         void onError(String message);
     }
 
     public RecuperarUriUtils(Activity activity, Context context) {
         selectorStyle = new PictureSelectorStyle();
         giphyUtils = new GiphyUtils();
+        verificaTamanhoArquivo = new VerificaTamanhoArquivo();
         this.activity = activity;
         this.context = context;
         configStylePictureSelector();
@@ -92,6 +107,37 @@ public class RecuperarUriUtils {
                     public void onResult(ArrayList<LocalMedia> result) {
                         limparUri();
                         if (result != null && result.size() > 0) {
+                            for (LocalMedia media : result) {
+                                String path = media.getPath();
+                                if (PictureMimeType.isHasImage(media.getMimeType())) {
+                                    openCropActivity(Uri.parse(path), destinoImagemUri(result), layoutCircular);
+                                }
+                            }
+                        } else {
+                            ToastCustomizado.toastCustomizadoCurto("Ocorreu um erro ao selecionar mídia", context);
+                        }
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        limparUri();
+                    }
+                });
+    }
+
+    public void selecionadoGaleriaMultiple(boolean layoutCircular) {
+        PictureSelector.create(activity)
+                .openGallery(SelectMimeType.ofImage())
+                .setSelectionMode(SelectModeConfig.MULTIPLE)
+                .setMaxSelectNum(4)
+                .setSelectorUIStyle(selectorStyle)
+                .setSelectMaxFileSize((long) SizeUtils.MAX_FILE_SIZE_IMAGEM * 1024 * 1024)
+                .setImageEngine(GlideEngineCustomizado.createGlideEngine())
+                .forResult(new OnResultCallbackListener<LocalMedia>() {
+                    @Override
+                    public void onResult(ArrayList<LocalMedia> result) {
+                        limparUri();
+                        if (result != null && !result.isEmpty()) {
                             for (LocalMedia media : result) {
                                 String path = media.getPath();
                                 if (PictureMimeType.isHasImage(media.getMimeType())) {
@@ -201,6 +247,31 @@ public class RecuperarUriUtils {
                 });
     }
 
+    public void selecionadoDocumentoMultiple() {
+        Intent intentDoc = new Intent(activity, FilePickerActivity.class);
+        intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                .setShowFiles(true)
+                .setShowImages(false)
+                .setShowVideos(false)
+                .setMaxSelection(4)
+                .setSkipZeroSizeFiles(true)
+                .build());
+        activity.startActivityForResult(intentDoc, SELECAO_DOCUMENTO);
+    }
+
+    public void selecionadoMusicaMultiple() {
+        Intent intentDoc = new Intent(activity, FilePickerActivity.class);
+        intentDoc.putExtra(FilePickerActivity.CONFIGS, new Configurations.Builder()
+                .setShowAudios(true)
+                .setShowFiles(false)
+                .setShowImages(false)
+                .setShowVideos(false)
+                .setMaxSelection(4)
+                .setSkipZeroSizeFiles(true)
+                .build());
+        activity.startActivityForResult(intentDoc, SELECAO_MUSICA);
+    }
+
     //*Método responsável por ajustar as proporções do corte.
     private void openCropActivity(Uri sourceUri, Uri destinationUri, boolean layoutCircular) {
         UCrop.of(sourceUri, destinationUri)
@@ -267,6 +338,50 @@ public class RecuperarUriUtils {
                     uriSelecionada = imagemRecortada;
                     callback.onRecuperado(uriSelecionada);
                     limparUri();
+                }
+            }
+        } else if (resultCode == RESULT_CANCELED) {
+            callback.onCancelado();
+        }
+    }
+
+    public void handleActivityResultDoc(int requestCode, int resultCode, Intent data, MediaFileRecuperadoCallback callback) {
+        if (requestCode == SELECAO_DOCUMENTO && resultCode == RESULT_OK) {
+            if (data != null) {
+                ArrayList<MediaFile> files = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
+                if (files != null && !files.isEmpty()) {
+                    for(MediaFile mediaFile : files){
+                        if(verificaTamanhoArquivo.verificaLimiteMB(SizeUtils.MAX_FILE_SIZE_DOCUMENT, mediaFile.getUri(), context)){
+                            callback.onRecuperado(mediaFile);
+                            limparUri();
+                        }else{
+                            callback.onOversized();
+                        }
+                    }
+                }else{
+                    callback.onCancelado();
+                }
+            }
+        } else if (resultCode == RESULT_CANCELED) {
+            callback.onCancelado();
+        }
+    }
+
+    public void handleActivityResultMusic(int requestCode, int resultCode, Intent data, MediaFileRecuperadoCallback callback) {
+        if (requestCode == SELECAO_MUSICA && resultCode == RESULT_OK) {
+            if (data != null) {
+                ArrayList<MediaFile> files = data.getParcelableArrayListExtra(FilePickerActivity.MEDIA_FILES);
+                if (files != null && !files.isEmpty()) {
+                    for(MediaFile mediaFile : files){
+                        if(verificaTamanhoArquivo.verificaLimiteMB(SizeUtils.MAX_FILE_SIZE_MUSIC, mediaFile.getUri(), context)){
+                            callback.onRecuperado(mediaFile);
+                            limparUri();
+                        }else{
+                            callback.onOversized();
+                        }
+                    }
+                }else{
+                    callback.onCancelado();
                 }
             }
         } else if (resultCode == RESULT_CANCELED) {
@@ -472,6 +587,29 @@ public class RecuperarUriUtils {
             retorno = false;
         }
         return retorno;
+    }
+
+    public String formatarTimer(long milliSeconds) {
+        String timerString = "";
+        String secondString;
+
+        int hours = (int) (milliSeconds / (1000 * 60 * 60));
+        int minutes = (int) (milliSeconds % (1000 * 60 * 60) / (1000 * 60));
+        int seconds = (int) (milliSeconds % (1000 * 60 * 60) % (1000 * 60) / 1000);
+
+        if (hours > 0) {
+            timerString = hours + ":";
+        }
+
+        if (seconds < 10) {
+            secondString = "0" + seconds;
+        } else {
+            secondString = "" + seconds;
+        }
+
+        timerString = timerString + minutes + ":" + secondString;
+
+        return timerString;
     }
 
     private void exibirProgressDialog(ProgressDialog progressDialog, String tipoMensagem) {

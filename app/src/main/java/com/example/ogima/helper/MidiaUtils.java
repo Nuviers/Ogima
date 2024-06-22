@@ -68,6 +68,11 @@ public class MidiaUtils {
     public static final String VIDEO = "video";
     public static final String IMAGE = "image";
     public static final String GIF = "gif";
+    public static final String DOCUMENT = "document";
+    public static final String MUSIC = "music";
+    public static final String AUDIO = "audio";
+    public static final String GALLERY = "gallery";
+    public static final String CAMERA = "camera";
 
     public interface UriRecuperadaCallback {
         void onRecuperado(Uri uriRecuperada);
