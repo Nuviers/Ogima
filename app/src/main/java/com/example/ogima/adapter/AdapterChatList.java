@@ -27,6 +27,7 @@ import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.TimestampUtils;
+import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Chat;
@@ -160,8 +161,13 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     holderPrincipal.txtViewDescChat.setTextColor(Color.BLACK);
                     conteudo = chat.getConteudoLastMsg();
                 } else {
-                    holderPrincipal.txtViewDescChat.setTextColor(Color.BLUE);
-                    conteudo = String.format("%s %s %s", "Mídia", "-", chat.getTipoMidiaLastMsg());
+                    if (tipoMidia.equals(MidiaUtils.NOTICE)) {
+                        holderPrincipal.txtViewDescChat.setTextColor(Color.GRAY);
+                        conteudo = String.format("%s%s%s","[",chat.getConteudoLastMsg(),"]");
+                    }else{
+                        holderPrincipal.txtViewDescChat.setTextColor(Color.BLUE);
+                        conteudo = String.format("%s %s %s", "Mídia", "-", chat.getTipoMidiaLastMsg());
+                    }
                 }
 
                 holderPrincipal.txtViewDescChat.setText(FormatarContadorUtils.abreviarTexto(conteudo, 28));

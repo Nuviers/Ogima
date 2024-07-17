@@ -635,7 +635,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
         queryInicialFiltro = firebaseRef.child("detalhesChatGrupo")
                 .child(idUsuario)
-                .orderByChild("idUsuario")
+                .orderByChild("idGrupo")
                 .equalTo(dadosGroup.getIdGrupo()).limitToFirst(1);
 
         childListenerInicioFiltro = queryInicialFiltro.addChildEventListener(new ChildEventListener() {
@@ -1580,7 +1580,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
     private void anexarNovoDado(Chat chatModificado) {
         newDataRef = firebaseRef.child("detalhesChatGrupo")
-                .child(idUsuario).orderByChild("idUsuario")
+                .child(idUsuario).orderByChild("idGrupo")
                 .equalTo(chatModificado.getIdGrupo()).limitToFirst(1);
         idsAIgnorarListeners.add(chatModificado.getIdGrupo());
         childEventListenerNewData = newDataRef.addChildEventListener(new ChildEventListener() {
@@ -1641,7 +1641,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             queryLoadMoreFiltro = null;
 
             queryLoadMoreFiltro = firebaseRef.child("detalhesChatGrupo")
-                    .child(idUsuario).orderByChild("idUsuario").equalTo(grupoPesquisa.getIdGrupo()).limitToFirst(1);
+                    .child(idUsuario).orderByChild("idGrupo").equalTo(grupoPesquisa.getIdGrupo()).limitToFirst(1);
 
             //ToastCustomizado.toastCustomizadoCurto("AOS FILTROS: " + usuarioPesquisa.getIdGrupo(), requireContext());
             //ToastCustomizado.toastCustomizadoCurto("NR FILTROS: " + aosFiltros, requireContext());

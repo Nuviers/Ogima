@@ -303,49 +303,49 @@ public class MudarWallpaperActivity extends AppCompatActivity {
     }
 
     private void verificaWallpaper() {
-        wallpaperPrivadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.getValue() != null) {
-                    Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
-                    GlideCustomizado.montarGlideFoto(getApplicationContext(),
-                            wallpaper.getUrlWallpaper(),
-                            imgViewPreviewWallpaper,
-                            android.R.color.transparent);
-                } else {
-                    wallpaperGlobalRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.getValue() != null) {
-                                Wallpaper wallpaperAll = snapshot.getValue(Wallpaper.class);
-                                //Wallpaper definido para todos chats
-                                if (wallpaperAll.getUrlWallpaper() != null) {
-                                    GlideCustomizado.montarGlideFoto(getApplicationContext(),
-                                            wallpaperAll.getUrlWallpaper(),
-                                            imgViewPreviewWallpaper,
-                                            android.R.color.transparent);
-                                }
-                            } else {
-                                //Não existe nenhum wallpaper definido
-                                imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
-                            }
-                            wallpaperGlobalRef.removeEventListener(this);
-                        }
+        if (wallpaperPlace == null || wallpaperPlace.isEmpty()) {
+            return;
+        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
+        if (wallpaperPlace.equals("onlyChat")) {
+           wallpaperPrivadoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+               @Override
+               public void onDataChange(@NonNull DataSnapshot snapshot) {
+                   if (snapshot.getValue() != null) {
+                       Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
+                       GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                               wallpaper.getUrlWallpaper(),
+                               imgViewPreviewWallpaper,
+                               android.R.color.transparent);
+                   }
+               }
 
-                        }
-                    });
+               @Override
+               public void onCancelled(@NonNull DatabaseError databaseError) {
+                   ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao recuperar seu wallpaper", getApplicationContext());
+                   imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
+               }
+           });
+        } else if (wallpaperPlace.equals("allChats")) {
+            wallpaperGlobalRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        Wallpaper wallpaper = snapshot.getValue(Wallpaper.class);
+                        GlideCustomizado.montarGlideFoto(getApplicationContext(),
+                                wallpaper.getUrlWallpaper(),
+                                imgViewPreviewWallpaper,
+                                android.R.color.transparent);
+                    }
                 }
-                wallpaperPrivadoRef.removeEventListener(this);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao recuperar seu wallpaper", getApplicationContext());
+                    imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
+                }
+            });
+        }
     }
 
     //*Método responsável por ajustar as proporções do corte.
@@ -372,19 +372,19 @@ public class MudarWallpaperActivity extends AppCompatActivity {
 
     private void salvarWallpaperLocalmente(String nomeWallpaper, String urlWallpaper, String tipoWallpaper, String idDestinatario) {
         salvarArquivoLocalmente.transformarWallpaperEmFile(urlWallpaper, nomeWallpaper, tipoWallpaper, idDestinatario, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
-                    @Override
-                    public void onFileSaved(File file) {
-                        ToastCustomizado.toastCustomizadoCurto("Sucesso wallpaper", getApplicationContext());
-                        Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-                        getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
-                    }
+            @Override
+            public void onFileSaved(File file) {
+                ToastCustomizado.toastCustomizadoCurto("Sucesso wallpaper", getApplicationContext());
+                Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
+            }
 
-                    @Override
-                    public void onSaveFailed(Exception e) {
-                        ToastCustomizado.toastCustomizado("Fail wallpaper " + e.getMessage(), getApplicationContext());
-                        Log.i("testewallpaper", "Fail - " + e.getMessage());
-                    }
-                });
+            @Override
+            public void onSaveFailed(Exception e) {
+                ToastCustomizado.toastCustomizado("Fail wallpaper " + e.getMessage(), getApplicationContext());
+                Log.i("testewallpaper", "Fail - " + e.getMessage());
+            }
+        });
     }
 
     private void removerWallpaperAnterior(String tipoWallpaper) {

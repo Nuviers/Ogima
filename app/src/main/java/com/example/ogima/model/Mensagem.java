@@ -22,8 +22,17 @@ public class Mensagem implements Serializable {
     private String talkKey;
     private Boolean exibirAviso;
     private boolean isPlaying;
+    private long timestampinteracao;
 
     public Mensagem() {
+    }
+
+    public long getTimestampinteracao() {
+        return timestampinteracao;
+    }
+
+    public void setTimestampinteracao(long timestampinteracao) {
+        this.timestampinteracao = timestampinteracao;
     }
 
     public boolean isPlaying() {

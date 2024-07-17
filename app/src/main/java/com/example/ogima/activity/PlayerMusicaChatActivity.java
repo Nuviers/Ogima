@@ -3,14 +3,19 @@ package com.example.ogima.activity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -19,19 +24,21 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 
+import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
 import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.MidiaUtils;
-import com.example.ogima.helper.Permissao;
+import com.example.ogima.helper.PermissionUtils;
+import com.example.ogima.helper.ToastCustomizado;
+import com.example.ogima.helper.UsuarioUtils;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
+import com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -53,15 +60,7 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Runnable runnable;
     private Usuario usuarioAtual;
-    private File caminhoDestino;
-
-    //Verifição de permissões necessárias
-    private String[] permissoesNecessarias = new String[]{
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.INTERNET,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.MANAGE_EXTERNAL_STORAGE
-    };
+    private CircleLineVisualizer audioVisualizer;
 
     @Override
     public void onBackPressed() {
@@ -80,6 +79,14 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (audioVisualizer != null){
+            audioVisualizer.release();
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,9 +97,6 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
         //Configurações iniciais.
         emailUsuario = autenticacao.getCurrentUser().getEmail();
         idUsuario = Base64Custom.codificarBase64(emailUsuario);
-
-        //Validar permissões necessárias para adição de fotos.
-        Permissao.validarPermissoes(permissoesNecessarias, PlayerMusicaChatActivity.this, 22);
 
         toolbarChatMusica.setTitle("");
 
@@ -110,16 +114,10 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
             imgViewPlayMusicaChat.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //Solicitar permissão de uso
-                    //exibeGifWave();
-                    //Solicitar permissão de uso
-                    imgViewPlayMusicaChat.setVisibility(View.GONE);
-                    imgViewPauseMusicaChat.setVisibility(View.VISIBLE);
-                    mediaPlayerChat.start();
-                    atualizarSeekBar();
-                    txtViewTempoAtualMusica.setVisibility(View.VISIBLE);
-                    txtViewDuracaoMusica.setVisibility(View.VISIBLE);
-                    txtViewDuracaoMusica.setText(formatarTimer(mediaPlayerChat.getDuration()));
+                    boolean permissionsGranted = PermissionUtils.requestGalleryPermissions(PlayerMusicaChatActivity.this);
+                    if (permissionsGranted) {
+                        configInicialPlay();
+                    }
                 }
             });
 
@@ -224,24 +222,99 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
 
     private void prepararMediaPlayer() {
         try {
+            Uri contentUri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContentResolver resolver = getContentResolver();
+                String diretorio = String.valueOf(retornarDiretorioDestino(mensagem));
+                Uri baseUri = MediaStore.Files.getContentUri("external");
+
+                Cursor cursor = resolver.query(baseUri, null,
+                        MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " + MediaStore.MediaColumns.RELATIVE_PATH + "=?",
+                        new String[]{mensagem.getNomeDocumento(), diretorio + "/"}, null);
+
+                if (cursor != null && cursor.moveToFirst()) {
+                    contentUri = ContentUris.withAppendedId(baseUri, cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)));
+                    cursor.close();
+                } else {
+                    ToastCustomizado.toastCustomizadoCurto("Falha ao localizar arquivo", getApplicationContext());
+                    return;
+                }
+            }else{
+                File fileMidia = retornarDiretorioOrigem(mensagem);
+                contentUri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", fileMidia);
+            }
+
             mediaPlayerChat.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayerChat.setDataSource(executarMusica(mensagem));
+            mediaPlayerChat.setDataSource(getApplicationContext(), contentUri);
+
+            UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
+                @Override
+                public void onConcluido(boolean epilepsia) {
+                    if (!epilepsia) {
+                        int audioSessionId = mediaPlayerChat.getAudioSessionId();
+                        if (audioSessionId != -1)
+                            audioVisualizer.setAudioSessionId(audioSessionId);
+                    }
+                }
+                @Override
+                public void onSemDado() {
+                }
+                @Override
+                public void onError(String message) {
+                }
+            });
             mediaPlayerChat.prepareAsync();
-            mediaPlayerChat.prepare();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Log.d("TESTEPLAYER", "ERRO: " + ex.getMessage());
         }
     }
 
-    private String executarMusica(Mensagem mensagemRecebida) {
-
-        if (mensagemRecebida.getTipoMensagem().equals(MidiaUtils.MUSIC)) {
-            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemRecebida.getIdDestinatario() + File.separator + "musicas");
-        } else if (mensagemRecebida.getTipoMensagem().equals(MidiaUtils.AUDIO)) {
-            caminhoDestino = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + File.separator + "Ogima" + File.separator + mensagemRecebida.getIdDestinatario() + File.separator + "audios");
+    private File retornarDiretorioOrigem(Mensagem mensagem) {
+        //Diretório onde está localizado o arquivo alvo.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            switch (mensagem.getTipoMensagem()) {
+                case MidiaUtils.MUSIC:
+                    return new File(Environment.DIRECTORY_MUSIC + File.separator + "Ogima" + File.separator + mensagem.getNomeDocumento());
+                case MidiaUtils.AUDIO:
+                    return new File(Environment.DIRECTORY_MUSIC + File.separator + "Ogima" + File.separator + "Audios" + File.separator + mensagem.getNomeDocumento());
+            }
+        } else {
+            switch (mensagem.getTipoMensagem()) {
+                case MidiaUtils.MUSIC:
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC + File.separator + "Ogima" + File.separator + mensagem.getNomeDocumento());
+                case MidiaUtils.AUDIO:
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC + File.separator + "Ogima" + File.separator + "Audios" + File.separator + mensagem.getNomeDocumento());
+            }
         }
-        File file = new File(caminhoDestino, mensagemRecebida.getNomeDocumento());
-        return file.getPath();
+        return null;
+    }
+
+    private File retornarDiretorioDestino(Mensagem mensagem) {
+        //Diretório onde está localizado o arquivo alvo.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            switch (mensagem.getTipoMensagem()) {
+                case MidiaUtils.MUSIC:
+                    return new File(Environment.DIRECTORY_MUSIC + File.separator + "Ogima");
+                case MidiaUtils.AUDIO:
+                    return new File(Environment.DIRECTORY_MUSIC + File.separator + "Ogima" + File.separator + "Audios");
+            }
+        } else {
+            switch (mensagem.getTipoMensagem()) {
+                case MidiaUtils.MUSIC:
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC + File.separator + "Ogima");
+                case MidiaUtils.AUDIO:
+                    return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC + File.separator + "Ogima" + File.separator + "Audios");
+            }
+        }
+        return null;
+    }
+
+    private String retornarIdAlvo(Mensagem mensagem) {
+        if (idUsuario.equals(mensagem.getIdRemetente())) {
+            //Se trata de uma mídia enviada pelo usuário atual.
+            return idUsuario;
+        }
+        return mensagem.getIdDestinatario();
     }
 
     private String formatarTimer(long milliSeconds) {
@@ -275,6 +348,27 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (PermissionUtils.checkPermissionResult(grantResults)) {
+            configInicialPlay();
+        } else {
+            // Permissões negadas.
+            PermissionUtils.openAppSettings(PlayerMusicaChatActivity.this, getApplicationContext());
+        }
+    }
+
+    private void configInicialPlay() {
+        imgViewPlayMusicaChat.setVisibility(View.GONE);
+        imgViewPauseMusicaChat.setVisibility(View.VISIBLE);
+        mediaPlayerChat.start();
+        atualizarSeekBar();
+        txtViewTempoAtualMusica.setVisibility(View.VISIBLE);
+        txtViewDuracaoMusica.setVisibility(View.VISIBLE);
+        txtViewDuracaoMusica.setText(formatarTimer(mediaPlayerChat.getDuration()));
+    }
+
     private void inicializandoComponentes() {
         txtTituloToolbarChatMusica = findViewById(R.id.txtTituloToolbarChatMusica);
         txtViewTempoAtualMusica = findViewById(R.id.txtViewTempoAtualMusica);
@@ -287,5 +381,6 @@ public class PlayerMusicaChatActivity extends AppCompatActivity {
         imgViewStopMusicaChat = findViewById(R.id.imgViewStopMusicaChat);
         imgViewCapaMusica = findViewById(R.id.imgViewCapaMusica);
         seekBarControlMusicaChat = findViewById(R.id.seekBarControlMusicaChat);
+        audioVisualizer = findViewById(R.id.blast);
     }
 }

@@ -93,6 +93,28 @@
             android:textSize="@dimen/_14ssp"
             android:visibility="gone" />
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txtViewNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_marginStart="@dimen/_8sdp"
+            android:layout_marginLeft="@dimen/_8sdp"
+            android:layout_marginRight="@dimen/_8sdp"
+            android:layout_marginEnd="@dimen/_8sdp"
+            android:background="@drawable/estilo_background_remetente"
+            android:backgroundTint="#5D6D7E"
+            android:fontFamily="@font/andada"
+            android:paddingStart="@dimen/_4sdp"
+            android:paddingLeft="@dimen/_4sdp"
+            android:paddingEnd="@dimen/_4sdp"
+            android:paddingRight="@dimen/_4sdp"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/_14ssp"
+            android:visibility="gone"
+            tools:targetApi="lollipop" />
+
         <LinearLayout
             android:id="@+id/linearAudioChat"
             android:layout_width="@dimen/_250sdp"

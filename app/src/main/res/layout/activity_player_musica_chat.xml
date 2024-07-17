@@ -56,7 +56,20 @@
         android:background="@drawable/background_caixa_texto"
         android:orientation="vertical">
 
-        <ImageView
+        <com.gauravk.audiovisualizer.visualizer.CircleLineVisualizer
+            xmlns:custom="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/blast"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_300sdp"
+            custom:avDensity="0.8"
+            custom:avType="fill"
+            android:background="@drawable/dragon"
+            custom:avColor="#FF9800"
+            android:layout_gravity="center_horizontal|bottom"
+            custom:avGravity="bottom"
+            custom:avSpeed="slow"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imgViewCapaMusica"
             android:layout_width="@dimen/_250sdp"
             android:layout_height="@dimen/_300sdp"
@@ -65,6 +78,7 @@
             android:background="#2D112539"
             android:padding="@dimen/_16sdp"
             android:scaleType="centerCrop"
+            android:visibility="gone"
             app:srcCompat="@drawable/ic_musica_postagem_white" />
     </LinearLayout>
 

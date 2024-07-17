@@ -30,6 +30,7 @@ import java.util.Objects;
 public class UsuarioUtils {
 
     public static final String FIELD_PHOTO = "photo";
+    public static final String NO_PHOTO = "noPhoto";
     public static final String FIELD_BACKGROUND = "background";
     public static final int MAX_NAME_LENGHT = 20;
     public static final int MAX_NAME_LENGHT_FOUNDER = 33;
