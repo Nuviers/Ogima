@@ -96,7 +96,6 @@ public class PostagemUtils {
         atualizarContador.acrescentarContador(atualizaNrCurtidaRef, new AtualizarContador.AtualizarContadorCallback() {
             @Override
             public void onSuccess(int contadorAtualizado) {
-                ToastCustomizado.toastCustomizadoCurto("Likes postagem " + contadorAtualizado, context);
                 AtualizaTotalNrLikePostagem(true, contadorAtualizado, postagem, callback);
             }
 

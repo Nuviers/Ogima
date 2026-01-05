@@ -11,7 +11,7 @@
         android:layout_height="@dimen/_110sdp"
         android:layout_margin="@dimen/_8sdp"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/animeprofileopera" />
+        app:srcCompat="@drawable/background_car" />
 
     <TextView
         android:id="@+id/txtViewTesteFire"

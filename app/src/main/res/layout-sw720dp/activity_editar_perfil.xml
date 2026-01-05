@@ -41,15 +41,14 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/_200sdp"
+            android:layout_height="@dimen/_320sdp"
             android:layout_marginTop="@dimen/_10sdp">
 
             <ImageView
                 android:id="@+id/imageViewFundoPerfilAlterar"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/_170sdp"
+                android:layout_height="@dimen/_215sdp"
                 android:layout_marginTop="@dimen/_8sdp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -57,21 +56,25 @@
 
             <ImageView
                 android:id="@+id/imageViewPerfilAlterar"
-                android:layout_width="@dimen/_130sdp"
-                android:layout_height="@dimen/_130sdp"
+                android:layout_width="@dimen/_150sdp"
+                android:layout_height="@dimen/_150sdp"
                 android:layout_gravity="center|center_horizontal|center_vertical"
                 android:layout_marginStart="@dimen/_8sdp"
                 android:layout_marginLeft="@dimen/_8sdp"
-                android:layout_marginTop="@dimen/_17sdp"
                 android:layout_marginEnd="@dimen/_8sdp"
                 android:layout_marginRight="@dimen/_8sdp"
-                android:layout_marginBottom="@dimen/_8sdp"
                 android:background="@drawable/circle"
-                android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:padding="@dimen/_2sdp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/imageViewFundoPerfilAlterar" />
+                app:layout_constraintTop_toTopOf="@+id/guideline87" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline87"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintGuide_percent="0.45" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -97,40 +100,30 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="@dimen/_10sdp"
-            android:paddingTop="@dimen/_10sdp"
-            android:paddingRight="@dimen/_10sdp">
+            android:layout_marginTop="@dimen/_8sdp"
+            android:orientation="horizontal">
 
-            <Switch
-                android:id="@+id/switchExibirNome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginEnd="@dimen/_2sdp"
-                android:layout_marginRight="@dimen/_2sdp"
+            <TextView
+                android:id="@+id/txtViewQRCode"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@drawable/background_caixa_texto"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_18ssp"
                 android:gravity="center"
-                android:paddingLeft="@dimen/_10sdp"
-                android:text="Exibir nome no perfil"
-                android:textSize="@dimen/_15ssp"
-                android:paddingStart="@dimen/_10sdp" />
+                android:background="@drawable/background_caixa_texto"
+                android:fontFamily="@font/andada"
+                android:text="Seu QRCode / Scan QRCode" />
 
-            <Switch
-                android:id="@+id/switchExibirApelido"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_2sdp"
-                android:layout_marginLeft="@dimen/_2sdp"
-                android:layout_marginTop="@dimen/_10sdp"
+            <ImageButton
+                android:id="@+id/imgBtnQRCode"
+                android:layout_width="@dimen/_30sdp"
+                android:layout_height="@dimen/_45sdp"
+                android:scaleType="centerCrop"
                 android:layout_weight="1"
+                android:layout_gravity="right|end"
                 android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:paddingLeft="@dimen/_10sdp"
-                android:text="Exibir apelido no perfil"
-                android:textSize="@dimen/_15ssp"
-                android:paddingStart="@dimen/_10sdp" />
+                app:srcCompat="@drawable/ic_qr_code" />
 
         </LinearLayout>
 
@@ -200,67 +193,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <View
-                android:id="@+id/view3"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_2sdp"
-                android:background="@drawable/background_caixa_texto" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/_8sdp"
-            android:paddingTop="@dimen/_10sdp">
-
-            <TextView
-                android:id="@+id/textViewApelidoExibir"
-                android:layout_width="@dimen/_70sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:text="Apelido"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view5"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:id="@+id/textViewApelidoAtual"
-                android:layout_width="@dimen/_150sdp"
-                android:layout_height="@dimen/_50sdp"
-                android:layout_weight="0.5"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:scrollbars="horizontal"
-                android:text="Apelido usuario"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view10"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.1" />
-
-            <ImageButton
-                android:id="@+id/imageButtonAlterarApelido"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_48sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_alterar_dado"
-                tools:ignore="SpeakableTextPresentCheck" />
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -336,56 +268,7 @@
                 android:background="@drawable/background_caixa_texto" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/_8sdp"
-            android:paddingTop="@dimen/_10sdp">
 
-            <TextView
-                android:id="@+id/textViewNumeroExibir"
-                android:layout_width="@dimen/_70sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:text="Meu link"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view15"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:id="@+id/textViewLinkAtual"
-                android:layout_width="@dimen/_150sdp"
-                android:layout_height="@dimen/_45sdp"
-                android:layout_weight="0.5"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:scrollbars="horizontal"
-                android:text="Link usuario"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view16"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.1" />
-
-            <ImageButton
-                android:id="@+id/imageButtonAlterarLink"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_48sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_alterar_dado"
-                tools:ignore="SpeakableTextPresentCheck" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -408,7 +291,7 @@
             android:paddingTop="@dimen/_10sdp">
 
             <TextView
-                android:id="@+id/textViewIdadeExibir"
+                android:id="@+id/textViewNumeroExibir"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/_40sdp"
                 android:layout_weight="0.1"
@@ -501,7 +384,7 @@
             <ListView
                 android:id="@+id/listViewInteresses"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/_168sdp"
+                android:layout_height="@dimen/_154sdp"
                 android:layout_marginTop="@dimen/_10sdp"
                 android:background="@drawable/background_caixa_texto">
 
@@ -532,6 +415,97 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_margin="@dimen/_8sdp">
+
+            <Switch
+                android:id="@+id/switchAddGrupo"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_45sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_2sdp"
+                android:layout_marginRight="@dimen/_2sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:gravity="center"
+                android:paddingLeft="@dimen/_10sdp"
+                android:text="Permitir ser adicionado a grupos somente de amigos"
+                android:textSize="@dimen/_15ssp" />
+
+            <Button
+                android:id="@+id/btnGruposBloqueados"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Grupos bloqueados"
+                android:textAllCaps="false"
+                android:visibility="gone"
+                android:textColor="#1228F4"
+                android:textSize="@dimen/_17ssp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView29"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/_18ssp"
+                android:layout_margin="@dimen/_8sdp"
+                android:padding="@dimen/_4sdp"
+                android:gravity="start|left"
+                android:background="@drawable/background_caixa_texto"
+                android:textColor="@android:color/white"
+                android:text="Exibir postagens e fotos somente para:" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupPrivacidadePostagens"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_4sdp">
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeTodos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:text="Todos" />
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeVinculos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:text="Somente amigos e seguidores" />
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeAmigos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:textColorHighlight="@android:color/white"
+                    android:text="Somente amigos" />
+
+                <RadioButton
+                    android:id="@+id/radioBtnPrivacidadeSeguidores"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/_14ssp"
+                    android:textColor="@android:color/white"
+                    android:text="Somente seguidores" />
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <Button
@@ -541,8 +515,19 @@
                 android:layout_marginTop="@dimen/_30sdp"
                 android:background="@drawable/background_caixa_texto"
                 android:text="Voltar"
-                android:textSize="@dimen/_16ssp"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_16ssp" />
+
+            <Button
+                android:id="@+id/btnChangePass"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_40sdp"
+                android:layout_marginTop="@dimen/_15sdp"
+                android:background="@drawable/background_caixa_texto"
+                android:text="Alterar Senha"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/_17ssp" />
 
             <Button
                 android:id="@+id/buttonDeslogar"
@@ -551,8 +536,8 @@
                 android:layout_marginTop="@dimen/_15sdp"
                 android:background="@drawable/background_caixa_texto"
                 android:text="Deslogar"
-                android:textSize="@dimen/_16ssp"
-                android:textColor="#5A2BDC" />
+                android:textColor="#5A2BDC"
+                android:textSize="@dimen/_16ssp" />
 
             <Button
                 android:id="@+id/buttonExcluirConta"

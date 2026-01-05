@@ -371,13 +371,6 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
                     Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
-
-                    ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
-
-                    //Atualizações granulares use payload na alteração
-                    //junto com a config de payload no adaper mas não use o diff
-                    //pois o diff só funciona quando é para notificaro objeto inteiro.
-
                     postagemDiffDAO.atualizarPostagem(postagemAtualizada, "descricaoPostagem");
                 }
             }
@@ -400,7 +393,6 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
     }
 
     private void adicionarPostagem(Postagem postagem) {
-        //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
         adapterFotosPostadas.updatePostagemList(listaFotos, null);
@@ -411,7 +403,6 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
         if (newPostagem != null && newPostagem.size() >= 1) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
             adapterFotosPostadas.updatePostagemList(listaFotos, null);
-            //*ToastCustomizado.toastCustomizadoCurto("Mais dados", getApplicationContext());
             setLoading(false);
         }
     }
@@ -433,7 +424,6 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
     @Override
     public void onPosicaoAnterior(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
-            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, getApplicationContext());
             mCurrentPosition = posicaoAnterior;
         }
     }
@@ -464,7 +454,6 @@ public class FotosPostadasActivity extends AppCompatActivity implements AdapterF
                         if (recyclerViewFotos != null) {
                             recyclerViewFotos.addOnScrollListener(scrollListener);
                             recyclerViewFotos.setOnTouchListener(null);
-                            ToastCustomizado.toastCustomizadoCurto("ADICIONADO LISTENER",getApplicationContext());
                         }
                         btnExcluir.setEnabled(true);
                         if (progressDialog != null && !isFinishing()

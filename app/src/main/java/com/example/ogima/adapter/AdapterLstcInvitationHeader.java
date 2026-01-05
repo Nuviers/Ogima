@@ -2,35 +2,22 @@ package com.example.ogima.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.CommunityInvitationsActivity;
-import com.example.ogima.activity.ConvitesComunidadeActivity;
-import com.example.ogima.activity.CriarComunidadeActivity;
-import com.example.ogima.activity.ListaComunidadesActivityOLD;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
 
 public class AdapterLstcInvitationHeader extends RecyclerView.Adapter<AdapterLstcInvitationHeader.HeaderViewHolder> {
 

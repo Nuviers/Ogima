@@ -217,7 +217,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
 
                     sinalizarEdicaoRef.setValue(true);
 
-                    ToastCustomizado.toastCustomizadoCurto("edicao", getApplicationContext());
                 }
             }
         }
@@ -468,7 +467,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
         }, new GiphyUtils.GiphyDialogListener() {
             @Override
             public void onGiphyDialogDismissed() {
-                ToastCustomizado.toastCustomizado("Cancelado", getApplicationContext());
                 finish();
             }
         });
@@ -575,7 +573,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
             }
         } else if (resultCode == RESULT_CANCELED) {
             arquivoMudado = false;
-            ToastCustomizado.toastCustomizadoCurto("Cancelado", getApplicationContext());
             finish();
         }
     }
@@ -651,7 +648,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
 
                 @Override
                 public void onError(String errorMessage) {
-                    ToastCustomizado.toastCustomizadoCurto("Fail " + errorMessage, getApplicationContext());
                 }
             });
         }
@@ -662,7 +658,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
             @Override
             public void onFailure(@NonNull Exception e) {
                 progressDialog.dismiss();
-                //ToastCustomizado.toastCustomizadoCurto("Erro ao enviar mensagem", getApplicationContext());
             }
         }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -782,7 +777,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestamps, getApplicationContext());
                         long timestampNegativo = -1 * timestamps;
                         dadosPostagem.put("timeStampNegativo", timestampNegativo);
                         dadosPostagem.put("dataPostagem", dataFormatada);
@@ -795,7 +789,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
                         } else if (tipoPostagem.equals("texto")) {
                             salvarDadosNoFirebase();
                         }
-                        ToastCustomizado.toastCustomizadoCurto("TIMESTAMP: " + timestampNegativo, getApplicationContext());
                     }
                 });
             }
@@ -849,7 +842,6 @@ public class CriarPostagemComunidadeActivity extends AppCompatActivity{
     private void salvarDadosNoFirebase() {
 
         if (edicaoPostagem) {
-            ToastCustomizado.toastCustomizadoCurto("Caiu em edição", getApplicationContext());
             postagemComunidadeRef = firebaseRef.child("postagensComunidade")
                     .child(idComunidade)
                     .child(postagemEdicao.getIdPostagem());

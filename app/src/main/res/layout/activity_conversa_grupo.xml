@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:scrollbarSize="@dimen/_2sdp"
-    tools:context=".activity.ConversaActivity"
+    tools:context=".activity.ConversaActivityOld"
     tools:ignore="SpeakableTextPresentCheck">
 
     <androidx.appcompat.widget.Toolbar
@@ -178,7 +178,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:scaleType="fitXY"
-            app:srcCompat="@drawable/wallpaperwaifutfour" />
+            app:srcCompat="@drawable/background_car" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerMensagensChat"

@@ -2337,7 +2337,7 @@ public class ConversaGrupoActivity extends AppCompatActivity implements View.OnF
 
     private void recuperarWallpaperPadrao() {
         // Obtém o drawable a ser utilizado como background
-        Drawable drawable = getResources().getDrawable(R.drawable.wallpaperwaifutfour);
+        Drawable drawable = getResources().getDrawable(R.drawable.background_car);
 
         // Define o drawable como background da janela
         getWindow().setBackgroundDrawable(drawable);

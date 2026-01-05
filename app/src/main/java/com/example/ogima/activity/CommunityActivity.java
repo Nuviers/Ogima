@@ -128,7 +128,6 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ToastCustomizado.toastCustomizadoCurto("ONDESTROY COMUNIDADE", getApplicationContext());
         removeValueEventListener();
         removeValueEventListenerFiltro();
         if (searchHandler != null) {
@@ -1130,9 +1129,6 @@ public class CommunityActivity extends AppCompatActivity implements AdapterPrevi
         setLoading(true);
         setFiltroPorTopico(true);
         dadoInicialPorTopico();
-        for (String conteudo : topicosSelecionados) {
-            ToastCustomizado.toastCustomizadoCurto("Filtro: " + conteudo, getApplicationContext());
-        }
     }
 
     @Override

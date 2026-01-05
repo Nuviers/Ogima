@@ -274,12 +274,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             return;
                         }
 
-                        /*
-                        for(String idSelecionado : adapterSelection.getListaSelecao()){
-                            ToastCustomizado.toastCustomizadoCurto("Selecionado: " + idSelecionado, getApplicationContext());
-                        }
-                         */
-
                         if (edicao) {
                             midiaUtils.exibirProgressDialog("", "salvarParticipantes");
                             salvarParticipantesEdicao();
@@ -454,7 +448,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             @Override
             public void onRecuperado() {
                 ocultarProgress();
-                //ToastCustomizado.toastCustomizado("INICIO CHAMADO " + idUltimoElemento, getApplicationContext());
                 childListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -506,7 +499,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                     && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Contatos.class).getIdContato())) {
                                 return;
                             }
-                            ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO INICIO", getApplicationContext());
                             logicaAtualizacao(snapshot, false);
                         }
                     }
@@ -521,7 +513,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                 return;
                             }
 
-                            ToastCustomizado.toastCustomizado("DELETE INICIO", getApplicationContext());
                             logicaRemocao(contatoRemovido, true, true);
 
                             verificaExistencia(contatoRemovido.getIdContato(), new VerificaExistenciaCallback() {
@@ -531,7 +522,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                                 && listenerHashMapNEWDATA.containsKey(contatoRemovido.getIdContato())) {
                                         } else {
-                                            ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do inicio " + contatoRemovido.getIdContato(), getApplicationContext());
                                             anexarNovoDado(contatoAtualizado);
                                         }
                                     }
@@ -668,23 +658,12 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     private void carregarMaisDados() {
         if (!isPesquisaAtivada()) {
             exibirProgress();
-            ToastCustomizado.toastCustomizadoCurto("Mais dados -_- " + idUltimoElemento, getApplicationContext());
-            if (listaContatos.size() > 1) {
-                ToastCustomizado.toastCustomizadoCurto("IdLista: " + listaContatos.get(listaContatos.size() - 1).getIdContato(), getApplicationContext());
-            }
+
             if (listaContatos.size() > 1
                     && idUltimoElemento != null && !idUltimoElemento.isEmpty()
                     && idsUsuarios != null && !idsUsuarios.isEmpty()
                     && idsUsuarios.contains(idUltimoElemento)) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA CHAT " + idUltimoElemento, getApplicationContext());
-                //NO LUGAR DE COMPARAR COM O ÚLTIMO ITEM ADICIONADO NA LISTA
-                //O CORRETO É TER UM MÉTODO SEPARADO QUE PEGA O ÚLTIMO ELEMENTO
-                //NO SERVIDOR COM O LISTENER ATIVO SEMPRE ASSIM EU COMPARO COM O ID
-                //DESSE DADO, ASSIM EU TENHO COMO SABER QUANDO A PAGINAÇÃO NÃO DEVE CONTINUAR
-                //JÁ QUE SABERIA QUE A LISTA JÁ PEGOU TODOS OS DADOS POSSÍVEIS DO SERVIDOR
-                //E NÃO TERIA MAIS DADOS ALÉM DELE, POSSO COLOCAR ESSA LÓGICA NO SCROLLISTENER
-                //E RETIRAR ESSE CÓDIGO ANTERIOR DO MÉTODO CARREGARMAISDADOS.
                 return;
             }
 
@@ -714,13 +693,11 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
 
                             if (listaContatos != null && listaContatos.size() > 1
                                     && contatoMore.getTimestampContato() < listaContatos.get(0).getTimestampContato()) {
-                                ToastCustomizado.toastCustomizadoCurto("TIME IGNORADO", getApplicationContext());
                                 ocultarProgress();
                                 setLoading(false);
                                 return;
                             }
 
-                            //*ToastCustomizado.toastCustomizadoCurto("ADICIONADO " + contatoMore.getIdUsuario(), requireContext());
                             List<Contatos> newContatos = new ArrayList<>();
                             long key = contatoMore.getTimestampContato();
                             if (lastTimestamp != -1 && key != -1) {
@@ -734,7 +711,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                                 newContatos.add(contatoMore);
                                             }
 
-                                            //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
                                             lastTimestamp = key;
 
                                             // Remove a última chave usada
@@ -791,14 +767,12 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                     if (snapshot.getValue() != null) {
                         if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                                 && idsAIgnorarListeners.contains(snapshot.getValue(Contatos.class).getIdContato())) {
-                            ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Contatos.class).getIdContato(), getApplicationContext());
                             return;
                         }
                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                 && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Contatos.class).getIdContato())) {
                             return;
                         }
-                        ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO CARREGAR + DADOS", getApplicationContext());
                         logicaAtualizacao(snapshot, false);
                     }
                 }
@@ -822,14 +796,11 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             @Override
                             public void onExistencia(boolean status, Contatos contatoAtualizado) {
 
-                                ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + contatoRemovido.getIdContato(), getApplicationContext());
-
                                 logicaRemocao(contatoRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = contatoAtualizado.getTimestampContato() <= listaContatos.get(0).getTimestampContato();
                                     if (!menorque) {
-                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + contatoRemovido.getIdContato(), getApplicationContext());
                                         anexarNovoDado(contatoAtualizado);
                                     }
                                 }
@@ -860,18 +831,14 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     private void carregarMaisDadosFiltrados(String dadoAnterior, RecuperarIdsFiltroCallback callback) {
         if (isPesquisaAtivada() && listaFiltrada != null) {
 
-            ToastCustomizado.toastCustomizadoCurto("PAGINACAO - LOAD:  " + isLoading, getApplicationContext());
-
             if (listaFiltrada.size() > 1
                     && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
                     && idsFiltrados != null && !idsFiltrados.isEmpty()
                     && idsFiltrados.contains(idUltimoElementoFiltro)) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, getApplicationContext());
                 return;
             }
 
-            //**ToastCustomizado.toastCustomizadoCurto("Last Name: " + lastName, requireContext());
             if (listaFiltrada != null && !listaFiltrada.isEmpty()
                     && lastName != null && !lastName.isEmpty()) {
 
@@ -892,7 +859,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
 
                                     if (listenerFiltroHashMap != null && !listenerFiltroHashMap.isEmpty()
                                             && listenerFiltroHashMap.containsKey(usuarioPesquisa.getIdUsuario())) {
-                                        ToastCustomizado.toastCustomizadoCurto("RETORNO PESQUISA IF " + usuarioPesquisa.getIdUsuario(), getApplicationContext());
                                         ocultarProgress();
                                         setLoading(false);
                                     } else {
@@ -996,7 +962,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
     }
 
     private void dadoInicialFiltragem(String nome, int counter) {
-        //*ToastCustomizado.toastCustomizadoCurto("Busca: " + nome, requireContext());
 
         exibirProgress();
 
@@ -1018,7 +983,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                 if (counter != searchCounter) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return counter != searchCounter", getApplicationContext());
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -1027,7 +991,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                 if (listaFiltrada != null && listaFiltrada.size() >= 1) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return listaFiltrada != null && listaFiltrada.size() >= 1", getApplicationContext());
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -1151,7 +1114,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                         && idsAIgnorarListeners.contains(snapshot.getValue(Contatos.class).getIdContato())) {
-                    ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Contatos.class).getIdContato(), getApplicationContext());
                     return;
                 }
                 if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -1164,7 +1126,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                     return;
                 }
 
-                ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH INICIO", getApplicationContext());
                 logicaAtualizacao(snapshot, false);
             }
 
@@ -1256,7 +1217,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    ToastCustomizado.toastCustomizadoCurto("Alterado pelo newdata", getApplicationContext());
                     logicaAtualizacao(snapshot, true);
                 }
             }
@@ -1265,7 +1225,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Contatos contatoRemovido = snapshot.getValue(Contatos.class);
-                    ToastCustomizado.toastCustomizado("DELETE PELO NEW DATA", getApplicationContext());
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(contatoRemovido.getIdContato())) {
                         idsAIgnorarListeners.remove(contatoRemovido.getIdContato());
@@ -1324,8 +1283,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             queryLoadMoreFiltro = firebaseRef.child("contatos")
                     .child(idUsuario).orderByChild("idContato").equalTo(usuarioPesquisa.getIdUsuario()).limitToFirst(1);
 
-            //ToastCustomizado.toastCustomizadoCurto("AOS FILTROS: " + usuarioPesquisa.getIdUsuario(), requireContext());
-            //ToastCustomizado.toastCustomizadoCurto("NR FILTROS: " + aosFiltros, requireContext());
 
             ChildEventListener childListener = new ChildEventListener() {
                 @Override
@@ -1335,13 +1292,11 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             && contatoMore.getIdContato() != null
                             && !contatoMore.getIdContato().isEmpty()) {
 
-                        //**ToastCustomizado.toastCustomizadoCurto("NEW PESQUISA: " + contatoMore.getIdUsuario(), requireContext());
                         Log.d(TAG, "Timestamp key: " + lastTimestamp);
                         Log.d(TAG, "id: " + contatoMore.getIdContato() + " time: " + contatoMore.getTimestampContato());
                         if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
                                 && idsFiltrados.contains(contatoMore.getIdContato())) {
                             Log.d(TAG, "Id já existia: " + contatoMore.getIdContato());
-                            ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + contatoMore.getIdContato(), getApplicationContext());
                             ocultarProgress();
                             setLoading(false);
                             return;
@@ -1355,7 +1310,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                                     !contatoMore.getIdContato()
                                             .equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdContato())) {
                                 newContatos.add(contatoMore);
-                                //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
                                 lastName = key;
                             }
                         }
@@ -1385,7 +1339,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
 
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(snapshot.getValue(Contatos.class).getIdContato())) {
-                        ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Contatos.class).getIdContato(), getApplicationContext());
                         return;
                     }
                     if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -1403,7 +1356,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                         return;
                     }
 
-                    ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH + DADOS " + contatoUpdate.getIdContato(), getApplicationContext());
                     logicaAtualizacao(snapshot, false);
                 }
 
@@ -1426,14 +1378,11 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             @Override
                             public void onExistencia(boolean status, Contatos contatoAtualizado) {
 
-                                ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + contatoRemovido.getIdContato(), getApplicationContext());
-
                                 logicaRemocao(contatoRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = contatoAtualizado.getTimestampContato() <= listaContatos.get(0).getTimestampContato();
                                     if (!menorque) {
-                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + contatoRemovido.getIdContato(), getApplicationContext());
                                         anexarNovoDado(contatoAtualizado);
                                     }
                                 }
@@ -1536,8 +1485,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
         if (snapshot.getValue() != null) {
             Contatos contatoAtualizado = snapshot.getValue(Contatos.class);
 
-            ToastCustomizado.toastCustomizadoCurto("BORA ATUALIZAR", getApplicationContext());
-
             if (contatoAtualizado == null || contatoAtualizado.getIdContato() == null) {
                 return;
             }
@@ -1567,7 +1514,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                     //Somente existe um listener desse contato na listagem filtrada.
                     contatoAnterior = listaFiltrada.get(posicaoChanged);
                 }
-                ToastCustomizado.toastCustomizadoCurto("Alterado: " + contatoAnterior.getIdContato(), getApplicationContext());
 
                 if (contatoAnterior.getTotalMensagens() != contatoAtualizado.getTotalMensagens()) {
                     atualizarPorPayload(contatoAtualizado, "totalMensagens");
@@ -1602,15 +1548,12 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                         }
                     });
                 }
-            } else {
-                ToastCustomizado.toastCustomizadoCurto("Hello code -1", getApplicationContext());
             }
             posicaoChanged = -1;
         }
     }
 
     private void atualizarPorPayload(Contatos contatoAtualizado, String tipoPayload) {
-        ToastCustomizado.toastCustomizadoCurto(tipoPayload, getApplicationContext());
 
         int index = posicaoChanged;
 
@@ -1619,7 +1562,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             if (isPesquisaAtivada() && referenceFiltroHashMap != null
                     && !referenceFiltroHashMap.isEmpty()
                     && referenceFiltroHashMap.containsKey(contatoAtualizado.getIdContato())) {
-                ToastCustomizado.toastCustomizadoCurto("CODE NOOOO", getApplicationContext());
                 contactDAOFiltrado.atualizarContatoPorPayload(contatoAtualizado, tipoPayload, new ContactDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1629,7 +1571,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
             }
             if (idsUsuarios != null && idsUsuarios.size() > 0
                     && idsUsuarios.contains(contatoAtualizado.getIdContato())) {
-                ToastCustomizado.toastCustomizadoCurto("CODE OK", getApplicationContext());
                 contactDiffDAO.atualizarContatoPorPayload(contatoAtualizado, tipoPayload, new ContactDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1687,7 +1628,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                             Bundle bundleUpdate = idsParaAtualizar.get(idUpdate);
                             if (index != -1) {
                                 adapterSelection.notifyItemChanged(index, bundleUpdate);
-                                ToastCustomizado.toastCustomizadoCurto("CODE NOTIFY", getApplicationContext());
                             }
                         }
                         if (contadorUpdate >= idsParaAtualizar.size()) {
@@ -1708,7 +1648,6 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                 Query userRef = referenceFiltroHashMap.get(userId);
                 ChildEventListener listener = listenerFiltroHashMap.get(userId);
                 if (userRef != null && listener != null) {
-                    ToastCustomizado.toastCustomizado("ListenerRemovido: " + userId, getApplicationContext());
                     userRef.removeEventListener(listener);
                 }
 
@@ -1872,13 +1811,11 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                 ChildEventListener listener = listenerHashMap.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
-                    //**ToastCustomizado.toastCustomizadoCurto("Clear", requireContext());
                 }
                 contadorRemocaoListener++;
                 if (contadorRemocaoListener == referenceHashMap.size()) {
                     referenceHashMap.clear();
                     listenerHashMap.clear();
-                    ToastCustomizado.toastCustomizadoCurto("LIMPO", getApplicationContext());
                 }
             }
         }
@@ -1892,13 +1829,11 @@ public class AddGroupUsersActivity extends AppCompatActivity implements AdapterU
                 ChildEventListener listener = listenerHashMapNEWDATA.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
-                    //**ToastCustomizado.toastCustomizadoCurto("Clear", requireContext());
                 }
                 contadorRemocaoListenerNEWDATA++;
                 if (contadorRemocaoListenerNEWDATA == referenceHashMapNEWDATA.size()) {
                     referenceHashMapNEWDATA.clear();
                     listenerHashMapNEWDATA.clear();
-                    ToastCustomizado.toastCustomizadoCurto("LIMPO NEW DATA", getApplicationContext());
                 }
             }
         }

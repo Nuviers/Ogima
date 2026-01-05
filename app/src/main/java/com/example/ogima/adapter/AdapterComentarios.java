@@ -632,11 +632,11 @@ public class AdapterComentarios extends RecyclerView.Adapter<AdapterComentarios.
                 if (snapshot.getValue() != null) {
                     dadosUsuarios = snapshot.getValue(Usuario.class);
                     if (dadosUsuarios.getMinhaFoto() != null) {
-                        if (meusDadosUsuario.getEpilepsia().equals("Sim")) {
+                        if (meusDadosUsuario.isStatusEpilepsia()) {
                             GlideCustomizado.montarGlideEpilepsia(context,
                                     dadosUsuarios.getMinhaFoto(), holder.imgViewUserComentario,
                                     android.R.color.transparent);
-                        } else if (meusDadosUsuario.getEpilepsia().equals("Não")) {
+                        } else if (!meusDadosUsuario.isStatusEpilepsia()) {
                             GlideCustomizado.montarGlide(context, dadosUsuarios.getMinhaFoto(),
                                     holder.imgViewUserComentario, android.R.color.transparent);
                         }

@@ -10,3 +10,7 @@ include ':app'
 rootProject.name='Ogima'
 
 include ':matisse'
+include ':miguelcatalan_materialsearchview'
+include ':gauravk95_audiovisualizer'
+include ':ZXingLite'
+include ':ArthurHub_AndroidImageCropper'

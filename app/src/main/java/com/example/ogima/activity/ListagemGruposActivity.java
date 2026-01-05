@@ -193,7 +193,7 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
     private void configInicial() {
         setSupportActionBar(toolbarIncPadrao);
         setTitle("");
-        txtViewTitleToolbar.setText(getString(R.string.group));
+        txtViewTitleToolbar.setText("Grupos/Chat de comunidade");
         meusGruposDiffDAO = new GrupoDiffDAO(listaMeusGrupos, adapterMeuGrupo);
         gruposBloqueadosDiffDAO = new GrupoDiffDAO(listaGruposBloqueados, adapterGrupoBloqueado);
         gruposSeguindoDiffDAO = new GrupoDiffDAO(listaGruposSeguindo, adapterGrupoSeguindo);
@@ -303,7 +303,7 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_communities), ":", error.getCode()), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_groups), ":", error.getCode()), getApplicationContext());
             }
         });
     }
@@ -359,7 +359,7 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_communities), ":", error.getCode()), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_groups), ":", error.getCode()), getApplicationContext());
             }
         });
     }
@@ -415,7 +415,7 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_communities), ":", error.getCode()), getApplicationContext());
+                ToastCustomizado.toastCustomizado(String.format("%s%s %s", getString(R.string.error_recovering_my_groups), ":", error.getCode()), getApplicationContext());
             }
         });
     }
@@ -477,7 +477,6 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
             if (grupoAtualizado == null || grupoAtualizado.getIdGrupo() == null) {
                 return;
             }
-            ToastCustomizado.toastCustomizado("Load: " + tipoOperacao, getApplicationContext());
             int posicaoAtualizada = -1;
             if (tipoOperacao.equals("my")) {
                 posicaoAtualizada = adapterMeuGrupo.findPositionInList(grupoAtualizado.getIdGrupo());
@@ -498,7 +497,6 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
                         && verificaRelacao(referenceHashMapFollowing, grupoAtualizado.getIdGrupo())) {
                     grupoAnterior = listaGruposSeguindo.get(posicaoAtualizada);
                 }
-                ToastCustomizado.toastCustomizadoCurto("Alterado: " + grupoAnterior.getIdGrupo(), getApplicationContext());
                 if (!grupoAnterior.getNomeGrupo().equals(grupoAtualizado.getNomeGrupo())) {
                     atualizarPorPayload(posicaoAtualizada, grupoAtualizado, "nomeGrupo", tipoOperacao);
                 }
@@ -674,7 +672,6 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
                 if (contadorRemocaoMy == referenceHashMapMy.size()) {
                     referenceHashMapMy.clear();
                     listenerHashMapMy.clear();
-                    ToastCustomizado.toastCustomizadoCurto("MY LIMPO", getApplicationContext());
                 }
             }
         }
@@ -693,7 +690,6 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
                 if (contadorRemocaoBlocked == referenceHashMapBlocked.size()) {
                     referenceHashMapBlocked.clear();
                     listenerHashMapBlocked.clear();
-                    ToastCustomizado.toastCustomizadoCurto("BLOCKED LIMPO", getApplicationContext());
                 }
             }
         }
@@ -712,7 +708,6 @@ public class ListagemGruposActivity extends AppCompatActivity implements Adapter
                 if (contadorRemocaoFollowing == referenceHashMapFollowing.size()) {
                     referenceHashMapFollowing.clear();
                     listenerHashMapFollowing.clear();
-                    ToastCustomizado.toastCustomizadoCurto("FOLLOWING LIMPO", getApplicationContext());
                 }
             }
         }

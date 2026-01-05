@@ -110,8 +110,6 @@ public class AdapterPaginacaoPesquisa extends RecyclerView.Adapter<RecyclerView.
 
                 if (dadoUser.getIdUsuario().equals(usuario.getIdUsuario())) {
 
-                    ToastCustomizado.toastCustomizado("BOA",context);
-
                     holderPrincipal.txtViewDataView.setText(usuario.getDataView());
 
                     if (dadoUser.getMinhaFoto() != null && !dadoUser.getMinhaFoto().isEmpty()) {

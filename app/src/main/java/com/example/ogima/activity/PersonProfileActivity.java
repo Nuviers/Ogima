@@ -107,6 +107,7 @@ public class PersonProfileActivity extends AppCompatActivity {
     private ValueEventListener listenerBlockVisitante;
     private DatabaseReference blockUserVisitanteRef;
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -150,7 +151,19 @@ public class PersonProfileActivity extends AppCompatActivity {
                                             dadosView.put(caminhoView + "timeStampView", timestampNegativo);
                                             dadosView.put(caminhoView + "timestampValidity", timestamp12Horas);
                                             dadosView.put(caminhoView + "dataView", dataFormatada);
-                                            firebaseRef.updateChildren(dadosView);
+                                            DatabaseReference salvarViewNoUsuario = firebaseRef.child("usuarios")
+                                                            .child(idDonoDoPerfil).child("viewsPerfil");
+
+                                            atualizarContador.acrescentarContador(salvarViewNoUsuario, new AtualizarContador.AtualizarContadorCallback() {
+                                                @Override
+                                                public void onSuccess(int contadorAtualizado) {
+                                                    firebaseRef.updateChildren(dadosView);
+                                                }
+
+                                                @Override
+                                                public void onError(String errorMessage) {
+                                                }
+                                            });
                                         }
                                     }
 
@@ -420,8 +433,11 @@ public class PersonProfileActivity extends AppCompatActivity {
                 imgButtonIniciarConversa.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent intent = new Intent(getApplicationContext(), ConversaActivity.class);
-                        intent.putExtra("usuario", usuarioAtual);
+
+
+
+                        Intent intent = new Intent(getApplicationContext(), ConversationActivity.class);
+                        intent.putExtra("usuarioDestinatario", usuarioAtual);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                         //finish();
@@ -568,7 +584,6 @@ public class PersonProfileActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot snapshotChildren : snapshot.getChildren()){
                     snapshotChildren.getRef().removeValue();
-                    ToastCustomizado.toastCustomizado("Excluído view anterior", getApplicationContext());
                 }
                 callback.onConcluido();
             }
@@ -947,10 +962,8 @@ public class PersonProfileActivity extends AppCompatActivity {
                 switch (menuItem.getItemId()) {
                     case R.id.blockUser:
                         tratarBlock(bloquearUsuario);
-                        ToastCustomizado.toastCustomizadoCurto("Block", getApplicationContext());
                         break;
                     case R.id.denunciaBlockUser:
-                        ToastCustomizado.toastCustomizadoCurto("Denunciar", getApplicationContext());
                         denunciarUsuario();
                         break;
                 }
@@ -964,9 +977,6 @@ public class PersonProfileActivity extends AppCompatActivity {
                 .child(idDonoDoPerfil).child(idVisitante);
 
         if (bloquear) {
-            ToastCustomizado.toastCustomizadoCurto("Bloquear", getApplicationContext());
-
-
             //Salvando dados do block
             HashMap<String, Object> dadosBlock = new HashMap<>();
             dadosBlock.put("idUsuario", idDonoDoPerfil);
@@ -984,7 +994,6 @@ public class PersonProfileActivity extends AppCompatActivity {
             });
 
         } else {
-            ToastCustomizado.toastCustomizadoCurto("Desbloquear", getApplicationContext());
             salvarBlockRef.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {

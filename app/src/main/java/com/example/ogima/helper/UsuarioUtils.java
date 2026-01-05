@@ -103,20 +103,25 @@ public class UsuarioUtils {
         void onError(String message);
     }
 
-    public interface RecuperarNomeCallback{
+    public interface RecuperarNomeCallback {
         void onRecuperado(String nome);
+
         void onError(String message);
     }
 
-    public interface RecuperarIdsMinhasComunidadesCallback{
+    public interface RecuperarIdsMinhasComunidadesCallback {
         void onRecuperado(ArrayList<String> idsComunidades);
+
         void onNaoExiste();
+
         void onError(String message);
     }
 
-    public interface RecuperarIdsMeusGruposCallback{
+    public interface RecuperarIdsMeusGruposCallback {
         void onRecuperado(ArrayList<String> idsGrupos);
+
         void onNaoExiste();
+
         void onError(String message);
     }
 
@@ -161,27 +166,43 @@ public class UsuarioUtils {
             emailUsuario = autenticacao.getCurrentUser().getEmail();
             idUsuario = Base64Custom.codificarBase64(emailUsuario);
 
+            DatabaseReference verificaSeExisteUsuarioRef = firebaseRef.child("usuarios")
+                    .child(idUsuario);
+
             DatabaseReference salvarStatusOnlineRef = firebaseRef.child("usuarios")
                     .child(idUsuario).child("online");
 
-            final String TAG = "StatusOnline";
-
-            if (statusOnline) {
-                salvarStatusOnlineRef.onDisconnect().setValue(false);
-                Log.d(TAG, "Online");
-            } else {
-                Log.d(TAG, "Offline");
-            }
-
-            salvarStatusOnlineRef.setValue(statusOnline).addOnSuccessListener(new OnSuccessListener<Void>() {
+            verificaSeExisteUsuarioRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onSuccess(Void unused) {
-                    Log.d(TAG, "Atualizado status - " + statusOnline);
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.getValue() != null) {
+                        final String TAG = "StatusOnline";
+
+                        if (statusOnline) {
+                            salvarStatusOnlineRef.onDisconnect().setValue(false);
+                            Log.d(TAG, "Online");
+                        } else {
+                            Log.d(TAG, "Offline");
+                        }
+
+                        salvarStatusOnlineRef.setValue(statusOnline).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Log.d(TAG, "Atualizado status - " + statusOnline);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d(TAG, "Error " + e.getMessage());
+                            }
+                        });
+                    }
+                    verificaSeExisteUsuarioRef.removeEventListener(this);
                 }
-            }).addOnFailureListener(new OnFailureListener() {
+
                 @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.d(TAG, "Error " + e.getMessage());
+                public void onCancelled(@NonNull DatabaseError error) {
+
                 }
             });
         } catch (Exception ex) {
@@ -473,7 +494,7 @@ public class UsuarioUtils {
         });
     }
 
-    public static void recuperarNome(Context context, String idAlvo, RecuperarNomeCallback callback){
+    public static void recuperarNome(Context context, String idAlvo, RecuperarNomeCallback callback) {
         DatabaseReference firebaseRef = ConfiguracaoFirebase.getFirebaseDataBase();
         DatabaseReference recuperarNomeRef = firebaseRef.child("usuarios").child(idAlvo).child("nomeUsuario");
         recuperarNomeRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -494,7 +515,7 @@ public class UsuarioUtils {
         });
     }
 
-    public static void recuperarIdsComunidades(Context context, String idAlvo, RecuperarIdsMinhasComunidadesCallback callback){
+    public static void recuperarIdsComunidades(Context context, String idAlvo, RecuperarIdsMinhasComunidadesCallback callback) {
         if (idAlvo == null
                 || idAlvo.isEmpty()) {
             callback.onError(context.getString(R.string.error_recovering_data));
@@ -507,15 +528,16 @@ public class UsuarioUtils {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {
+                    };
                     ArrayList<String> listaIds = snapshot.getValue(t);
                     if (listaIds != null
                             && listaIds.size() > 0) {
                         callback.onRecuperado(listaIds);
-                    }else{
+                    } else {
                         callback.onNaoExiste();
                     }
-                }else{
+                } else {
                     callback.onNaoExiste();
                 }
                 recuperarIdsRef.removeEventListener(this);
@@ -528,7 +550,7 @@ public class UsuarioUtils {
         });
     }
 
-    public static void recuperarIdsGrupos(Context context, String idAlvo, RecuperarIdsMeusGruposCallback callback){
+    public static void recuperarIdsGrupos(Context context, String idAlvo, RecuperarIdsMeusGruposCallback callback) {
         if (idAlvo == null
                 || idAlvo.isEmpty()) {
             callback.onError(context.getString(R.string.error_recovering_data));
@@ -541,15 +563,16 @@ public class UsuarioUtils {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
-                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {};
+                    GenericTypeIndicator<ArrayList<String>> t = new GenericTypeIndicator<ArrayList<String>>() {
+                    };
                     ArrayList<String> listaIds = snapshot.getValue(t);
                     if (listaIds != null
                             && listaIds.size() > 0) {
                         callback.onRecuperado(listaIds);
-                    }else{
+                    } else {
                         callback.onNaoExiste();
                     }
-                }else{
+                } else {
                     callback.onNaoExiste();
                 }
                 recuperarIdsRef.removeEventListener(this);

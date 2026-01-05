@@ -285,7 +285,7 @@ public class ChatRandomActivity extends AppCompatActivity implements View.OnFocu
     }
 
     private void wallpaperPadrao() {
-        Drawable drawable = getResources().getDrawable(R.drawable.backgroundblueteste);
+        Drawable drawable = getResources().getDrawable(R.drawable.dragon);
 
         // Define o drawable como background da janela
         getWindow().setBackgroundDrawable(drawable);

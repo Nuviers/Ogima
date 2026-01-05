@@ -158,7 +158,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
         if (adapterFuncoesPostagem != null && linearLayoutManager != null
                 && mCurrentPosition == -1) {
             mCurrentPosition = linearLayoutManager.findFirstVisibleItemPosition();
-            //ToastCustomizado.toastCustomizadoCurto("Find " + mCurrentPosition, getApplicationContext());
         }
 
         if (mCurrentPosition == -1) {
@@ -176,8 +175,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
 
             postagemDiffDAO.limparListaPostagems();
             idsPostagens.clear();
-
-            ToastCustomizado.toastCustomizadoCurto("onStop", getApplicationContext());
         }
     }
 
@@ -203,8 +200,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
         idsPostagens.clear();
 
         mCurrentPosition = -1;
-
-        ToastCustomizado.toastCustomizadoCurto("onDestroy", getApplicationContext());
     }
 
     @Override
@@ -362,7 +357,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
                                             break;
                                         } else {
                                             currentVideoVisible = -1;
-                                            //ToastCustomizado.toastCustomizadoCurto("Pode parar",getApplicationContext());
                                         }
                                     } else {
                                         currentVideoVisible = -1;
@@ -430,10 +424,8 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
                     List<Postagem> newPostagem = new ArrayList<>();
                     long key = snapshot.child("timeStampNegativo").getValue(Long.class);
-                    //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
                     if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
                         newPostagem.add(snapshot.getValue(Postagem.class));
                         lastTimestamp = key;
@@ -455,11 +447,9 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
                 if (snapshot.getValue() != null) {
                     Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
 
-                    ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
-
                     //Atualizações granulares use payload na alteração
                     //junto com a config de payload no adaper mas não use o diff
-                    //pois o diff só funciona quando é para notificaro objeto inteiro.
+                    //pois o diff só funciona quando é para notificar o objeto inteiro.
 
                     postagemDiffDAO.atualizarPostagem(postagemAtualizada, "descricaoPostagem");
                     postagemDiffDAO.atualizarPostagem(postagemAtualizada, "interessesPostagem");
@@ -468,23 +458,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                /*
-                //melhor deixar comentado, somente exclusão pelo
-                //próprio usuário faz sentido.
-                if (snapshot.getValue() != null) {
-
-                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
-                    postagemDiffDAO.removerPostagem(postagemRemovida);
-                    //ToastCustomizado.toastCustomizadoCurto("Postagem removida com sucesso",getApplicationContext());
-                    Log.d("PAG-On", "Postagem removida com sucesso");
-
-                    // Notifica o adapter das mudanças usando o DiffUtil
-                    adapterPostagens.updatePostagemList(listaPostagens);
-                    //ToastCustomizado.toastCustomizadoCurto("Adapter notificado com sucesso",getApplicationContext());
-                    Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
-
-                }
-                 */
             }
 
             @Override
@@ -505,13 +478,11 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
         if (newPostagem != null && newPostagem.size() >= 1) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
             adapterFuncoesPostagem.updatePostagemList(listaPostagens, null);
-            //*ToastCustomizado.toastCustomizadoCurto("Mais dados", getApplicationContext());
             setLoading(false);
         }
     }
 
     private void adicionarPostagem(Postagem postagem) {
-        //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
         adapterFuncoesPostagem.updatePostagemList(listaPostagens, null);
@@ -536,7 +507,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
     @Override
     public void onPosicaoAnterior(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
-            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, getApplicationContext());
             mCurrentPosition = posicaoAnterior;
         }
     }
@@ -574,7 +544,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
                             if (proximaPosicao != -1) {
                                 RecyclerView.ViewHolder viewHolder = recyclerViewPostagem.findViewHolderForAdapterPosition(proximaPosicao);
                                 if (viewHolder instanceof AdapterFuncoesPostagem.VideoViewHolder) {
-                                    ToastCustomizado.toastCustomizadoCurto("POSIÇÃO - " + proximaPosicao, getApplicationContext());
                                     AdapterFuncoesPostagem.VideoViewHolder videoViewHolder = (AdapterFuncoesPostagem.VideoViewHolder) viewHolder;
                                     videoViewHolder.iniciarExoVisivel();
                                     currentVideoVisible = proximaPosicao;
@@ -588,7 +557,6 @@ public class DetalhesPostagemActivity extends AppCompatActivity implements Adapt
                         if (recyclerViewPostagem != null) {
                             recyclerViewPostagem.addOnScrollListener(scrollListener);
                             recyclerViewPostagem.setOnTouchListener(null);
-                            //ToastCustomizado.toastCustomizadoCurto("ADICIONADO LISTENER",getApplicationContext());
                         }
                         imgBtnExcluir.setEnabled(true);
                         if (progressDialog != null && !isFinishing()

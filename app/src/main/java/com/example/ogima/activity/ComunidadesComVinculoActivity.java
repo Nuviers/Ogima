@@ -407,7 +407,6 @@ public class ComunidadesComVinculoActivity extends AppCompatActivity implements 
     @Override
     public void onRecuperaPosicao(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
-            ToastCustomizado.toastCustomizado("Position: " + posicaoAnterior, getApplicationContext());
             mCurrentPosition = posicaoAnterior;
         }
     }

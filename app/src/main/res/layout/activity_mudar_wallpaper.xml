@@ -106,7 +106,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayoutSelecionarWallpaper"
-        app:srcCompat="@drawable/wallpaperwaifutfour" />
+        app:srcCompat="@drawable/background_car" />
 
     <TextView
         android:id="@+id/textView37"

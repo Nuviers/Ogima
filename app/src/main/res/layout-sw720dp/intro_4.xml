@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/couplestwo" />
+        app:srcCompat="@drawable/banner_final_chat_comum" />
 
     <TextView
         android:id="@+id/textIntroParceiros"

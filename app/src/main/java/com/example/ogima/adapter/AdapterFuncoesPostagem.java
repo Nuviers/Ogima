@@ -274,7 +274,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                     if (bundle.containsKey("descricaoPostagem")) {
                         String novaDescricao = bundle.getString("descricaoPostagem");
                         postagemAtual.setDescricaoPostagem(novaDescricao);
-                        ToastCustomizado.toastCustomizadoCurto("BOA", context);
                         if (holder instanceof VideoViewHolder) {
                             ((VideoViewHolder) holder).atualizarDescricao(novaDescricao);
                         } else if (holder instanceof PhotoViewHolder) {
@@ -285,7 +284,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                             ((TextViewHolder) holder).exibirPostagemTexto(novaDescricao);
                         }
                     } else if (bundle.containsKey("interessesPostagem")) {
-                        ToastCustomizado.toastCustomizadoCurto("BOA INTERESSE", context);
                         ArrayList<String> novosInteresses = new ArrayList<>();
                         novosInteresses = bundle.getStringArrayList("interessesPostagem");
                         postagemAtual.setListaInteressesPostagem(novosInteresses);
@@ -705,7 +703,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                     isControllerVisible = false;
 
                     if (callback != null) {
-                        ToastCustomizado.toastCustomizadoCurto("LIBERO EXO", context);
                         removerPostagemListener.onPostagemRemocao(postagem, position, imgBtnExcluirPostagem);
                     }
                 }
@@ -919,8 +916,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                 public void onUsuarioRecuperado(Usuario usuarioAtual, String nomeUsuarioAjustado, Boolean epilepsia, ArrayList<String> listaIdAmigos, ArrayList<String> listaIdSeguindo, String fotoUsuario, String fundoUsuario) {
                     if (epilepsia) {
 
-                        ToastCustomizado.toastCustomizadoCurto("Epilepsia", context);
-
                         GlideCustomizado.montarGlideCenterInsideEpilepsia(context,
                                 urlPostagem, imgViewGifPostagem, android.R.color.transparent);
                     } else {
@@ -1079,7 +1074,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                 if (epilepsia) {
 
                     if (usuarioAtual.getMinhaFoto() != null) {
-                        ToastCustomizado.toastCustomizadoCurto("Foto", context);
                         GlideCustomizado.montarGlideEpilepsia(context,
                                 usuarioAtual.getMinhaFoto(), imgViewFoto, android.R.color.transparent);
                     }
@@ -1356,7 +1350,6 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                     if (idPostagensCurtidas != null && idPostagensCurtidas.size() >= 0) {
 
                         if (idPostagensCurtidas.contains(postagemSelecionada.getIdPostagem())) {
-                            ToastCustomizado.toastCustomizadoCurto("Desfazer curtida", context);
                             atualizarContadorLike(postagemSelecionada, verificaCurtidasPostagemRef,
                                     imgBtnLikePostagem, txtViewNrLikes, true, idPostagensCurtidas);
                         } else {
@@ -1418,7 +1411,7 @@ public class AdapterFuncoesPostagem extends RecyclerView.Adapter<RecyclerView.Vi
                                 salvarCurtidaNoUsuarioRef.removeValue();
                             }
 
-                            ToastCustomizado.toastCustomizadoCurto("Postagem desfeita com sucesso " + contadorAtualizado, context);
+                            ToastCustomizado.toastCustomizadoCurto("Postagem descurtida com sucesso " + contadorAtualizado, context);
                             exibirContadorLikeUI(imgBtnLikePostagem, postagemSelecionada, txtViewNrLikes);
                         }
                     }).addOnFailureListener(new OnFailureListener() {

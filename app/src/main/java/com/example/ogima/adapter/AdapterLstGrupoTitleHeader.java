@@ -46,9 +46,9 @@ public class AdapterLstGrupoTitleHeader extends RecyclerView.Adapter<RecyclerVie
         if (holder instanceof HeaderViewHolder) {
             HeaderViewHolder holderPrincipal = (HeaderViewHolder) holder;
             if (existemGrupos) {
-                holderPrincipal.txtViewMsgSemComunidades.setVisibility(View.GONE);
+                holderPrincipal.txtViewMsgSemGrupos.setVisibility(View.GONE);
             } else  {
-                holderPrincipal.txtViewMsgSemComunidades.setVisibility(View.VISIBLE);
+                holderPrincipal.txtViewMsgSemGrupos.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -61,7 +61,7 @@ public class AdapterLstGrupoTitleHeader extends RecyclerView.Adapter<RecyclerVie
     private class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         private LinearLayout linearLayoutLstcTitle;
-        private TextView txtViewTitle, txtViewMsgSemComunidades;
+        private TextView txtViewTitle, txtViewMsgSemGrupos;
         private ImageButton imgBtnLstcPublica;
 
         public HeaderViewHolder(@NonNull View itemView) {
@@ -70,7 +70,7 @@ public class AdapterLstGrupoTitleHeader extends RecyclerView.Adapter<RecyclerVie
             linearLayoutLstcTitle = itemView.findViewById(R.id.linearLayoutLstcTitle);
             txtViewTitle = itemView.findViewById(R.id.txtViewLstcTitle);
             imgBtnLstcPublica = itemView.findViewById(R.id.imgBtnLstcPublica);
-            txtViewMsgSemComunidades = itemView.findViewById(R.id.txtViewMsgSemComunidades);
+            txtViewMsgSemGrupos = itemView.findViewById(R.id.txtViewMsgSemComunidades);
 
             if (tipoTitulo == null || tipoTitulo.isEmpty()) {
                 return;
@@ -80,27 +80,27 @@ public class AdapterLstGrupoTitleHeader extends RecyclerView.Adapter<RecyclerVie
                 case Grupo.PUBLIC_GROUP:
                     imgBtnLstcPublica.setVisibility(View.VISIBLE);
                     titulo = Grupo.PUBLIC_GROUP;
-                    msgSemGrupo = context.getString(R.string.no_public_community);
+                    msgSemGrupo = context.getString(R.string.no_public_group);
                     break;
                 case Grupo.GROUP_FOLLOWING:
                     titulo = Grupo.GROUP_FOLLOWING;
-                    msgSemGrupo = context.getString(R.string.not_following_community);
+                    msgSemGrupo = context.getString(R.string.not_following_group);
                     break;
                 case Grupo.MY_GROUP:
                     titulo = Grupo.MY_GROUP;
-                    msgSemGrupo = context.getString(R.string.you_dont_have_community);
+                    msgSemGrupo = context.getString(R.string.you_dont_have_group);
                     break;
                 case Grupo.BLOCKED_GROUP:
                     titulo = Grupo.BLOCKED_GROUP;
-                    msgSemGrupo = context.getString(R.string.not_following_community);
+                    msgSemGrupo = context.getString(R.string.not_following_group);
                     break;
                 case Grupo.ALL_GROUPS:
                     titulo = Grupo.ALL_GROUPS;
-                    msgSemGrupo = context.getString(R.string.there_are_no_communities);
+                    msgSemGrupo = context.getString(R.string.there_are_no_group);
                     break;
             }
             txtViewTitle.setText(FormatarContadorUtils.abreviarTexto(titulo, 40));
-            txtViewMsgSemComunidades.setText(msgSemGrupo);
+            txtViewMsgSemGrupos.setText(msgSemGrupo);
         }
     }
 }

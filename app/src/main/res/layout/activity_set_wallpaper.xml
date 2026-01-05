@@ -72,7 +72,7 @@
         android:layout_marginEnd="@dimen/_12sdp"
         android:layout_marginRight="@dimen/_12sdp"
         android:scaleType="fitXY"
-        app:srcCompat="@drawable/wallpaperwaifutfour" />
+        app:srcCompat="@drawable/background_car" />
 
     <LinearLayout
         android:layout_width="match_parent"

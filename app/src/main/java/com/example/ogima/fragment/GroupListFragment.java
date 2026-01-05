@@ -424,7 +424,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                                             && listenerHashMapNEWDATA.containsKey(chat.getIdGrupo())) {
                                         return;
                                     }
-                                    ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + chat.getIdGrupo(), requireContext());
                                     anexarNovoDado(chat);
                                 }
                             }
@@ -442,7 +441,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                                     && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Chat.class).getIdGrupo())) {
                                 return;
                             }
-                            ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO INICIO", requireContext());
                             logicaAtualizacao(snapshot, false);
                         }
                     }
@@ -456,8 +454,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                                 //O próprio listenernewdata vai cuidar da remoção desse dado.
                                 return;
                             }
-
-                            ToastCustomizado.toastCustomizado("DELETE INICIO", requireContext());
                             logicaRemocao(chatRemovido, true, true);
 
                             verificaExistencia(chatRemovido.getIdGrupo(), new VerificaExistenciaCallback() {
@@ -467,7 +463,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                                 && listenerHashMapNEWDATA.containsKey(chatRemovido.getIdGrupo())) {
                                         } else {
-                                            ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do inicio " + chatRemovido.getIdGrupo(), requireContext());
                                             anexarNovoDado(chatAtualizado);
                                         }
                                     }
@@ -498,7 +493,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
     }
 
     private void dadoInicialFiltragem(String nome, int counter) {
-        //*ToastCustomizado.toastCustomizadoCurto("Busca: " + nome, requireContext());
 
         exibirProgress();
         queryInicialFind = firebaseRef.child("group_chats_by_name")
@@ -512,7 +506,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                 if (counter != searchCounter) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return counter != searchCounter", requireContext());
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -521,7 +514,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                 if (listaFiltrada != null && listaFiltrada.size() >= 1) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return listaFiltrada != null && listaFiltrada.size() >= 1", requireContext());
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -570,8 +562,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             @Override
             public void onRecuperado(Grupo dadosGrupo) {
 
-                ToastCustomizado.toastCustomizadoCurto("Grupo: " + dadosGrupo.getIdGrupo(), requireContext());
-
                 chatDiffDAO.adicionarChat(chatAlvo);
                 chatDiffDAO.adicionarIdAoSet(idsGrupos, dadosGrupo.getIdGrupo());
 
@@ -599,7 +589,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                         if (travar != 0) {
                             if (areFirstThreeItemsVisible(recyclerView)) {
                                 int newPosition = 0; // A posição para a qual você deseja rolar
-                                //*ToastCustomizado.toastCustomizadoCurto("SCROLL", requireContext());
                                 recyclerView.scrollToPosition(newPosition);
                             }
                         }
@@ -617,7 +606,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             public void onError(String message) {
                 ocultarProgress();
                 setLoading(false);
-                ToastCustomizado.toastCustomizado("Ocorreu um erro ao recuperar suas conversas.", requireContext());
             }
         });
     }
@@ -682,7 +670,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                         && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdGrupo())) {
-                    ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdGrupo(), requireContext());
                     return;
                 }
                 if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -694,8 +681,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                         && listenerHashMap.containsKey(snapshot.getValue(Chat.class).getIdGrupo())) {
                     return;
                 }
-
-                ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH INICIO", requireContext());
                 logicaAtualizacao(snapshot, false);
             }
 
@@ -721,18 +706,14 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
     private void carregarMaisDadosFiltrados(String dadoAnterior, RecuperarIdsFiltroCallback callback) {
         if (isPesquisaAtivada() && listaFiltrada != null) {
 
-            ToastCustomizado.toastCustomizadoCurto("PAGINACAO - LOAD:  " + isLoading, requireContext());
-
             if (listaFiltrada.size() > 1
                     && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
                     && idsFiltrados != null && !idsFiltrados.isEmpty()
                     && idsFiltrados.contains(idUltimoElementoFiltro)) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, requireContext());
                 return;
             }
 
-            //**ToastCustomizado.toastCustomizadoCurto("Last Name: " + lastName, requireContext());
             if (listaFiltrada != null && !listaFiltrada.isEmpty()
                     && lastName != null && !lastName.isEmpty()) {
 
@@ -753,7 +734,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
                                     if (listenerFiltroHashMap != null && !listenerFiltroHashMap.isEmpty()
                                             && listenerFiltroHashMap.containsKey(grupoPesquisa.getIdGrupo())) {
-                                        ToastCustomizado.toastCustomizadoCurto("RETORNO PESQUISA IF " + grupoPesquisa.getIdGrupo(), requireContext());
                                         ocultarProgress();
                                         setLoading(false);
                                     } else {
@@ -787,14 +767,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                     && idsGrupos != null && !idsGrupos.isEmpty()
                     && idsGrupos.contains(idUltimoElemento)) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA CHAT " + idUltimoElemento, requireContext());
-                //NO LUGAR DE COMPARAR COM O ÚLTIMO ITEM ADICIONADO NA LISTA
-                //O CORRETO É TER UM MÉTODO SEPARADO QUE PEGA O ÚLTIMO ELEMENTO
-                //NO SERVIDOR COM O LISTENER ATIVO SEMPRE ASSIM EU COMPARO COM O ID
-                //DESSE DADO, ASSIM EU TENHO COMO SABER QUANDO A PAGINAÇÃO NÃO DEVE CONTINUAR
-                //JÁ QUE SABERIA QUE A LISTA JÁ PEGOU TODOS OS DADOS POSSÍVEIS DO SERVIDOR
-                //E NÃO TERIA MAIS DADOS ALÉM DELE, POSSO COLOCAR ESSA LÓGICA NO SCROLLISTENER
-                //E RETIRAR ESSE CÓDIGO ANTERIOR DO MÉTODO CARREGARMAISDADOS.
                 return;
             }
 
@@ -824,13 +796,11 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
                             if (listaChat != null && listaChat.size() > 1
                                     && chatMore.getTimestampLastMsg() < listaChat.get(0).getTimestampLastMsg()) {
-                                ToastCustomizado.toastCustomizadoCurto("TIME IGNORADO", requireContext());
                                 ocultarProgress();
                                 setLoading(false);
                                 return;
                             }
 
-                            //*ToastCustomizado.toastCustomizadoCurto("ADICIONADO " + chatMore.getIdGrupo(), requireContext());
                             List<Chat> newChat = new ArrayList<>();
                             long key = chatMore.getTimestampLastMsg();
                             if (lastTimestamp != -1 && key != -1) {
@@ -838,7 +808,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                                         !chatMore.getIdGrupo()
                                                 .equals(listaChat.get(listaChat.size() - 1).getIdGrupo())) {
                                     newChat.add(chatMore);
-                                    //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
                                     lastTimestamp = key;
                                 }
                             }
@@ -860,14 +829,12 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                     if (snapshot.getValue() != null) {
                         if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                                 && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdGrupo())) {
-                            ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdGrupo(), requireContext());
                             return;
                         }
                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                 && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Chat.class).getIdGrupo())) {
                             return;
                         }
-                        ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO CARREGAR + DADOS", requireContext());
                         logicaAtualizacao(snapshot, false);
                     }
                 }
@@ -891,14 +858,11 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                             @Override
                             public void onExistencia(boolean status, Chat chatAtualizado) {
 
-                                ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + chatRemovido.getIdGrupo(), requireContext());
-
                                 logicaRemocao(chatRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = chatAtualizado.getTimestampLastMsg() <= listaChat.get(0).getTimestampLastMsg();
                                     if (!menorque) {
-                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + chatRemovido.getIdGrupo(), requireContext());
                                         anexarNovoDado(chatAtualizado);
                                     }
                                 }
@@ -1076,8 +1040,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             return;
         }
 
-        ToastCustomizado.toastCustomizadoCurto("Listener add: " + idGroup, requireContext());
-
         referenceFiltroHashMap.put(idGroup, queryAlvo);
         listenerFiltroHashMap.put(idGroup, childEventListenerAlvo);
     }
@@ -1165,7 +1127,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                             Bundle bundleUpdate = idsParaAtualizar.get(idUpdate);
                             if (index != -1) {
                                 adapterChatList.notifyItemChanged(index, bundleUpdate);
-                                ToastCustomizado.toastCustomizadoCurto("CODE NOTIFY", requireContext());
                             }
                         }
                         if (contadorUpdate >= idsParaAtualizar.size()) {
@@ -1185,13 +1146,11 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                 ChildEventListener listener = listenerHashMap.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
-                    //**ToastCustomizado.toastCustomizadoCurto("Clear", requireContext());
                 }
                 contadorRemocaoListener++;
                 if (contadorRemocaoListener == referenceHashMap.size()) {
                     referenceHashMap.clear();
                     listenerHashMap.clear();
-                    ToastCustomizado.toastCustomizadoCurto("LIMPO", requireContext());
                 }
             }
         }
@@ -1205,13 +1164,11 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                 ChildEventListener listener = listenerHashMapNEWDATA.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
-                    //**ToastCustomizado.toastCustomizadoCurto("Clear", requireContext());
                 }
                 contadorRemocaoListenerNEWDATA++;
                 if (contadorRemocaoListenerNEWDATA == referenceHashMapNEWDATA.size()) {
                     referenceHashMapNEWDATA.clear();
                     listenerHashMapNEWDATA.clear();
-                    ToastCustomizado.toastCustomizadoCurto("LIMPO NEW DATA", requireContext());
                 }
             }
         }
@@ -1225,7 +1182,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                 Query userRef = referenceFiltroHashMap.get(userId);
                 ChildEventListener listener = listenerFiltroHashMap.get(userId);
                 if (userRef != null && listener != null) {
-                    ToastCustomizado.toastCustomizado("ListenerRemovido: " + userId, requireContext());
                     userRef.removeEventListener(listener);
                 }
 
@@ -1283,54 +1239,7 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
         if (idsGrupos != null && idsGrupos.size() > 0
                 && idsGrupos.contains(chatRemovido.getIdGrupo())) {
-            /*
-            if (listenerHashMap != null && referenceHashMap != null) {
-                Query userRef = referenceHashMap.get(chatRemovido.getIdGrupo());
-                ChildEventListener listener = listenerHashMap.get(chatRemovido.getIdGrupo());
-                if (userRef != null && listener != null) {
-                    ToastCustomizado.toastCustomizado("LISTENER REMOVIDO + DADOS " + chatRemovido.getIdGrupo(), requireContext());
-                    userRef.removeEventListener(listener);
-                }
-            }
-
-
-                 if (referenceHashMap != null && referenceHashMap.size() > 0
-                    && listenerHashMap != null && listenerHashMap.size() > 0) {
-                referenceHashMap.remove(chatRemovido.getIdGrupo());
-                listenerHashMap.remove(chatRemovido.getIdGrupo());
-                if (idsListeners != null && idsListeners.size() > 0) {
-                    idsListeners.remove(chatRemovido.getIdGrupo());
-                }
-            }
-
-             */
-
-
         }
-
-     /*
-        if (listenerHashMapNEWDATA != null && referenceHashMapNEWDATA != null) {
-            if (idsListenersNEWDATA != null && idsListenersNEWDATA.size() > 0) {
-                idsListenersNEWDATA.remove(chatRemovido.getIdGrupo());
-            }
-            Query userRef = referenceHashMapNEWDATA.get(chatRemovido.getIdGrupo());
-            ChildEventListener listener = listenerHashMapNEWDATA.get(chatRemovido.getIdGrupo());
-            if (userRef != null && listener != null) {
-                ToastCustomizado.toastCustomizado("LISTENER REMOVIDO NEW DATA", requireContext());
-                userRef.removeEventListener(listener);
-            }
-        }
-
-
-        if (referenceHashMapNEWDATA != null && referenceHashMapNEWDATA.size() > 0
-                && listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0) {
-            referenceHashMapNEWDATA.remove(chatRemovido.getIdGrupo());
-            listenerHashMapNEWDATA.remove(chatRemovido.getIdGrupo());
-            if (idsListenersNEWDATA != null && idsListenersNEWDATA.size() > 0) {
-                idsListenersNEWDATA.remove(chatRemovido.getIdGrupo());
-            }
-        }
-         */
 
         DatabaseReference verificaExistenciaRef = firebaseRef.child("detalhesChatGrupo")
                 .child(idUsuario).child(chatRemovido.getIdGrupo());
@@ -1425,26 +1334,37 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                     //Somente existe um listener desse chat na listagem filtrada.
                     chatAnterior = listaFiltrada.get(posicaoChanged);
                 }
-                ToastCustomizado.toastCustomizadoCurto("Alterado: " + chatAnterior.getIdGrupo(), requireContext());
 
-                if (chatAnterior.getTotalMsgNaoLida() != chatAtualizado.getTotalMsgNaoLida()) {
-                    atualizarPorPayload(chatAtualizado, "totalMsgNaoLida");
-                }
+                if (chatAnterior != null && chatAtualizado != null) {
+                    if (chatAnterior.getTotalMsgNaoLida() != -1) {
+                        if (chatAnterior.getTotalMsgNaoLida() != chatAtualizado.getTotalMsgNaoLida()) {
+                            atualizarPorPayload(chatAtualizado, "totalMsgNaoLida");
+                        }
+                    }
 
-                if (chatAnterior.getTotalMsg() != chatAtualizado.getTotalMsg()) {
-                    atualizarPorPayload(chatAtualizado, "totalMsg");
-                }
+                    if (chatAnterior.getTotalMsg() != -1) {
+                        if (chatAnterior.getTotalMsg() != chatAtualizado.getTotalMsg()) {
+                            atualizarPorPayload(chatAtualizado, "totalMsg");
+                        }
+                    }
 
-                if (!chatAnterior.getTipoMidiaLastMsg().equals(chatAtualizado.getTipoMidiaLastMsg())) {
-                    atualizarPorPayload(chatAtualizado, "tipoMidiaLastMsg");
-                }
+                    if (chatAnterior.getTipoMidiaLastMsg() != null) {
+                        if (!chatAnterior.getTipoMidiaLastMsg().equals(chatAtualizado.getTipoMidiaLastMsg())) {
+                            atualizarPorPayload(chatAtualizado, "tipoMidiaLastMsg");
+                        }
+                    }
 
-                if (!chatAnterior.getConteudoLastMsg().equals(chatAtualizado.getConteudoLastMsg())) {
-                    atualizarPorPayload(chatAtualizado, "conteudoLastMsg");
-                }
+                    if (chatAnterior.getConteudoLastMsg() != null) {
+                        if (!chatAnterior.getConteudoLastMsg().equals(chatAtualizado.getConteudoLastMsg())) {
+                            atualizarPorPayload(chatAtualizado, "conteudoLastMsg");
+                        }
+                    }
 
-                if (chatAnterior.getTimestampLastMsg() != chatAtualizado.getTimestampLastMsg()) {
-                    atualizarPorPayload(chatAtualizado, "timestampLastMsg");
+                    if (chatAnterior.getTimestampLastMsg() != -1) {
+                        if (chatAnterior.getTimestampLastMsg() != chatAtualizado.getTimestampLastMsg()) {
+                            atualizarPorPayload(chatAtualizado, "timestampLastMsg");
+                        }
+                    }
                 }
 
                 if (isPesquisaAtivada() && listaFiltrada != null) {
@@ -1466,15 +1386,12 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                         }
                     });
                 }
-            } else {
-                ToastCustomizado.toastCustomizadoCurto("Hello code -1", requireContext());
             }
             posicaoChanged = -1;
         }
     }
 
     private void atualizarPorPayload(Chat chatAtualizado, String tipoPayload) {
-        ToastCustomizado.toastCustomizadoCurto(tipoPayload, requireContext());
 
         int index = posicaoChanged;
 
@@ -1483,7 +1400,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             if (isPesquisaAtivada() && referenceFiltroHashMap != null
                     && !referenceFiltroHashMap.isEmpty()
                     && referenceFiltroHashMap.containsKey(chatAtualizado.getIdGrupo())) {
-                ToastCustomizado.toastCustomizadoCurto("CODE NOOOO", requireContext());
                 chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, tipoPayload, new ChatDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1493,7 +1409,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             }
             if (idsGrupos != null && idsGrupos.size() > 0
                     && idsGrupos.contains(chatAtualizado.getIdGrupo())) {
-                ToastCustomizado.toastCustomizadoCurto("CODE OK", requireContext());
                 chatDiffDAO.atualizarChatPorPayload(chatAtualizado, tipoPayload, new ChatDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1599,7 +1514,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    ToastCustomizado.toastCustomizadoCurto("Alterado pelo newdata", requireContext());
                     logicaAtualizacao(snapshot, true);
                 }
             }
@@ -1608,7 +1522,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Chat chatRemovido = snapshot.getValue(Chat.class);
-                    ToastCustomizado.toastCustomizado("DELETE PELO NEW DATA", requireContext());
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(chatRemovido.getIdGrupo())) {
                         idsAIgnorarListeners.remove(chatRemovido.getIdGrupo());
@@ -1643,9 +1556,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
             queryLoadMoreFiltro = firebaseRef.child("detalhesChatGrupo")
                     .child(idUsuario).orderByChild("idGrupo").equalTo(grupoPesquisa.getIdGrupo()).limitToFirst(1);
 
-            //ToastCustomizado.toastCustomizadoCurto("AOS FILTROS: " + usuarioPesquisa.getIdGrupo(), requireContext());
-            //ToastCustomizado.toastCustomizadoCurto("NR FILTROS: " + aosFiltros, requireContext());
-
             ChildEventListener childListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -1654,13 +1564,11 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                             && chatMore.getIdGrupo() != null
                             && !chatMore.getIdGrupo().isEmpty()) {
 
-                        //**ToastCustomizado.toastCustomizadoCurto("NEW PESQUISA: " + chatMore.getIdGrupo(), requireContext());
                         Log.d(TAG, "Timestamp key: " + lastTimestamp);
                         Log.d(TAG, "id: " + chatMore.getIdGrupo() + " time: " + chatMore.getTimestampLastMsg());
                         if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
                                 && idsFiltrados.contains(chatMore.getIdGrupo())) {
                             Log.d(TAG, "Id já existia: " + chatMore.getIdGrupo());
-                            ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + chatMore.getIdGrupo(), requireContext());
                             ocultarProgress();
                             setLoading(false);
                             return;
@@ -1674,7 +1582,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                                     !chatMore.getIdGrupo()
                                             .equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdGrupo())) {
                                 newChat.add(chatMore);
-                                //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
                                 lastName = key;
                             }
                         }
@@ -1704,7 +1611,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
 
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdGrupo())) {
-                        ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdGrupo(), requireContext());
                         return;
                     }
                     if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -1722,7 +1628,6 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                         return;
                     }
 
-                    ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH + DADOS " + chatUpdate.getIdGrupo(), requireContext());
                     logicaAtualizacao(snapshot, false);
                 }
 
@@ -1745,14 +1650,11 @@ public class GroupListFragment extends Fragment implements AdapterChatGroupList.
                             @Override
                             public void onExistencia(boolean status, Chat chatAtualizado) {
 
-                                ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + chatRemovido.getIdGrupo(), requireContext());
-
                                 logicaRemocao(chatRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = chatAtualizado.getTimestampLastMsg() <= listaChat.get(0).getTimestampLastMsg();
                                     if (!menorque) {
-                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + chatRemovido.getIdGrupo(), requireContext());
                                         anexarNovoDado(chatAtualizado);
                                     }
                                 }

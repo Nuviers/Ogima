@@ -50,22 +50,19 @@
                 android:id="@+id/imageView14"
                 android:layout_width="@dimen/_90sdp"
                 android:layout_height="@dimen/_90sdp"
-                android:layout_weight="1"
-                android:src="@drawable/animegirl_seria_58" />
+                android:layout_weight="1" />
 
             <ImageView
                 android:id="@+id/imageView16"
                 android:layout_width="@dimen/_90sdp"
                 android:layout_height="@dimen/_90sdp"
-                android:layout_weight="1"
-                android:src="@drawable/animegirl_feliz_acenando_05" />
+                android:layout_weight="1"/>
 
             <ImageView
                 android:id="@+id/imageView15"
                 android:layout_width="@dimen/_90sdp"
                 android:layout_height="@dimen/_90sdp"
-                android:layout_weight="1"
-                android:src="@drawable/animegirl_muitoapaixonada_37" />
+                android:layout_weight="1"/>
 
         </LinearLayout>
 
@@ -73,6 +70,7 @@
             android:id="@+id/linearLayoutVerDaily"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:orientation="horizontal">
 
             <TextView

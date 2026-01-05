@@ -71,7 +71,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
     private PhotoView imgViewFotoPostada, imgViewGifPostada;
     private ImageView imgViewFotoUser, imgViewUserPostador;
     private TextView txtViewDescricaoPostada, txtViewTituloPostado,
-            txtViewStatusExibicao, txtViewContadorComentario;
+            txtViewStatusExibicao, txtViewContadorComentario, txtViewTextoPostado;
     private ImageButton imageButtonComentario, imgButtonBackPostagem,
             imgButtonLikePostagem, imgButtonDenunciarPostagem;
     private EditText edtTextComentarPostagem;
@@ -156,16 +156,22 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                 tipoPublicacao = dados.getString("tipoPublicacao");
                 tipoPostagem = dados.getString("tipoPostagem");
 
-                txtViewStatusExibicao.setText("Visível para: " + publicoPostagem);
-
-                //Exibindo título da postagem
-                txtViewTituloPostado.setText(tituloPostagem);
-                if (tituloPostagem == null || tituloPostagem.equals("")) {
+                if (tituloPostagem == null || tituloPostagem.isEmpty()) {
                     txtViewTituloPostado.setVisibility(View.GONE);
+                }else{
+                    //Exibindo título da postagem
+                    txtViewTituloPostado.setVisibility(View.VISIBLE);
+                    txtViewTituloPostado.setText(tituloPostagem);
                 }
 
                 if (tipoPostagem != null) {
-                    if(tipoPostagem.equals("imagem") || tipoPostagem.equals("foto")){
+                    if (tipoPostagem.equals("texto")) {
+                        videoPlayerViewPostagem.setVisibility(View.GONE);
+                        imgViewGifPostada.setVisibility(View.GONE);
+                        imgViewFotoPostada.setVisibility(View.GONE);
+                        txtViewTextoPostado.setVisibility(View.VISIBLE);
+                        txtViewTextoPostado.setText(descricaoPostagem);
+                    } else if(tipoPostagem.equals("imagem") || tipoPostagem.equals("foto")){
                         videoPlayerViewPostagem.setVisibility(View.GONE);
                         imgViewGifPostada.setVisibility(View.GONE);
                         imgViewFotoPostada.setVisibility(View.VISIBLE);
@@ -400,7 +406,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         usuarioProfile = snapshot.getValue(Usuario.class);
                         String fotoUsuarioPostador = usuarioProfile.getMinhaFoto();
                         if (usuarioProfile.getMinhaFoto() != null) {
-                            if (usuarioProfile.getEpilepsia().equals("Sim")) {
+                            if (usuarioProfile.isStatusEpilepsia()) {
                                 GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), fotoUsuarioPostador, imgViewUserPostador, R.color.gph_transparent);
                             } else {
                                 GlideCustomizado.montarGlide(getApplicationContext(), fotoUsuarioPostador, imgViewUserPostador, R.color.gph_transparent);
@@ -446,7 +452,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
                         Usuario usuarioAtual = snapshot.getValue(Usuario.class);
                         String fotoUsuarioAtual = usuarioAtual.getMinhaFoto();
                         if (usuarioAtual.getMinhaFoto() != null) {
-                            if (usuarioAtual.getEpilepsia().equals("Sim")) {
+                            if (usuarioAtual.isStatusEpilepsia()) {
                                 GlideCustomizado.montarGlideEpilepsia(getApplicationContext(), fotoUsuarioAtual, imgViewFotoUser, R.color.gph_transparent);
                             } else {
                                 GlideCustomizado.montarGlide(getApplicationContext(), fotoUsuarioAtual, imgViewFotoUser, R.color.gph_transparent);
@@ -553,6 +559,7 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         imgViewFotoUser = findViewById(R.id.imgViewFotoUser);
         imgViewUserPostador = findViewById(R.id.imgViewUserPostador);
         txtViewTituloPostado = findViewById(R.id.txtViewTituloPostado);
+        txtViewTextoPostado = findViewById(R.id.txtViewTextoPostado);
         txtViewDescricaoPostada = findViewById(R.id.txtViewDescricaoPostada);
         txtViewStatusExibicao = findViewById(R.id.txtViewStatusExibicao);
         imageButtonComentario = findViewById(R.id.imageButtonComentario);
@@ -776,7 +783,6 @@ public class TodasFotosUsuarioActivity extends AppCompatActivity {
         builder.setCancelable(true);
         builder.setPositiveButton("Denunciar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                ToastCustomizado.toastCustomizadoCurto("IdDono " + idUsuarioRecebido,getApplicationContext());
                 Intent intent = new Intent(getApplicationContext(), DenunciaPostagemActivity.class);
                 intent.putExtra("numeroDenuncias", postagemComentario.getTotalDenunciasPostagem());
                 intent.putExtra("idDonoPostagem", idUsuarioRecebido);

@@ -2,10 +2,8 @@
 package com.example.ogima.adapter;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,27 +17,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ComunidadePostagensActivity;
-import com.example.ogima.activity.ConversaGrupoActivity;
-import com.example.ogima.activity.DetalhesComunidadeActivity;
 import com.example.ogima.helper.Base64Custom;
-import com.example.ogima.helper.ComunidadeDAO;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.SnackbarUtils;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.model.Comunidade;
-import com.example.ogima.model.Grupo;
-import com.example.ogima.model.Mensagem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class AdapterMinhasComunidades extends RecyclerView.Adapter<AdapterMinhasComunidades.MyViewHolder> {

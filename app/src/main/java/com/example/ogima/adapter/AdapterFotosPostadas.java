@@ -126,7 +126,6 @@ public class AdapterFotosPostadas extends RecyclerView.Adapter<AdapterFotosPosta
                     if (bundle.containsKey("descricaoPostagem")) {
                         String novaDescricao = bundle.getString("descricaoPostagem");
                         fotoPostada.setDescricaoPostagem(novaDescricao);
-                        ToastCustomizado.toastCustomizadoCurto("BOA", context);
                         holder.txtViewDescPostagem.setText(novaDescricao);
                     }
                 }

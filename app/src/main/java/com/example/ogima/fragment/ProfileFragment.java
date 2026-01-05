@@ -127,6 +127,8 @@ public class ProfileFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
+        recuperarDadosUsuario();
+
 
         if (atualizarProfile) {
             atualizarProfile = false;
@@ -148,8 +150,6 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         inicializandoComponentes(view);
-
-        recuperarDadosUsuario();
 
         clickListeners();
 
@@ -437,7 +437,7 @@ public class ProfileFragment extends Fragment {
     private void irParaEdicaoDePerfil() {
         Intent intent = new Intent(getActivity(), EditarPerfilActivity.class);
         intent.putExtra("irParaProfile", "irParaProfile");
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
@@ -838,8 +838,6 @@ public class ProfileFragment extends Fragment {
 
                     if (imagemCortada != null) {
                         exibirProgressDialog();
-
-                        ToastCustomizado.toastCustomizadoCurto("Uri " + imagemCortada, getContext());
 
                         ocultarProgressDialog();
 

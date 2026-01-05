@@ -120,16 +120,16 @@ public class AdapterLstGrupoButton extends RecyclerView.Adapter<RecyclerView.Vie
 
             switch (tipoTitulo) {
                 case GroupUtils.MY_GROUPS:
-                    titulo = context.getString(R.string.see_all_your_communities);
+                    titulo = context.getString(R.string.see_all_your_groups);
                     break;
                 case GroupUtils.PUBLIC_GROUPS:
-                    titulo = context.getString(R.string.see_all_public_communities);
+                    titulo = context.getString(R.string.see_all_public_groups);
                     break;
                 case GroupUtils.GROUPS_FOLLOWING:
-                    titulo = context.getString(R.string.see_all_communities_following);
+                    titulo = context.getString(R.string.see_all_groups_following);
                     break;
                 case GroupUtils.BLOCKED_GROUPS:
-                    titulo = context.getString(R.string.see_all_communities_following);
+                    titulo = context.getString(R.string.view_blocked_groups);
                     break;
             }
             btnViewSeeGroup.setText(FormatarContadorUtils.abreviarTexto(titulo, 50));

@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:scaleType="centerInside"
-        app:srcCompat="@drawable/sticker_kazuma_excluir" />
+        app:srcCompat="@drawable/dragon" />
 
     <include layout="@layout/inc_button_excluir_postagem"
         android:layout_width="@dimen/_45sdp"

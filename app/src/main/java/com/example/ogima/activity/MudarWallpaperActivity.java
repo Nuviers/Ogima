@@ -245,7 +245,6 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                         wallpaperStorageRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                             @Override
                             public void onComplete(@NonNull Task<Uri> task) {
-                                ToastCustomizado.toastCustomizadoCurto("Sucesso ao enviar mensagem", getApplicationContext());
                                 Uri url = task.getResult();
                                 String urlNewWallpaper = url.toString();
                                 HashMap<String, Object> dadosWallpaper = new HashMap<>();
@@ -323,7 +322,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                @Override
                public void onCancelled(@NonNull DatabaseError databaseError) {
                    ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao recuperar seu wallpaper", getApplicationContext());
-                   imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
+                   imgViewPreviewWallpaper.setImageResource(R.drawable.background_car);
                }
            });
         } else if (wallpaperPlace.equals("allChats")) {
@@ -342,7 +341,7 @@ public class MudarWallpaperActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                     ToastCustomizado.toastCustomizadoCurto("Ocorre um erro ao recuperar seu wallpaper", getApplicationContext());
-                    imgViewPreviewWallpaper.setImageResource(R.drawable.wallpaperwaifutwo);
+                    imgViewPreviewWallpaper.setImageResource(R.drawable.background_car);
                 }
             });
         }
@@ -374,14 +373,12 @@ public class MudarWallpaperActivity extends AppCompatActivity {
         salvarArquivoLocalmente.transformarWallpaperEmFile(urlWallpaper, nomeWallpaper, tipoWallpaper, idDestinatario, new SalvarArquivoLocalmente.SalvarArquivoCallback() {
             @Override
             public void onFileSaved(File file) {
-                ToastCustomizado.toastCustomizadoCurto("Sucesso wallpaper", getApplicationContext());
                 Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
                 getWindow().setBackgroundDrawable(new BitmapDrawable(getResources(), bitmap));
             }
 
             @Override
             public void onSaveFailed(Exception e) {
-                ToastCustomizado.toastCustomizado("Fail wallpaper " + e.getMessage(), getApplicationContext());
                 Log.i("testewallpaper", "Fail - " + e.getMessage());
             }
         });

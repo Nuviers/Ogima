@@ -706,7 +706,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                     && idUltimoElemento != null && !idUltimoElemento.isEmpty()
                     && idUltimoElemento.equals(listaUsuarios.get(listaUsuarios.size() - 1).getIdUsuario())) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA CHAT " + idUltimoElemento, getApplicationContext());
                 return;
             }
 
@@ -790,13 +789,10 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     private void carregarMaisDadosFiltrados(String dadoAnterior) {
         if (isPesquisaAtivada() && listaFiltrada != null) {
 
-            ToastCustomizado.toastCustomizadoCurto("PAGINACAO - LOAD:  " + isLoading, getApplicationContext());
-
             if (listaFiltrada.size() > 1
                     && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
                     && idUltimoElementoFiltro.equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdParticipante())) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, getApplicationContext());
                 return;
             }
 
@@ -978,7 +974,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
     }
 
     private void dadoInicialFiltragem(String nome, int counter) {
-        //*ToastCustomizado.toastCustomizadoCurto("Busca: " + nome, requireContext());
 
         exibirProgress();
 
@@ -1000,14 +995,12 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                 if (counter != searchCounter) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return counter != searchCounter", getApplicationContext());
                     return;
                 }
 
                 if (listaFiltrada != null && listaFiltrada.size() >= 1) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return listaFiltrada != null && listaFiltrada.size() >= 1", getApplicationContext());
                     return;
                 }
 
@@ -1189,7 +1182,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                             Bundle bundleUpdate = idsParaAtualizar.get(idUpdate);
                             if (index != -1) {
                                 adapterSelection.notifyItemChanged(index, bundleUpdate);
-                                ToastCustomizado.toastCustomizadoCurto("CODE NOTIFY", getApplicationContext());
                             }
                         }
                         if (contadorUpdate >= idsParaAtualizar.size()) {
@@ -1210,7 +1202,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                 Query userRef = referenceFiltroHashMap.get(userId);
                 ChildEventListener listener = listenerFiltroHashMap.get(userId);
                 if (userRef != null && listener != null) {
-                    ToastCustomizado.toastCustomizado("ListenerRemovido: " + userId, getApplicationContext());
                     userRef.removeEventListener(listener);
                 }
 
@@ -1586,7 +1577,6 @@ public class GroupManagementActivity extends AppCompatActivity implements Adapte
                     newParticipantes.add(usuarioNew);
                 }
                 lastName = nomeParticipante;
-                //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
             }
         }
         // Remove a última chave usada

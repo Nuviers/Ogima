@@ -304,14 +304,26 @@
     <string name="error_recovering_public_communities">Ocorreu um erro ao recuperar as comunidades públicas. Tente novamente.</string>
     <string name="error_recovering_communities_following">Ocorreu um erro ao recuperar as comunidades que você está seguindo. Tente novamente.</string>
 
+    <!-- ListagemGruposActivity  -->
+    <string name="error_recovering_my_groups">Ocorreu um erro ao recuperar os seus grupos. Tente novamente.</string>
+    <string name="error_recovering_public_groups">Ocorreu um erro ao recuperar os grupos públicos. Tente novamente.</string>
+    <string name="error_recovering_groups_following">Ocorreu um erro ao recuperar os grupos que você está seguindo. Tente novamente.</string>
+
     <!-- AdapterPreviewCommunityActivity  -->
     <string name="community_unavailable">Comunidade indisponível</string>
     <string name="error_visiting_community">Ocorreu um erro ao visitar a comunidade selecionada. Tente novamente.</string>
     <string name="community_does_not_exist">Esta comunidade não existe mais</string>
 
-    <!-- AdapterPreviewCommunity -->
+    <!-- CreateCommunityActivity -->
     <string name="error_community_registration">Ocorreu um erro ao ir para o cadastro da comunidade. Tente novamente mais tarde.</string>
     <string name="community_creation_limit">Limite de criação de comunidades atingido, por favor exclua uma delas para que seja possível criar uma nova comunidade!</string>
+
+    <!-- AdapterLstGrupoHeader -->
+    <string name="error_group_registration">Ocorreu um erro ao ir para o cadastro de grupo. Tente novamente mais tarde.</string>
+    <string name="group_creation_limit">Limite de criação de grupos atingido, por favor exclua um deles para que seja possível criar um novo grupo!</string>
+    <string name="public_group">Grupo Público</string>
+    <string name="private_group">Grupo Privado</string>
+    <string name="choose_an_option">Escolha uma opção:</string>
 
     <!-- AdapterLstcTitleHeader -->
     <string name="no_public_community">Não existem comunidades públicas no momento.</string>
@@ -319,12 +331,26 @@
     <string name="you_dont_have_community">Você não possui comunidades.</string>
     <string name="there_are_no_communities">Não existem comunidades  no momento. Seja o primeiro a criar uma comunidade.</string>
 
+    <!-- AdapterLstGrupoTitleHeader -->
+    <string name="no_public_group">Não existem grupos públicos no momento.</string>
+    <string name="not_following_group">Você não está seguindo nenhum grupo no momento.</string>
+    <string name="you_dont_have_group">Você não possui grupos.</string>
+    <string name="there_are_no_group">Não existem grupos  no momento. Seja o primeiro a criar um grupo.</string>
+
     <!-- AdapterLstcButton -->
     <string name="see_all_your_communities">Ver todas as suas comunidades</string>
     <string name="see_all_public_communities">Ver todas as comunidades públicas</string>
     <string name="see_all_communities_following">Ver todas as comunidades que você segue</string>
     <string name="see_all_recommended_communities">Ver todas as comunidades recomendadas</string>
     <string name="see_all_communities">Ver todas as comunidades</string>
+
+    <!-- AdapterLstGrupoButton -->
+    <string name="see_all_your_groups">Ver todas os seus grupos</string>
+    <string name="see_all_public_groups">Ver todos os grupos públicos</string>
+    <string name="see_all_groups_following">Ver todos os grupos que você segue</string>
+    <string name="see_all_recommended_groups">Ver todos os grupos recomendados</string>
+    <string name="see_all_groups">Ver todos os grupos</string>
+    <string name="view_blocked_groups">Ver os grupos bloqueados</string>
 
     <!-- AdapterLstcInvitationHeader -->
     <string name="no_community_invites">Não existem convites no momento.</string>
@@ -336,8 +362,6 @@
     <string name="enter_name_group">Informe o nome do grupo:</string>
     <string name="group_description">Descrição do grupo</string>
     <string name="enter_description_group">Informe a descrição do grupo:</string>
-    <string name="public_group">Público</string>
-    <string name="private_group">Privado</string>
     <string name="group">Grupo</string>
     <string name="error_displaying_group_setting">Ocorreu um erro ao exibir os ajustes do seu grupo.</string>
     <string name="create_group">Criar grupo</string>

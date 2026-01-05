@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/estilo_background_inicio_v2"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textViewTitleTipoGrupo"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_32sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_caixa_texto"
+        android:gravity="center"
+        android:text="@string/choose_an_option"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/_18ssp" />
+
+    <Button
+        android:id="@+id/btnViewGrupoPublico"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:backgroundTint="#58E431"
+        android:fontFamily="@font/allerta"
+        android:gravity="center"
+        android:text="@string/public_group"
+        android:textAllCaps="false"
+        android:textColor="#58E431"
+        android:textSize="@dimen/_18ssp"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/btnViewGrupoPrivado"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_margin="@dimen/_8sdp"
+        android:background="@drawable/background_mais_fotos"
+        android:backgroundTint="#FB8C00"
+        android:fontFamily="@font/allerta"
+        android:gravity="center"
+        android:text="@string/private_group"
+        android:textAllCaps="false"
+        android:textColor="#FB8C00"
+        android:textSize="@dimen/_18ssp"
+        android:visibility="visible" />
+</LinearLayout>

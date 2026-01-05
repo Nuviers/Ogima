@@ -151,7 +151,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         if (mCurrentPosition == -1 || novaPostagem) {
 
-            //ToastCustomizado.toastCustomizadoCurto("OnStart", getApplicationContext());
             recuperarCargo();
 
             configRecyclerView();
@@ -211,7 +210,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (adapterPostagens != null && linearLayoutManagerComunidade != null
                 && mCurrentPosition == -1) {
             mCurrentPosition = linearLayoutManagerComunidade.findFirstVisibleItemPosition();
-            //ToastCustomizado.toastCustomizadoCurto("Find " + mCurrentPosition, getApplicationContext());
         }
 
         if (mCurrentPosition == -1 || novaPostagem) {
@@ -229,8 +227,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
             postagemDiffDAO.limparListaPostagems();
             idsPostagens.clear();
-
-            ToastCustomizado.toastCustomizadoCurto("onStop", getApplicationContext());
         }
 
         fecharFabMenu();
@@ -267,7 +263,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
         mCurrentPosition = -1;
 
-        ToastCustomizado.toastCustomizadoCurto("onDestroy", getApplicationContext());
     }
 
     @Override
@@ -449,7 +444,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                                             break;
                                         } else {
                                             currentVideoVisible = -1;
-                                            //ToastCustomizado.toastCustomizadoCurto("Pode parar",getApplicationContext());
                                         }
                                     } else {
                                         currentVideoVisible = -1;
@@ -511,10 +505,8 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    //ToastCustomizado.toastCustomizadoCurto("Mais Dados", getApplicationContext());
                     List<Postagem> newPostagem = new ArrayList<>();
                     long key = snapshot.child("timeStampNegativo").getValue(Long.class);
-                    //*ToastCustomizado.toastCustomizadoCurto("existe " + key, getApplicationContext());
                     if (lastTimestamp != -1 && key != -1 && key != lastTimestamp) {
                         newPostagem.add(snapshot.getValue(Postagem.class));
                         lastTimestamp = key;
@@ -536,8 +528,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 if (snapshot.getValue() != null) {
                     Postagem postagemAtualizada = snapshot.getValue(Postagem.class);
 
-                    ToastCustomizado.toastCustomizadoCurto("UPDATE", getApplicationContext());
-
                     //Atualizações granulares use payload na alteração
                     //junto com a config de payload no adaper mas não use o diff
                     //pois o diff só funciona quando é para notificaro objeto inteiro.
@@ -548,23 +538,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                /*
-                //melhor deixar comentado, somente exclusão pelo
-                //próprio usuário faz sentido.
-                if (snapshot.getValue() != null) {
-
-                    Postagem postagemRemovida = snapshot.getValue(Postagem.class);
-                    postagemDiffDAO.removerPostagem(postagemRemovida);
-                    //ToastCustomizado.toastCustomizadoCurto("Postagem removida com sucesso",getApplicationContext());
-                    Log.d("PAG-On", "Postagem removida com sucesso");
-
-                    // Notifica o adapter das mudanças usando o DiffUtil
-                    adapterPostagens.updatePostagemList(listaPostagens);
-                    //ToastCustomizado.toastCustomizadoCurto("Adapter notificado com sucesso",getApplicationContext());
-                    Log.d("PAG-On Child Removed", "Adapter notificado com sucesso");
-
-                }
-                 */
             }
 
             @Override
@@ -585,13 +558,11 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         if (newPostagem != null && newPostagem.size() >= 1) {
             postagemDiffDAO.carregarMaisPostagem(newPostagem, idsPostagens);
             adapterPostagens.updatePostagemList(listaPostagens, null);
-            //*ToastCustomizado.toastCustomizadoCurto("Mais dados", getApplicationContext());
             setLoading(false);
         }
     }
 
     private void adicionarPostagem(Postagem postagem) {
-        //ToastCustomizado.toastCustomizadoCurto("Inicio",getApplicationContext());
         postagemDiffDAO.adicionarPostagem(postagem);
         idsPostagens.add(postagem.getIdPostagem());
         adapterPostagens.updatePostagemList(listaPostagens, null);
@@ -617,8 +588,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
-                ToastCustomizado.toastCustomizadoCurto("Teste refresh", getApplicationContext());
             }
         });
     }
@@ -651,7 +620,7 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBtnOpcoesPostagemComunidade:
-                ToastCustomizado.toastCustomizadoCurto("Clicado fab", getApplicationContext());
+
                 if (isMenuOpen) {
                     fecharFabMenu();
                 } else {
@@ -749,8 +718,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                     finish();
                 }
 
-                ToastCustomizado.toastCustomizadoCurto("HEADER: " + headerAdapter.getItemCount(), getApplicationContext());
-
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -771,7 +738,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                             if (proximaPosicao != -1) {
                                 RecyclerView.ViewHolder viewHolder = recyclerViewPostagensComunidade.findViewHolderForAdapterPosition(proximaPosicao);
                                 if (viewHolder instanceof AdapterPostagensComunidade.VideoViewHolder) {
-                                    ToastCustomizado.toastCustomizadoCurto("POSIÇÃO - " + proximaPosicao, getApplicationContext());
                                     AdapterPostagensComunidade.VideoViewHolder videoViewHolder = (AdapterPostagensComunidade.VideoViewHolder) viewHolder;
                                     videoViewHolder.iniciarExoVisivel();
                                     currentVideoVisible = proximaPosicao;
@@ -785,7 +751,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                         if (recyclerViewPostagensComunidade != null) {
                             recyclerViewPostagensComunidade.addOnScrollListener(scrollListener);
                             recyclerViewPostagensComunidade.setOnTouchListener(null);
-                            //ToastCustomizado.toastCustomizadoCurto("ADICIONADO LISTENER",getApplicationContext());
                         }
                         imgBtnExcluir.setEnabled(true);
                         if (progressDialog != null && !isFinishing()
@@ -806,7 +771,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     @Override
     public void onPosicaoAnterior(int posicaoAnterior) {
         if (posicaoAnterior != -1) {
-            ToastCustomizado.toastCustomizado("Position anterior: " + posicaoAnterior, getApplicationContext());
             mCurrentPosition = posicaoAnterior;
         }
     }
@@ -898,7 +862,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
     }
 
     private void recuperarCargo() {
-        //ToastCustomizado.toastCustomizadoCurto("CARGO",context);
 
         if (idComunidade != null && !idComunidade.isEmpty()) {
             FirebaseRecuperarUsuario.recuperaComunidadeDetalhes(idComunidade, new FirebaseRecuperarUsuario.RecuperaComunidadeDetalhesCallback() {
@@ -906,7 +869,6 @@ public class ComunidadePostagensActivity extends AppCompatActivity implements Vi
                 public void onComunidadeRecuperada(Comunidade comunidadeAtual, String idFundador, ArrayList<String> idsAdms, boolean existemAdms) {
                     if (idFundador != null && idFundador.equals(idUsuario) ||
                             existemAdms && idsAdms.contains(idUsuario)) {
-                        //ToastCustomizado.toastCustomizadoCurto("POSSUI CARGO",context);
                         imgBtnOpcoesPostagem.setVisibility(View.VISIBLE);
                     } else {
                         imgBtnOpcoesPostagem.setVisibility(View.GONE);

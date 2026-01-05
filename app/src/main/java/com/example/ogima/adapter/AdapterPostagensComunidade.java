@@ -274,7 +274,6 @@ public class AdapterPostagensComunidade extends RecyclerView.Adapter<RecyclerVie
                     if (bundle.containsKey("edicaoAndamento")) {
                         Boolean newEdicao = bundle.getBoolean("edicaoAndamento");
                         postagemSelecionada.setEdicaoEmAndamento(newEdicao);
-                        ToastCustomizado.toastCustomizadoCurto("BOA", context);
                         if (holder instanceof VideoViewHolder) {
                             ((VideoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
                         } else if (holder instanceof PhotoViewHolder) {

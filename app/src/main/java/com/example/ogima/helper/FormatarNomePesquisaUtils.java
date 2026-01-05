@@ -7,7 +7,6 @@ import java.util.Locale;
 
 public class FormatarNomePesquisaUtils {
 
-
     //Formata cada palavra com a primeira letra dela em maiúsculo
     public static String formatarNomeParaPesquisa(String nome) {
         if (nome == null || nome.isEmpty()) {
@@ -16,6 +15,10 @@ public class FormatarNomePesquisaUtils {
         String[] partes = nome.toLowerCase(Locale.ROOT).split(" ");
         StringBuilder sb = new StringBuilder();
         for (String parte : partes) {
+            // --- PROTEÇÃO CONTRA ESPAÇO DUPLO ---
+            if (parte.trim().isEmpty()) continue;
+            // ------------------------------------
+
             sb.append(parte.substring(0, 1).toUpperCase(Locale.ROOT))
                     .append(parte.substring(1))
                     .append(" ");

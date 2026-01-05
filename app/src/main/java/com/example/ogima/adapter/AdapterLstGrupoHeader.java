@@ -82,34 +82,34 @@ public class AdapterLstGrupoHeader extends RecyclerView.Adapter<RecyclerView.Vie
 
             configurarBottomSheetDialog();
 
-            verificarLimiteComunidade(new VerificaLimiteCadCallback() {
+            verificarLimiteGrupo(new VerificaLimiteCadCallback() {
                 @Override
                 public void onConcluido() {
                     linearLayoutLstHeader.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            irParaCadComunidade();
+                            irParaCadGrupo();
                         }
                     });
 
                     imgBtnCadGrupo.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            irParaCadComunidade();
+                            irParaCadGrupo();
                         }
                     });
 
                     btnCadGrupo.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            irParaCadComunidade();
+                            irParaCadGrupo();
                         }
                     });
                 }
             });
         }
 
-        private void verificarLimiteComunidade(VerificaLimiteCadCallback callback) {
+        private void verificarLimiteGrupo(VerificaLimiteCadCallback callback) {
             DatabaseReference verificaLimiteRef = firebaseRef.child("usuarios")
                     .child(idUsuario).child("idMeusGrupos");
             verificaLimiteRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -141,14 +141,14 @@ public class AdapterLstGrupoHeader extends RecyclerView.Adapter<RecyclerView.Vie
             });
         }
 
-        private void irParaCadComunidade(){
+        private void irParaCadGrupo(){
             if (cadIndisponivel) {
-                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_community_registration), context);
+                ToastCustomizado.toastCustomizadoCurto(context.getString(R.string.error_group_registration), context);
                 return;
             }
             if (limiteCadAtingido) {
-                //Usuário atual já tem 5 comunidades criadas.
-                snackbarLimiteGrupo = Snackbar.make(btnCadGrupo, context.getString(R.string.community_creation_limit),
+                //Usuário atual já tem 5 grupos criados.
+                snackbarLimiteGrupo = Snackbar.make(btnCadGrupo, context.getString(R.string.group_creation_limit),
                         Snackbar.LENGTH_LONG);
                 View snackbarView = snackbarLimiteGrupo.getView();
                 TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
@@ -159,8 +159,8 @@ public class AdapterLstGrupoHeader extends RecyclerView.Adapter<RecyclerView.Vie
                 bottomSheetDialog.show();
                 bottomSheetDialog.setCancelable(true);
 
-                btnGrupoPublico = bottomSheetDialog.findViewById(R.id.btnViewComunidadePublica);
-                btnGrupoPrivado = bottomSheetDialog.findViewById(R.id.btnViewComunidadePrivada);
+                btnGrupoPublico = bottomSheetDialog.findViewById(R.id.btnViewGrupoPublico);
+                btnGrupoPrivado = bottomSheetDialog.findViewById(R.id.btnViewGrupoPrivado);
 
                 btnGrupoPublico.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -188,7 +188,7 @@ public class AdapterLstGrupoHeader extends RecyclerView.Adapter<RecyclerView.Vie
 
         private void configurarBottomSheetDialog() {
             bottomSheetDialog = new BottomSheetDialog(context);
-            bottomSheetDialog.setContentView(R.layout.bottom_sheet_tipo_comunidade);
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_tipo_grupo);
         }
 
         private void fecharDialog() {

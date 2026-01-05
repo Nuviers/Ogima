@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.ConversaGrupoActivity;
+import com.example.ogima.activity.ConversationActivity;
 import com.example.ogima.activity.GroupDetailsActivity;
 import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.model.Grupo;
@@ -90,9 +91,9 @@ public class VisitarPerfilSelecionado {
                     FirebaseRecuperarUsuario.recoverGroup(idGrupo, new FirebaseRecuperarUsuario.RecoverGroupCallback() {
                         @Override
                         public void onGrupoRecuperado(Grupo grupoAtual) {
-                            Intent intent = new Intent(context, ConversaGrupoActivity.class);
+                            Intent intent = new Intent(context, ConversationActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            intent.putExtra("grupo", grupoAtual);
+                            intent.putExtra("grupoDestinatario", grupoAtual);
                             intent.putExtra("chatComunidade", chatComunidade);
                             context.startActivity(intent);
                         }

@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/_250sdp"
             android:visibility="gone"
-            app:srcCompat="@drawable/sticker_romcom_excluir" />
+            app:srcCompat="@drawable/dragon" />
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/videoViewPreviewEdicao"

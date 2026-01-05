@@ -188,6 +188,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
+        android:visibility="gone"
         android:layout_below="@id/cardSolicitacaoAmizade"/>
 
     <TextView
@@ -195,7 +196,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/inc_daily_short"
+        android:layout_below="@+id/cardSolicitacaoAmizade"
         android:layout_marginStart="@dimen/_8sdp"
         android:layout_marginLeft="@dimen/_8sdp"
         android:layout_marginRight="@dimen/_8sdp"

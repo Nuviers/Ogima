@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/waifufive" />
+        app:srcCompat="@drawable/background_car" />
 
     <include layout="@layout/inc_button_excluir_postagem"
         android:layout_width="@dimen/_45sdp"

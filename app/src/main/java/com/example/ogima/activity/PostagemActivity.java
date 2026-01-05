@@ -284,7 +284,6 @@ public class PostagemActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onRecuperado(String urlGif) {
                 enviarUrlGif(urlGif);
-                ToastCustomizado.toastCustomizadoCurto("Gif " + urlGif, getApplicationContext());
             }
 
             @Override

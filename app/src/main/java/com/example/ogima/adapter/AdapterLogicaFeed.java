@@ -219,10 +219,8 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         if (!payloads.isEmpty()) {
             if (position == 0) {
-                ToastCustomizado.toastCustomizadoCurto("Bind payload " + position, context);
                 atualizarPrimeiraPostagem = true;
             }
-            ToastCustomizado.toastCustomizadoCurto("PAYLOAD", context);
 
             for (Object payload : payloads) {
                 if (payload instanceof Bundle) {
@@ -231,7 +229,6 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
                     if (bundle.containsKey("edicaoAndamento")) {
                         Boolean newEdicao = bundle.getBoolean("edicaoAndamento");
                         postagemSelecionada.setEdicaoEmAndamento(newEdicao);
-                        ToastCustomizado.toastCustomizadoCurto("BOA", context);
                         if (holder instanceof VideoViewHolder) {
                             //* ((VideoViewHolder) holder).atualizarStatusEdicao(postagemSelecionada);
                         } else if (holder instanceof PhotoViewHolder) {
@@ -423,7 +420,6 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         private void removerListenerExoPlayer() {
             if (listenerExo != null) {
-                //*ToastCustomizado.toastCustomizadoCurto("Removido listener", context);
                 exoPlayer.removeListener(listenerExo);
             }
         }
@@ -436,8 +432,6 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
                 Postagem newPostagem = listaPostagens.get(position);
 
                 if (newPostagem.getTipoPostagem().equals("video")) {
-
-                    //ToastCustomizado.toastCustomizadoCurto("Attached", context);
 
                     //Verificação garante que o vídeo não seja montado novamente
                     //se ele já estiver em reprodução.
@@ -480,24 +474,17 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
                             }
                         }
                     });
-
-                    //ToastCustomizado.toastCustomizadoCurto("Attached", context);
                 }
             }
         }
 
         public void pararExoPlayer(RemocaoDadosServidor callback) {
-            //*Detached
-
-            //ToastCustomizado.toastCustomizadoCurto("LIMPAR",context);
 
             // Verifique se a posição atual é um vídeo
             int position = getBindingAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
                 Postagem postagem = listaPostagens.get(position);
                 if (postagem.getTipoPostagem().equals("video")) {
-
-                    //*ToastCustomizado.toastCustomizadoCurto("CLEAN", context);
 
                     //Remove o listener do exoPlayer
                     removerListenerExoPlayer();
@@ -518,7 +505,6 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
                     isControllerVisible = false;
 
                     if (callback != null) {
-                        ToastCustomizado.toastCustomizadoCurto("LIBERO EXO", context);
                         removerPostagemListener.onPostagemRemocao(postagem, position, imgBtnExcluirPostagem);
                     }
                 }
@@ -536,9 +522,6 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
                 atualizarPrimeiraPostagem = false;
             }
 
-            // Inicia o exoPlayer somente se estiver completamente visível,
-            //método configurado pelo scrollListener na Activity.
-            //ToastCustomizado.toastCustomizadoCurto("VISIBLE", context);
             iniciarExoPlayer();
         }
     }
@@ -601,7 +584,6 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
         private void exibirPostagemFoto(String urlPostagem) {
-            //ToastCustomizado.toastCustomizado("Epilepsia " + isStatusEpilepsia(), context);
             GlideCustomizado.loadUrl(context,
                     urlPostagem, imgViewFotoPostagem,
                     android.R.color.transparent,
@@ -933,207 +915,126 @@ public class AdapterLogicaFeed extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public void atualizarPesos(int position, String tipoInteracao) {
 
-        if (position != -1 && position >= listaPostagens.size()) {
-            int posicao = position - 1;
-            Postagem postagem = listaPostagens.get(posicao);
+        if (position == -1 || listaPostagens == null || position >= listaPostagens.size()) return;
 
-            if (tipoInteracao.equals("view")) {
+        int posicaoReal = position;
 
-                if (idsPostagens != null
-                        && idsPostagens.size() > 0
-                        && idsPostagens.contains(postagem.getIdPostagem())) {
-                    //Postagem já visualizada nessa sessão.
-                    return;
-                }
-
-                //Recuperar interesses da postagem
-                DatabaseReference salvarRef = firebaseRef.child("usuarios")
-                        .child(idUsuarioLogado).child("listaInteresses");
-                if (postagem != null
-                        && postagem.getListaInteressesPostagem() != null
-                        && postagem.getListaInteressesPostagem().size() > 0) {
-                    FirebaseRecuperarUsuario.recuperarInteresses(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
-                        @Override
-                        public void onRecuperado(HashMap<String, Double> listaInteresses) {
-                            for (String interesse : postagem.getListaInteressesPostagem()) {
-                                if (listaInteresses.containsKey(interesse)) {
-                                    idsPostagens.add(postagem.getIdPostagem());
-                                    ToastCustomizado.toastCustomizadoCurto("Interesse " + interesse, context);
-                                    double anterior = listaInteresses.get(interesse) + recuperarPesoCorreto(tipoInteracao);
-                                    anterior = Math.round(anterior * 100.0) / 100.0;
-                                    listaInteresses.put(interesse, anterior);
-                                    salvarRef.setValue(listaInteresses);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onSemInteresses() {
-
-                        }
-
-                        @Override
-                        public void onError(String message) {
-
-                        }
-                    });
-                }
-            } else if (tipoInteracao.equals("like")) {
-                //Recuperar interesses da postagem
-                DatabaseReference salvarRef = firebaseRef.child("usuarios")
-                        .child(idUsuarioLogado).child("listaInteresses");
-                if (postagem != null
-                        && postagem.getListaInteressesPostagem() != null
-                        && postagem.getListaInteressesPostagem().size() > 0) {
-                    FirebaseRecuperarUsuario.recuperarInteresses(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
-                        @Override
-                        public void onRecuperado(HashMap<String, Double> listaInteresses) {
-                            for (String interesse : postagem.getListaInteressesPostagem()) {
-                                if (listaInteresses.containsKey(interesse)) {
-                                    ToastCustomizado.toastCustomizadoCurto("Interesse " + interesse, context);
-                                    double anterior = listaInteresses.get(interesse) + recuperarPesoCorreto(tipoInteracao);
-                                    anterior = Math.round(anterior * 100.0) / 100.0;
-                                    listaInteresses.put(interesse, anterior);
-                                    salvarRef.setValue(listaInteresses);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onSemInteresses() {
-
-                        }
-
-                        @Override
-                        public void onError(String message) {
-
-                        }
-                    });
-                }
-            }
-        }else if (position != -1) {
-            Postagem postagem = listaPostagens.get(position);
-
-            if (tipoInteracao.equals("view")) {
-
-                if (idsPostagens != null
-                        && idsPostagens.size() > 0
-                        && idsPostagens.contains(postagem.getIdPostagem())) {
-                    //Postagem já visualizada nessa sessão.
-                    return;
-                }
-
-                //Recuperar interesses da postagem
-                DatabaseReference salvarRef = firebaseRef.child("usuarios")
-                        .child(idUsuarioLogado).child("listaInteresses");
-                if (postagem != null
-                        && postagem.getListaInteressesPostagem() != null
-                        && postagem.getListaInteressesPostagem().size() > 0) {
-                    FirebaseRecuperarUsuario.recuperarInteresses(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
-                        @Override
-                        public void onRecuperado(HashMap<String, Double> listaInteresses) {
-                            for (String interesse : postagem.getListaInteressesPostagem()) {
-                                if (listaInteresses.containsKey(interesse)) {
-                                    idsPostagens.add(postagem.getIdPostagem());
-                                    ToastCustomizado.toastCustomizadoCurto("Interesse " + interesse, context);
-                                    double anterior = listaInteresses.get(interesse) + recuperarPesoCorreto(tipoInteracao);
-                                    anterior = Math.round(anterior * 100.0) / 100.0;
-                                    listaInteresses.put(interesse, anterior);
-                                    salvarRef.setValue(listaInteresses);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onSemInteresses() {
-
-                        }
-
-                        @Override
-                        public void onError(String message) {
-
-                        }
-                    });
-                }
-            } else if (tipoInteracao.equals("like")) {
-                //Recuperar interesses da postagem
-                DatabaseReference salvarRef = firebaseRef.child("usuarios")
-                        .child(idUsuarioLogado).child("listaInteresses");
-                if (postagem != null
-                        && postagem.getListaInteressesPostagem() != null
-                        && postagem.getListaInteressesPostagem().size() > 0) {
-                    FirebaseRecuperarUsuario.recuperarInteresses(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
-                        @Override
-                        public void onRecuperado(HashMap<String, Double> listaInteresses) {
-                            for (String interesse : postagem.getListaInteressesPostagem()) {
-                                if (listaInteresses.containsKey(interesse)) {
-                                    ToastCustomizado.toastCustomizadoCurto("Interesse " + interesse, context);
-                                    double anterior = listaInteresses.get(interesse) + recuperarPesoCorreto(tipoInteracao);
-                                    anterior = Math.round(anterior * 100.0) / 100.0;
-                                    listaInteresses.put(interesse, anterior);
-                                    salvarRef.setValue(listaInteresses);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onSemInteresses() {
-
-                        }
-
-                        @Override
-                        public void onError(String message) {
-
-                        }
-                    });
-                }
-            }
+        if (position > 0 && position <= listaPostagens.size()) {
+            posicaoReal = position - 1;
+        } else if (position == 0) {
+            return;
         }
+
+        if (posicaoReal < 0 || posicaoReal >= listaPostagens.size()) return;
+
+        Postagem postagem = listaPostagens.get(posicaoReal);
+
+        if (tipoInteracao.equals("view")) {
+            if (idsPostagens != null && idsPostagens.contains(postagem.getIdPostagem())) {
+                return;
+            }
+            idsPostagens.add(postagem.getIdPostagem());
+            salvarIdPostVisualizada(position); // Seu método de salvar histórico
+        }
+
+        if (postagem.getListaInteressesPostagem() == null || postagem.getListaInteressesPostagem().isEmpty()) {
+            return;
+        }
+
+        DatabaseReference salvarRef = firebaseRef.child("usuarios")
+                .child(idUsuarioLogado).child("listaInteresses");
+
+        FirebaseRecuperarUsuario.recuperarInteresses(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
+            @Override
+            public void onRecuperado(HashMap<String, Double> listaInteressesUsuario) {
+                boolean houveAlteracao = false;
+
+                for (String interessePost : postagem.getListaInteressesPostagem()) {
+                    double pesoAdicional = recuperarPesoCorreto(tipoInteracao);
+
+                    if (listaInteressesUsuario.containsKey(interessePost)) {
+                        double pesoAtual = listaInteressesUsuario.get(interessePost);
+                        double novoPeso = Math.round((pesoAtual + pesoAdicional) * 100.0) / 100.0;
+                        listaInteressesUsuario.put(interessePost, novoPeso);
+                    } else {
+                        listaInteressesUsuario.put(interessePost, pesoAdicional);
+                    }
+                    houveAlteracao = true;
+                }
+
+                if (houveAlteracao) {
+                    salvarRef.setValue(listaInteressesUsuario);
+                }
+            }
+
+            @Override
+            public void onSemInteresses() {
+
+                HashMap<String, Double> novaLista = new HashMap<>();
+
+                for (String interessePost : postagem.getListaInteressesPostagem()) {
+                    double pesoInicial = recuperarPesoCorreto(tipoInteracao);
+                    novaLista.put(interessePost, pesoInicial);
+                }
+
+                if (!novaLista.isEmpty()) {
+                    salvarRef.setValue(novaLista);
+                }
+            }
+
+            @Override
+            public void onError(String message) {
+            }
+        });
     }
 
     private void diminuirPesoLike(Postagem postagem, int position) {
+        if (postagem == null || postagem.getListaInteressesPostagem() == null || postagem.getListaInteressesPostagem().isEmpty()) {
+            return;
+        }
+
         DatabaseReference salvarRef = firebaseRef.child("usuarios")
                 .child(idUsuarioLogado).child("listaInteresses");
-        if (postagem != null
-                && postagem.getListaInteressesPostagem() != null
-                && postagem.getListaInteressesPostagem().size() > 0) {
-            FirebaseRecuperarUsuario.recuperarInteresses(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
-                @Override
-                public void onRecuperado(HashMap<String, Double> listaInteresses) {
-                    for (String interesse : postagem.getListaInteressesPostagem()) {
-                        if (listaInteresses.containsKey(interesse)) {
-                            ToastCustomizado.toastCustomizadoCurto("Interesse " + interesse, context);
-                            double anterior = listaInteresses.get(interesse) - PESO_LIKE;
-                            if (anterior <= 0) {
-                                anterior = 0;
-                            }
-                            anterior = Math.round(anterior * 100.0) / 100.0;
-                            listaInteresses.put(interesse, anterior);
-                            salvarRef.setValue(listaInteresses);
-                        }
+
+        FirebaseRecuperarUsuario.recuperarInteresses(idUsuarioLogado, new FirebaseRecuperarUsuario.RecuperarInteressesCallback() {
+            @Override
+            public void onRecuperado(HashMap<String, Double> listaInteressesUsuario) {
+                boolean houveAlteracao = false;
+
+                for (String interesse : postagem.getListaInteressesPostagem()) {
+                    if (listaInteressesUsuario.containsKey(interesse)) {
+                        double pesoAtual = listaInteressesUsuario.get(interesse);
+                        double novoPeso = pesoAtual - PESO_LIKE;
+
+                        if (novoPeso < 0) novoPeso = 0;
+
+                        novoPeso = Math.round(novoPeso * 100.0) / 100.0;
+                        listaInteressesUsuario.put(interesse, novoPeso);
+                        houveAlteracao = true;
                     }
                 }
 
-                @Override
-                public void onSemInteresses() {
-
+                if (houveAlteracao) {
+                    salvarRef.setValue(listaInteressesUsuario);
                 }
+            }
 
-                @Override
-                public void onError(String message) {
+            @Override
+            public void onSemInteresses() {
 
-                }
-            });
-        }
+            }
+
+            @Override
+            public void onError(String message) {
+            }
+        });
     }
 
     private double recuperarPesoCorreto(String tipoInteracao) {
         switch (tipoInteracao) {
             case "view":
-                ToastCustomizado.toastCustomizadoCurto("View " + PESO_VIEW, context);
                 return PESO_VIEW;
             case "like":
-                ToastCustomizado.toastCustomizadoCurto("Like " + PESO_LIKE, context);
                 return PESO_LIKE;
         }
         return 0;

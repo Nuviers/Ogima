@@ -16,8 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
 import com.example.ogima.activity.CreateCommunityActivity;
-import com.example.ogima.activity.CriarComunidadeActivity;
-import com.example.ogima.activity.ListaComunidadesActivityOLD;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;

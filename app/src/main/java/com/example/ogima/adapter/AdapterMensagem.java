@@ -42,7 +42,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.activity.FotoVideoExpandidoActivity;
 import com.example.ogima.activity.PlayerMusicaChatActivity;
 import com.example.ogima.activity.ShareMessageActivity;
@@ -50,6 +49,7 @@ import com.example.ogima.helper.Base64Custom;
 import com.example.ogima.helper.CommunityUtils;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.CoresRandomicas;
+import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.GroupUtils;
 import com.example.ogima.helper.MidiaUtils;
@@ -62,8 +62,6 @@ import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.Usuario;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -107,7 +105,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private StorageReference removerArquivoRef;
 
     public String stringTeste;
-    private ConversaActivity conversaActivity = new ConversaActivity();
     private SolicitaPermissoes solicitaPermissoes = new SolicitaPermissoes();
     //Verifição de permissões necessárias
     private String[] permissoesNecessarias = new String[]{
@@ -369,10 +366,8 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 public void onClick(View view) {
                     try {
                         if (arquivoExiste(context, mensagemAtual)) {
-                            ToastCustomizado.toastCustomizadoCurto("ABRIR", context);
                             abrirDocumento(mensagemAtual);
                         } else {
-                            ToastCustomizado.toastCustomizadoCurto("BAIXAR", context);
                             baixarArquivo(mensagemAtual, true);
                         }
 
@@ -633,6 +628,11 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                         int cor = coresRandom.get(numero % coresRandom.size());
                         txtViewMensagem.setBackgroundTintList(ColorStateList.valueOf(cor));
                         txtViewNomeRemetenteGrupo.setTextColor(cor);
+                        String nome = UsuarioUtils.recuperarNomeConfigurado(usuarioGrupo);
+                        if (!nome.isEmpty()) {
+                            String nomeConfigurado = FormatarContadorUtils.abreviarTexto(nome, UsuarioUtils.MAX_NAME_LENGHT);
+                            txtViewNomeRemetenteGrupo.setText(nomeConfigurado);
+                        }
                         linearMusicaChat.setBackgroundTintList(ColorStateList.valueOf(cor));
                         linearDocumentoChat.setBackgroundTintList(ColorStateList.valueOf(cor));
                         linearAudioChat.setBackgroundTintList(ColorStateList.valueOf(cor));
@@ -977,7 +977,7 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                                         apagarConversa.put(caminhoDetalhesAtual + "tipoMidiaLastMsg", penultimaMsg.getTipoMensagem());
                                         apagarConversa.put(caminhoDetalhesAtual + "idConversa", penultimaMsg.getIdConversa());
                                         apagarConversa.put(caminhoDetalhesAtual + "timestampLastMsg", penultimaMsg.getTimestampinteracao());
-                                        apagarConversa.put(caminhoDetalhesAtual + "idUsuario", penultimaMsg.getIdRemetente());
+                                        apagarConversa.put(caminhoDetalhesAtual + "idUsuario", penultimaMsg.getIdDestinatario());
                                         apagarConversa.put(caminhoDetalhesAtual + "dateLastMsg", penultimaMsg.getDataMensagem());
                                         terminarExclusaoForMe(apagarConversa, caminhoConversaUserAtual, mensagem, excluirLocalmente);
                                     }
@@ -1047,15 +1047,12 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 boolean caminhoexiste = arquivoExiste(context, mensagem);
                 boolean canread = caminhoDestino.canRead();
                 boolean canwrite = caminhoDestino.canWrite();
-                ToastCustomizado.toastCustomizadoCurto("Caminho Existe " + caminhoexiste, context);
-                ToastCustomizado.toastCustomizadoCurto("CanRead " + canread, context);
-                ToastCustomizado.toastCustomizadoCurto("CanWrite " + canwrite, context);
                 if (caminhoexiste) {
                     caminhoDestino.delete();
                     ToastCustomizado.toastCustomizadoCurto("Arquivo excluído de seu dispositivo com sucesso", context);
                     ocultarProgressDialog();
                 } else {
-                    ToastCustomizado.toastCustomizadoCurto("Arquivo não localizado em seu dispositivo", context);
+                    //Apenas não foi salvo o arquivo no celular do usuário
                     ocultarProgressDialog();
                 }
             } catch (Exception ex) {
@@ -1429,7 +1426,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
     private void baixarPeloSheet(Mensagem mensagem) {
         switch (mensagem.getTipoMensagem()) {
             case MidiaUtils.IMAGE: {
-                ToastCustomizado.toastCustomizadoCurto("Imagem", context);
                 solicitaPermissoes("imagem");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
                     baixarArquivo(mensagem, false);
@@ -1444,7 +1440,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
             }
              */
             case MidiaUtils.VIDEO: {
-                ToastCustomizado.toastCustomizadoCurto("Video", context);
                 solicitaPermissoes("video");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
                     baixarArquivo(mensagem, false);
@@ -1452,7 +1447,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 break;
             }
             case MidiaUtils.MUSIC: {
-                ToastCustomizado.toastCustomizadoCurto("Musica", context);
                 solicitaPermissoes("musica");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
                     baixarArquivo(mensagem, false);
@@ -1460,7 +1454,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 break;
             }
             case MidiaUtils.AUDIO: {
-                ToastCustomizado.toastCustomizadoCurto("Audio", context);
                 solicitaPermissoes("audio");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
                     baixarArquivo(mensagem, false);
@@ -1468,7 +1461,6 @@ public class AdapterMensagem extends FirebaseRecyclerAdapter<Mensagem, AdapterMe
                 break;
             }
             case MidiaUtils.DOCUMENT: {
-                ToastCustomizado.toastCustomizadoCurto("Documento", context);
                 solicitaPermissoes("documento");
                 if (!solicitaPermissoes.exibirPermissaoNegada) {
                     baixarArquivo(mensagem, false);

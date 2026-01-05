@@ -67,15 +67,6 @@ public class GerenciarUsersGrupoActivity extends AppCompatActivity {
     private List<Usuario> listaFundadorAleatorio = new ArrayList<>();
 
     @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(GerenciarUsersGrupoActivity.this, DetalhesGrupoActivity.class);
-        intent.putExtra("grupoAtual", grupo);
-        startActivity(intent);
-        finish();
-        super.onBackPressed();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gerenciar_users_grupo);

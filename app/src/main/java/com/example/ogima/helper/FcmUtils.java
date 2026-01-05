@@ -343,7 +343,6 @@ public class FcmUtils {
                 @Override
                 public void onOnline() {
                     //Usuário está online
-                    ToastCustomizado.toastCustomizadoCurto("Online", context);
 
                     //Verifica se o usuário está na conversa atual
                     verificaSeEstaNaConversaAtual(messageNotificacao, new VerificaViewConversaAtualCallback() {
@@ -351,12 +350,10 @@ public class FcmUtils {
                         public void onEstaNaConversaAtual() {
                             //Usuário está na conversa que a lógica se refere, logo
                             //não há mensagens perdidas nessa conversa, não é necessário fazer nada.
-                            ToastCustomizado.toastCustomizadoCurto("Está na conversa", context);
                         }
 
                         @Override
                         public void onNaoEsta() {
-                            ToastCustomizado.toastCustomizadoCurto("Não está na conversa", context);
                             //Usuário não está na conversa atual então logo ele tem
                             //mensagens perdidas nessa conversa
                             salvarMsgNaoLida(messageNotificacao, new NotificacaoLocalCallback() {
@@ -370,12 +367,11 @@ public class FcmUtils {
                                             enviarNotificacaoPadrao(context, idDestinatario, tipoOperacao, messageNotificacao, body, new NotificacaoCallback() {
                                                 @Override
                                                 public void onEnviado() {
-                                                    ToastCustomizado.toastCustomizadoCurto("Enviado", context);
                                                 }
 
                                                 @Override
                                                 public void onError(String message) {
-                                                    ToastCustomizado.toastCustomizadoCurto("Error " + message, context);
+                                                    //ToastCustomizado.toastCustomizadoCurto("Error " + message, context);
                                                 }
                                             });
                                         }
@@ -414,7 +410,6 @@ public class FcmUtils {
 
                 @Override
                 public void onOffline() {
-                    ToastCustomizado.toastCustomizadoCurto("Offline", context);
 
                     salvarMsgNaoLida(messageNotificacao, new NotificacaoLocalCallback() {
                         @Override
@@ -423,13 +418,11 @@ public class FcmUtils {
                             enviarNotificacaoPadrao(context, idDestinatario, tipoOperacao, messageNotificacao, body, new NotificacaoCallback() {
                                 @Override
                                 public void onEnviado() {
-                                    ToastCustomizado.toastCustomizadoCurto("Enviado", context);
-
                                 }
 
                                 @Override
                                 public void onError(String message) {
-                                    ToastCustomizado.toastCustomizadoCurto("Error " + message, context);
+                                    //ToastCustomizado.toastCustomizadoCurto("Error " + message, context);
                                 }
                             });
                         }
@@ -483,7 +476,6 @@ public class FcmUtils {
             @Override
             public void onRecuperado(String token) {
                 //Token recuperado para que seja possível enviar a notificação padrão
-                ToastCustomizado.toastCustomizadoCurto("Token recuperado", context);
 
                 String idRemetente = messageNotificacao.getIdRemetente();
                 String idDestinatario = messageNotificacao.getIdDestinatario();
@@ -507,7 +499,6 @@ public class FcmUtils {
                 call.enqueue(new Callback<NotificacaoDados>() {
                     @Override
                     public void onResponse(Call<NotificacaoDados> call, Response<NotificacaoDados> response) {
-                        ToastCustomizado.toastCustomizado("Chamado " + response.code(), context);
 
                         if (response.isSuccessful()) {
                             callback.onEnviado();

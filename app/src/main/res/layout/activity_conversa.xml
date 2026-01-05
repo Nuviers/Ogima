@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:scrollbarSize="@dimen/_2sdp"
-    tools:context=".activity.ConversaActivity"
+    tools:context=".activity.ConversaActivityOld"
     tools:ignore="SpeakableTextPresentCheck">
 
     <androidx.appcompat.widget.Toolbar

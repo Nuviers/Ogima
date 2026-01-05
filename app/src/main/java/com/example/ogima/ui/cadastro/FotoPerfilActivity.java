@@ -18,7 +18,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.ogima.BuildConfig;
 import com.example.ogima.R;
+import com.example.ogima.activity.EditarPerfilActivity;
+import com.example.ogima.activity.FotosPostadasActivity;
 import com.example.ogima.activity.PermissaoSegundoPlanoActivity;
+import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.ConfiguracaoFirebase;
 import com.example.ogima.helper.FirebaseRecuperarUsuario;
 import com.example.ogima.helper.GlideCustomizado;
@@ -86,13 +89,15 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         void onError(String message);
     }
 
-    public interface DadosIniciaisCallback{
+    public interface DadosIniciaisCallback {
         void onConcluido();
+
         void onError(String message);
     }
 
-    public interface SalvarIdQRCodeCallback{
+    public interface SalvarIdQRCodeCallback {
         void onSalvo();
+
         void onError(String message);
     }
 
@@ -356,7 +361,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 && uriFoto == null
                 && uriFundo == null) {
             //É edição e nada foi alterado.
-            finish();
+            voltarParaEdicao();
             return;
         }
 
@@ -376,8 +381,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                             //Não há mais o que salvar, finalizar activity.
                             midiaUtils.ocultarProgressDialog();
                             if (edicao) {
-                                ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
-                                finish();
+                                voltarParaEdicao();
                             } else {
                                 salvarUsuario();
                             }
@@ -409,8 +413,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                     //Não há mais o que salvar, finalizar activity.
                                     midiaUtils.ocultarProgressDialog();
                                     if (edicao) {
-                                        ToastCustomizado.toastCustomizado(msgEdicao, getApplicationContext());
-                                        finish();
+                                        voltarParaEdicao();
                                     } else {
                                         salvarUsuario();
                                     }
@@ -442,8 +445,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     public void onSalvo() {
                         midiaUtils.ocultarProgressDialog();
                         if (edicao) {
-                            ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
-                            finish();
+                            voltarParaEdicao();
                         } else {
                             salvarUsuario();
                         }
@@ -472,8 +474,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                                 //Foto editada com sucesso.
                                 midiaUtils.ocultarProgressDialog();
                                 if (edicao) {
-                                    ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
-                                    finish();
+                                    voltarParaEdicao();
                                 } else {
                                     salvarUsuario();
                                 }
@@ -503,7 +504,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     .child(idUsuario).child("minhaFoto");
             StorageReference fotoStorage = storageRef.child("usuarios")
                     .child(idUsuario).child("minhaFoto.jpeg");
-            prepararGifParaSalvamento(fotoRef, fotoStorage, String.valueOf(uriFoto),"foto",callback);
+            prepararGifParaSalvamento(fotoRef, fotoStorage, String.valueOf(uriFoto), "foto", callback);
         }
     }
 
@@ -513,7 +514,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     .child(idUsuario).child("meuFundo");
             StorageReference fundoStorage = storageRef.child("usuarios")
                     .child(idUsuario).child("meuFundo.jpeg");
-            prepararGifParaSalvamento(fundoRef, fundoStorage, String.valueOf(uriFundo),"fundo",callback);
+            prepararGifParaSalvamento(fundoRef, fundoStorage, String.valueOf(uriFundo), "fundo", callback);
         }
     }
 
@@ -727,9 +728,10 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                         }
                     });
                 }
+
                 @Override
                 public void onError(String message) {
-                    ToastCustomizado.toastCustomizadoCurto(message,getApplicationContext());
+                    ToastCustomizado.toastCustomizadoCurto(message, getApplicationContext());
                 }
             });
         } else {
@@ -753,14 +755,14 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void salvarIdQRCode(SalvarIdQRCodeCallback callback){
+    private void salvarIdQRCode(SalvarIdQRCodeCallback callback) {
         DatabaseReference qrcodeRef = firebaseRef.child("qrcode");
         String idQRCode = qrcodeRef.push().getKey();
         if (idQRCode != null && !idQRCode.isEmpty()) {
             DatabaseReference salvarIdQRCodeRef = firebaseRef.child("qrcode")
                     .child(idQRCode);
             HashMap<String, Object> dadosQRcode = new HashMap<>();
-            dadosQRcode.put("idUsuario",idUsuario);
+            dadosQRcode.put("idUsuario", idUsuario);
             dadosQRcode.put("idQRCode", idQRCode);
             salvarIdQRCodeRef.setValue(dadosQRcode).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
@@ -774,7 +776,7 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                     callback.onError(e.getMessage());
                 }
             });
-        }else{
+        } else {
             callback.onError(getString(R.string.error_in_registration_cad));
         }
     }
@@ -875,5 +877,13 @@ public class FotoPerfilActivity extends AppCompatActivity implements View.OnClic
                 }
                 break;
         }
+    }
+
+    private void voltarParaEdicao() {
+        ToastCustomizado.toastCustomizadoCurto(msgEdicao, getApplicationContext());
+        Intent intent = new Intent(FotoPerfilActivity.this, EditarPerfilActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 }

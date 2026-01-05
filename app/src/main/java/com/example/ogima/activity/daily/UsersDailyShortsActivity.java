@@ -154,21 +154,6 @@ public class UsersDailyShortsActivity extends AppCompatActivity implements Adapt
         mCurrentPosition = savedInstanceState.getInt("current_position");
     }
 
-    private void testeDaily() {
-
-        /*Teste de visualização
-        listaDailys.add(new DailyShort("https://media.tenor.com/r0IRrRJqMIwAAAAd/dance-anime.gif",
-                "https://images.unsplash.com/photo-1525915473429-44eb9efc26ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&w=500&q=60",
-                "Laura Anier", "12:27", "imagem"));
-        listaDailys.add(new DailyShort("https://media.tenor.com/aYmIBD8B_b8AAAAC/anime-dance.gif",
-                "https://images.unsplash.com/photo-1508285296015-c0b524447532?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=401&q=80",
-                "Bruna Slad", "14:17", "imagem"));
-        listaDailys.add(new DailyShort("https://media.tenor.com/36U-DfUl5MoAAAAC/anime-dance.gif",
-                "https://firebasestorage.googleapis.com/v0/b/ogima-7.appspot.com/o/dailyShorts%2Fvideos%2FcmFmYWJlbmVkZXRmZXJAZ21haWwuY29t%2Fvideoc8f9170d-2a63-4ec9-ab66-d5e41a220fff.mp4?alt=media&token=6473d1d2-69c6-44c6-9c5c-c78670be0302",
-                "Jennifer Stilson", "17:17", "video"));
-         */
-    }
-
     private void configPaginacao() {
         if (recyclerViewDailyShorts != null) {
             isScrolling = true;

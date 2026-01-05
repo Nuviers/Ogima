@@ -334,7 +334,7 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
 
             @Override
             public void onChildChanged(@androidx.annotation.NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                ToastCustomizado.toastCustomizadoCurto("CHANGED", getApplicationContext());
+
             }
 
             @Override
@@ -433,7 +433,6 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
                 && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
                 && idUltimoElementoFiltro.equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdUsuario())) {
             ocultarProgress();
-            ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, getApplicationContext());
             return;
         }
 
@@ -450,14 +449,12 @@ public class FindPeopleActivity extends AppCompatActivity implements AdapterFind
 
                         if (listenerHashMap != null && !listenerHashMap.isEmpty()
                                 && listenerHashMap.containsKey(usuarioMore.getIdUsuario())) {
-                            ToastCustomizado.toastCustomizadoCurto("RETORNO PESQUISA IF " + usuarioMore.getIdUsuario(), getApplicationContext());
                             ocultarProgress();
                             setLoading(false);
                         }else{
 
                             if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
                                     && idsFiltrados.contains(usuarioMore.getIdUsuario())) {
-                                ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + usuarioMore.getIdUsuario(), getApplicationContext());
                                 ocultarProgress();
                                 setLoading(false);
                                 return;

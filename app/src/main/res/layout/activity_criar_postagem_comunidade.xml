@@ -91,7 +91,7 @@
             android:layout_marginLeft="@dimen/_8sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:scaleType="centerInside"
-            android:src="@drawable/backgroundclaroteste"
+            android:src="@drawable/dragon"
             android:visibility="gone"
             app:riv_corner_radius="@dimen/_12sdp" />
 
@@ -105,7 +105,7 @@
             android:layout_marginLeft="@dimen/_8sdp"
             android:layout_marginTop="@dimen/_8sdp"
             android:scaleType="centerInside"
-            android:src="@drawable/backgroundclaroteste"
+            android:src="@drawable/dragon"
             android:visibility="gone"
             app:riv_corner_radius="@dimen/_12sdp" />
 

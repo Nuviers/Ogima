@@ -63,7 +63,17 @@
             android:paddingLeft="@dimen/_8sdp"
             android:paddingEnd="@dimen/_4sdp"
             android:paddingRight="@dimen/_4sdp"
-            android:text="TextView"
+            android:visibility="gone"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/_17ssp" />
+
+        <TextView
+            android:id="@+id/txtViewTextoPostado"
+            android:padding="@dimen/_20sdp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/_4sdp"
+            android:visibility="gone"
             android:textColor="@android:color/black"
             android:textSize="@dimen/_17ssp" />
 
@@ -78,6 +88,7 @@
             android:paddingEnd="@dimen/_4sdp"
             android:paddingRight="@dimen/_4sdp"
             android:text="Visível para:"
+            android:visibility="gone"
             android:textColor="@android:color/white"
             android:textSize="@dimen/_14ssp" />
 
@@ -89,7 +100,7 @@
 
         <com.github.chrisbanes.photoview.PhotoView
             android:id="@+id/imgViewGifPostada"
-            android:layout_marginTop="@dimen/_24sdp"
+            android:layout_marginTop="@dimen/_8sdp"
             android:layout_width="match_parent"
             android:layout_height="@dimen/_270sdp"
             android:layout_gravity="center"
@@ -191,17 +202,25 @@
                 <Button
                     android:id="@+id/btnCurtidasPostagem"
                     android:layout_width="wrap_content"
-                    android:layout_height="@dimen/_30sdp"
-                    android:layout_marginStart="@dimen/_8sdp"
-                    android:layout_marginLeft="@dimen/_8sdp"
+                    android:layout_height="@dimen/_34sdp"
+                    android:layout_margin="@dimen/_12sdp"
                     android:background="@drawable/estilo_button_google"
                     android:backgroundTint="@android:color/holo_blue_dark"
                     android:gravity="center_vertical"
-                    android:paddingStart="@dimen/_8sdp"
-                    android:paddingLeft="@dimen/_8sdp"
-                    android:paddingEnd="@dimen/_8sdp"
-                    android:paddingRight="@dimen/_8sdp"
-                    android:text="1k de curtidas"
+                    android:padding="@dimen/_8sdp"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/_14ssp" />
+
+                <Button
+                    android:id="@+id/btnComentariosPostagem"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/_34sdp"
+                    android:layout_margin="@dimen/_12sdp"
+                    android:padding="@dimen/_8sdp"
+                    android:background="@drawable/estilo_button_google"
+                    android:backgroundTint="@android:color/holo_blue_dark"
+                    android:gravity="center|center_vertical"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/_14ssp" />
@@ -221,6 +240,7 @@
                     android:paddingLeft="@dimen/_8sdp"
                     android:paddingEnd="@dimen/_8sdp"
                     android:paddingRight="@dimen/_8sdp"
+                    android:visibility="gone"
                     android:text="250 compartilhamentos"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
@@ -235,22 +255,6 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/btnComentariosPostagem"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_30sdp"
-                android:layout_marginStart="@dimen/_40sdp"
-                android:layout_marginLeft="@dimen/_40sdp"
-                android:layout_marginEnd="@dimen/_40sdp"
-                android:layout_marginRight="@dimen/_40sdp"
-                android:background="@drawable/estilo_button_google"
-                android:backgroundTint="@android:color/holo_blue_dark"
-                android:gravity="center|center_vertical"
-                android:text="40 comentários"
-                android:textAllCaps="false"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/_14ssp" />
-
             <TextView
                 android:id="@+id/txtViewDescricaoPostada"
                 android:layout_width="match_parent"
@@ -260,7 +264,6 @@
                 android:paddingLeft="@dimen/_8sdp"
                 android:paddingEnd="@dimen/_4sdp"
                 android:paddingRight="@dimen/_4sdp"
-                android:text="TextView"
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/_17ssp" />
         </LinearLayout>

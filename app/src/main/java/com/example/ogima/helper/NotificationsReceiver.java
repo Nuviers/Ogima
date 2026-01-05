@@ -1,8 +1,5 @@
 package com.example.ogima.helper;
 
-import static androidx.core.app.NotificationCompat.DEFAULT_VIBRATE;
-import static com.google.firebase.messaging.Constants.MessageNotificationKeys.DEFAULT_SOUND;
-
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -17,33 +14,24 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.ImageView;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.activity.ConversationActivity;
-import com.example.ogima.activity.NotificationsTesteActivity;
-import com.example.ogima.activity.SplashActivity;
 import com.example.ogima.model.MessageNotificacao;
 import com.example.ogima.model.Usuario;
-import com.example.ogima.ui.menusInicio.NavigationDrawerActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;

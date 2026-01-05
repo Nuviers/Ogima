@@ -194,9 +194,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
         inicializarComponentes(view);
-        if (isAdded()) {
-            ToastCustomizado.toastCustomizadoCurto("CREATE", requireContext());
-        }
         configInicial();
         return view;
     }
@@ -410,9 +407,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                                             && listenerHashMapNEWDATA.containsKey(chat.getIdUsuario())) {
                                         return;
                                     }
-                                    if (isAdded()) {
-                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + chat.getIdUsuario(), requireContext());
-                                    }
                                     anexarNovoDado(chat);
                                 }
                             }
@@ -430,10 +424,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                                     && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Chat.class).getIdUsuario())) {
                                 return;
                             }
-
-                            if (isAdded()) {
-                                ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO INICIO", requireContext());
-                            }
                             logicaAtualizacao(snapshot, false);
                         }
                     }
@@ -447,11 +437,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                                 //O próprio listenernewdata vai cuidar da remoção desse dado.
                                 return;
                             }
-
-                            if (isAdded()) {
-                                ToastCustomizado.toastCustomizado("DELETE INICIO", requireContext());
-                            }
-
                             logicaRemocao(chatRemovido, true, true);
 
                             verificaExistencia(chatRemovido.getIdUsuario(), new VerificaExistenciaCallback() {
@@ -461,9 +446,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                                 && listenerHashMapNEWDATA.containsKey(chatRemovido.getIdUsuario())) {
                                         } else {
-                                            if (isAdded()) {
-                                                ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do inicio " + chatRemovido.getIdUsuario(), requireContext());
-                                            }
                                             anexarNovoDado(chatAtualizado);
                                         }
                                     }
@@ -496,8 +478,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
     }
 
     private void dadoInicialFiltragem(String nome, int counter) {
-        //*ToastCustomizado.toastCustomizadoCurto("Busca: " + nome, requireContext());
-
         exibirProgress();
         queryInicialFind = firebaseRef.child("chats_by_name")
                 .child(idUsuario)
@@ -510,9 +490,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 if (counter != searchCounter) {
                     ocultarProgress();
                     setLoading(false);
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizadoCurto("Return counter != searchCounter", requireContext());
-                    }
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -521,9 +498,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 if (listaFiltrada != null && listaFiltrada.size() >= 1) {
                     ocultarProgress();
                     setLoading(false);
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizadoCurto("Return listaFiltrada != null && listaFiltrada.size() >= 1", requireContext());
-                    }
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -699,9 +673,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                         && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdUsuario())) {
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdUsuario(), requireContext());
-                    }
                     return;
                 }
                 if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -712,10 +683,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 if (listenerHashMap != null && listenerHashMap.size() > 0
                         && listenerHashMap.containsKey(snapshot.getValue(Chat.class).getIdUsuario())) {
                     return;
-                }
-
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH INICIO", requireContext());
                 }
                 logicaAtualizacao(snapshot, false);
             }
@@ -743,18 +710,10 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
 
     private void carregarMaisDadosFiltrados(String dadoAnterior, RecuperarIdsFiltroCallback callback) {
         if (isPesquisaAtivada() && listaFiltrada != null) {
-
-            if (isAdded()) {
-                ToastCustomizado.toastCustomizadoCurto("PAGINACAO - LOAD:  " + isLoading, requireContext());
-            }
-
             if (listaFiltrada.size() > 1
                     && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
                     && idUltimoElementoFiltro.equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdUsuario())) {
                 ocultarProgress();
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, requireContext());
-                }
                 return;
             }
 
@@ -778,9 +737,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
 
                                     if (listenerFiltroHashMap != null && !listenerFiltroHashMap.isEmpty()
                                             && listenerFiltroHashMap.containsKey(usuarioPesquisa.getIdUsuario())) {
-                                        if (isAdded()) {
-                                            ToastCustomizado.toastCustomizadoCurto("RETORNO PESQUISA IF " + usuarioPesquisa.getIdUsuario(), requireContext());
-                                        }
                                         ocultarProgress();
                                         setLoading(false);
                                     } else {
@@ -813,16 +769,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                     && idUltimoElemento != null && !idUltimoElemento.isEmpty()
                     && idUltimoElemento.equals(listaChat.get(listaChat.size() - 1).getIdUsuario())) {
                 ocultarProgress();
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA CHAT " + idUltimoElemento, requireContext());
-                }
-                //NO LUGAR DE COMPARAR COM O ÚLTIMO ITEM ADICIONADO NA LISTA
-                //O CORRETO É TER UM MÉTODO SEPARADO QUE PEGA O ÚLTIMO ELEMENTO
-                //NO SERVIDOR COM O LISTENER ATIVO SEMPRE ASSIM EU COMPARO COM O ID
-                //DESSE DADO, ASSIM EU TENHO COMO SABER QUANDO A PAGINAÇÃO NÃO DEVE CONTINUAR
-                //JÁ QUE SABERIA QUE A LISTA JÁ PEGOU TODOS OS DADOS POSSÍVEIS DO SERVIDOR
-                //E NÃO TERIA MAIS DADOS ALÉM DELE, POSSO COLOCAR ESSA LÓGICA NO SCROLLISTENER
-                //E RETIRAR ESSE CÓDIGO ANTERIOR DO MÉTODO CARREGARMAISDADOS.
                 return;
             }
 
@@ -852,9 +798,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
 
                             if (listaChat != null && listaChat.size() > 1
                                     && chatMore.getTimestampLastMsg() < listaChat.get(0).getTimestampLastMsg()) {
-                                if (isAdded()) {
-                                    ToastCustomizado.toastCustomizadoCurto("TIME IGNORADO", requireContext());
-                                }
                                 ocultarProgress();
                                 setLoading(false);
                                 return;
@@ -888,17 +831,11 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                     if (snapshot.getValue() != null) {
                         if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                                 && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdUsuario())) {
-                            if (isAdded()) {
-                                ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdUsuario(), requireContext());
-                            }
                             return;
                         }
                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                 && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Chat.class).getIdUsuario())) {
                             return;
-                        }
-                        if (isAdded()) {
-                            ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO CARREGAR + DADOS", requireContext());
                         }
                         logicaAtualizacao(snapshot, false);
                     }
@@ -922,19 +859,11 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                         verificaExistencia(chatRemovido.getIdUsuario(), new VerificaExistenciaCallback() {
                             @Override
                             public void onExistencia(boolean status, Chat chatAtualizado) {
-
-                                if (isAdded()) {
-                                    ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + chatRemovido.getIdUsuario(), requireContext());
-                                }
-
                                 logicaRemocao(chatRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = chatAtualizado.getTimestampLastMsg() <= listaChat.get(0).getTimestampLastMsg();
                                     if (!menorque) {
-                                        if (isAdded()) {
-                                            ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + chatRemovido.getIdUsuario(), requireContext());
-                                        }
                                         anexarNovoDado(chatAtualizado);
                                     }
                                 }
@@ -1045,18 +974,11 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                     && idsUsuarios.contains(dadosUser.getIdUsuario())
                     || idsListeners != null && idsListeners.size() > 0
                     && idsListeners.contains(dadosUser.getIdUsuario())) {
-                //Já existe listener anteriormente.
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("Listener já existe - " + dadosUser.getIdUsuario(), requireContext());
-                }
+
                 ocultarProgress();
                 adicionarDadoDoUsuario(dadosUser, null, null, false);
                 setLoading(false);
                 return;
-            }
-
-            if (isAdded()) {
-                ToastCustomizado.toastCustomizadoCurto("Indo add listener: " + dadosUser.getIdUsuario(), requireContext());
             }
 
             queryLoadMoreFiltro = firebaseRef.child("detalhesChat")
@@ -1079,9 +1001,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                         if (chatAtualizado == null ||
                                 chatAtualizado.getIdUsuario() == null || chatAtualizado.getIdUsuario().isEmpty()) {
                             return;
-                        }
-                        if (isAdded()) {
-                            ToastCustomizado.toastCustomizadoCurto("Atualizado pelo + filtro " + chatAtualizado.getIdUsuario(), requireContext());
                         }
                         logicaAtualizacao(snapshot, false);
                     }
@@ -1193,10 +1112,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
             return;
         }
 
-        if (isAdded()) {
-            ToastCustomizado.toastCustomizadoCurto("Listener add: " + idUser, requireContext());
-        }
-
         referenceFiltroHashMap.put(idUser, queryAlvo);
         listenerFiltroHashMap.put(idUser, childEventListenerAlvo);
     }
@@ -1281,9 +1196,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                             Bundle bundleUpdate = idsParaAtualizar.get(idUpdate);
                             if (index != -1) {
                                 adapterChatList.notifyItemChanged(index, bundleUpdate);
-                                if (isAdded()) {
-                                    ToastCustomizado.toastCustomizadoCurto("CODE NOTIFY", requireContext());
-                                }
                             }
                         }
                         if (contadorUpdate >= idsParaAtualizar.size()) {
@@ -1308,9 +1220,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 if (contadorRemocaoListener == referenceHashMap.size()) {
                     referenceHashMap.clear();
                     listenerHashMap.clear();
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizadoCurto("LIMPO", requireContext());
-                    }
                 }
             }
         }
@@ -1329,9 +1238,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 if (contadorRemocaoListenerNEWDATA == referenceHashMapNEWDATA.size()) {
                     referenceHashMapNEWDATA.clear();
                     listenerHashMapNEWDATA.clear();
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizadoCurto("LIMPO NEW DATA", requireContext());
-                    }
                 }
             }
         }
@@ -1345,9 +1251,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                 Query userRef = referenceFiltroHashMap.get(userId);
                 ChildEventListener listener = listenerFiltroHashMap.get(userId);
                 if (userRef != null && listener != null) {
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizado("ListenerRemovido: " + userId, requireContext());
-                    }
                     userRef.removeEventListener(listener);
                 }
 
@@ -1502,10 +1405,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                     chatAnterior = listaFiltrada.get(posicaoChanged);
                 }
 
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("Alterado: " + chatAnterior.getIdUsuario(), requireContext());
-                }
-
                 if (chatAnterior.getTotalMsgNaoLida() != -1) {
                     if (chatAnterior.getTotalMsgNaoLida() != chatAtualizado.getTotalMsgNaoLida()) {
                         atualizarPorPayload(chatAtualizado, "totalMsgNaoLida");
@@ -1554,20 +1453,12 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                         }
                     });
                 }
-            } else {
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("Hello code -1", requireContext());
-                }
             }
             posicaoChanged = -1;
         }
     }
 
     private void atualizarPorPayload(Chat chatAtualizado, String tipoPayload) {
-        if (isAdded()) {
-            ToastCustomizado.toastCustomizadoCurto(tipoPayload, requireContext());
-        }
-
         int index = posicaoChanged;
 
         if (index != -1) {
@@ -1575,9 +1466,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
             if (isPesquisaAtivada() && referenceFiltroHashMap != null
                     && !referenceFiltroHashMap.isEmpty()
                     && referenceFiltroHashMap.containsKey(chatAtualizado.getIdUsuario())) {
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("CODE NOOOO", requireContext());
-                }
                 chatDAOFiltrado.atualizarChatPorPayload(chatAtualizado, tipoPayload, new ChatDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1587,9 +1475,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
             }
             if (idsUsuarios != null && idsUsuarios.size() > 0
                     && idsUsuarios.contains(chatAtualizado.getIdUsuario())) {
-                if (isAdded()) {
-                    ToastCustomizado.toastCustomizadoCurto("CODE OK", requireContext());
-                }
                 chatDiffDAO.atualizarChatPorPayload(chatAtualizado, tipoPayload, new ChatDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1694,9 +1579,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizadoCurto("Alterado pelo newdata", requireContext());
-                    }
                     logicaAtualizacao(snapshot, true);
                 }
             }
@@ -1705,9 +1587,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Chat chatRemovido = snapshot.getValue(Chat.class);
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizado("DELETE PELO NEW DATA", requireContext());
-                    }
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(chatRemovido.getIdUsuario())) {
                         idsAIgnorarListeners.remove(chatRemovido.getIdUsuario());
@@ -1755,9 +1634,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                         if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
                                 && idsFiltrados.contains(chatMore.getIdUsuario())) {
                             Log.d(TAG, "Id já existia: " + chatMore.getIdUsuario());
-                            if (isAdded()) {
-                                ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + chatMore.getIdUsuario(), requireContext());
-                            }
                             ocultarProgress();
                             setLoading(false);
                             return;
@@ -1800,9 +1676,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
 
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(snapshot.getValue(Chat.class).getIdUsuario())) {
-                        if (isAdded()) {
-                            ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Chat.class).getIdUsuario(), requireContext());
-                        }
                         return;
                     }
                     if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -1818,10 +1691,6 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                     if (listaFiltrada != null && listaFiltrada.size() > 0
                             && chatUpdate.getIdUsuario().equals(listaFiltrada.get(0).getIdUsuario())) {
                         return;
-                    }
-
-                    if (isAdded()) {
-                        ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH + DADOS " + chatUpdate.getIdUsuario(), requireContext());
                     }
                     logicaAtualizacao(snapshot, false);
                 }
@@ -1845,18 +1714,11 @@ public class ChatListNewFragment extends Fragment implements AdapterChatList.Rec
                             @Override
                             public void onExistencia(boolean status, Chat chatAtualizado) {
 
-                                if (isAdded()) {
-                                    ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + chatRemovido.getIdUsuario(), requireContext());
-                                }
-
                                 logicaRemocao(chatRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = chatAtualizado.getTimestampLastMsg() <= listaChat.get(0).getTimestampLastMsg();
                                     if (!menorque) {
-                                        if (isAdded()) {
-                                            ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + chatRemovido.getIdUsuario(), requireContext());
-                                        }
                                         anexarNovoDado(chatAtualizado);
                                     }
                                 }

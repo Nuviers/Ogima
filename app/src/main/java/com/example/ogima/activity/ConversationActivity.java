@@ -58,6 +58,7 @@ import com.example.ogima.helper.RecuperarUriUtils;
 import com.example.ogima.helper.SizeUtils;
 import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
+import com.example.ogima.model.Grupo;
 import com.example.ogima.model.Mensagem;
 import com.example.ogima.model.MessageNotificacao;
 import com.example.ogima.model.Usuario;
@@ -91,6 +92,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Random;
 import java.util.UUID;
 
 import kotlin.io.FilesKt;
@@ -110,6 +112,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     private LinearLayout linearLayoutLigacao;
     private RecyclerView recyclerMensagensChat;
     private Usuario usuarioDestinatario;
+    private Grupo grupoDestinatario;
     private Bundle dados;
     private SharedPreferences sharedWallpaper;
     private Wallpaper wallpaperShared;
@@ -163,6 +166,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     private boolean permissaoApagarMidia = false;
     private int totalParaExclusao = 0;
     private int progressoExclusao = 0;
+    private boolean grupo = false;
 
     public ConversationActivity() {
         idUsuario = UsuarioUtils.recuperarIdUserAtual();
@@ -188,10 +192,22 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         void onConcluido();
     }
 
+    private interface RecuperaTotalMsgGrupoCallback{
+        void onRecuperado(long totalMsg);
+        void onError(String message);
+    }
+
+    public boolean isGrupo() {
+        return grupo;
+    }
+
+    public void setGrupo(boolean grupo) {
+        this.grupo = grupo;
+    }
+
     @Override
     public void onBackPressed() {
         liberarRecursoAudio();
-        atualizarStatusViewConversa();
         if (dados != null && dados.containsKey("notificacao")
                 && !dados.getString("notificacao").isEmpty()) {
             Intent intent = new Intent(getApplicationContext(), ChatInteractionsActivity.class);
@@ -210,11 +226,16 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 @Override
                 public void onConcluido(boolean epilepsia) {
                     rolarMsgs = true;
-                    atualizarStatusOnline();
+                    if (isGrupo()) {
+                        imgBtnStatusOnline.setVisibility(ImageView.INVISIBLE);
+                    } else {
+                        atualizarStatusOnline();
+                    }
+
                     adapterMensagem.startListening();
+                    adapterMensagem.setStatusEpilpesia(epilepsia);
                     recuperarMensagens();
                     configSearchView();
-                    adapterMensagem.setStatusEpilpesia(epilepsia);
                     primeiroCarregamento = false;
                 }
 
@@ -250,6 +271,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
+
         inicializarComponentes();
         AndroidThreeTen.init(this);
         NtpSyncService.startSync(this);
@@ -262,25 +284,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
             }
         });
-
-        String fotoUserTeste = "https://firebasestorage.googleapis.com/v0/b/ogima-7.appspot.com/o/apenasteste%2Fimgteste2.jpg?alt=media&token=1df60806-ba2f-416b-875d-c0a98dac0916";
-        String fotoWallpaperTeste = "https://firebasestorage.googleapis.com/v0/b/ogima-7.appspot.com/o/apenasteste%2Fdragon.jpg?alt=media&token=bf93103a-e0ee-4c3d-80b3-037d0b816430";
-
-        /*
-        GlideCustomizado.loadUrlComListener(getApplicationContext(), fotoWallpaperTeste,
-                imgViewWallpaper, android.R.color.transparent, GlideCustomizado.CENTER_CROP, false, false, new GlideCustomizado.ListenerLoadUrlCallback() {
-                    @Override
-                    public void onCarregado() {
-
-                    }
-
-                    @Override
-                    public void onError(String message) {
-
-                    }
-                });
-
-         */
     }
 
     private void configInicial(ConfigInicialCallback callback) {
@@ -292,18 +295,29 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
         dados = getIntent().getExtras();
 
-        if (dados == null || !dados.containsKey("usuarioDestinatario")) {
-            ToastCustomizado.toastCustomizado("Não foi possível recuperar os dados do usuário selecionado", getApplicationContext());
+        if (dados == null || !dados.containsKey("usuarioDestinatario") && !dados.containsKey("grupoDestinatario")) {
+            ToastCustomizado.toastCustomizado("Não foi possível recuperar os dados do chat selecionado", getApplicationContext());
             onBackPressed();
             return;
         }
 
-        usuarioDestinatario = (Usuario) dados.getSerializable("usuarioDestinatario");
+        if (dados.containsKey("usuarioDestinatario")) {
+            usuarioDestinatario = (Usuario) dados.getSerializable("usuarioDestinatario");
+            if (usuarioDestinatario == null) {
+                ToastCustomizado.toastCustomizado("Não foi possível recuperar os dados do chat selecionado", getApplicationContext());
+                onBackPressed();
+                return;
+            }
+        }
 
-        if (usuarioDestinatario == null) {
-            ToastCustomizado.toastCustomizado("Não foi possível recuperar os dados do usuário selecionado", getApplicationContext());
-            onBackPressed();
-            return;
+        if (dados.containsKey("grupoDestinatario")) {
+            grupoDestinatario = (Grupo) dados.getSerializable("grupoDestinatario");
+            if (grupoDestinatario == null) {
+                ToastCustomizado.toastCustomizado("Não foi possível recuperar os dados do chat selecionado", getApplicationContext());
+                onBackPressed();
+                return;
+            }
+            setGrupo(true);
         }
 
         configNotificacao();
@@ -339,17 +353,23 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
     private void recuperarMensagens() {
 
-        DatabaseReference verificaNrMensagensRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+        DatabaseReference verificaNrMensagensRef = null;
 
-        recuperarMensagensRef = firebaseRef.child("conversas")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+        if (isGrupo()) {
+            verificaNrMensagensRef = firebaseRef.child("conversas")
+                    .child(retornarIdDestinatario());
+            recuperarMensagensRef = firebaseRef.child("conversas")
+                    .child(retornarIdDestinatario());
+        } else {
+            verificaNrMensagensRef = firebaseRef.child("conversas")
+                    .child(idUsuario).child(retornarIdDestinatario());
+            recuperarMensagensRef = firebaseRef.child("conversas")
+                    .child(idUsuario).child(retornarIdDestinatario());
+        }
 
         verificaNrMensagensRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                expectedItemCount = (int) dataSnapshot.getChildrenCount();
-                ToastCustomizado.toastCustomizado("Expected: " + expectedItemCount, getApplicationContext());
                 childEventListenerMensagens = recuperarMensagensRef.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
@@ -361,15 +381,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                             if (currentItemCount == expectedItemCount) {
                                 // Todos os dados foram carregados inicialmente
                                 // Agora você pode rolar para a última posição
-                                ToastCustomizado.toastCustomizado("RolarMsgLast", getApplicationContext());
                                 recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
                                 rolarMsgs = false;
                             }
                         } else if (isLastFourItemsVisible()) {
-                            ToastCustomizado.toastCustomizado("Nova mensagem", getApplicationContext());
                             recyclerMensagensChat.scrollToPosition(adapterMensagem.getItemCount() - 1);
                         } else {
-                            ToastCustomizado.toastCustomizado("Mensagem não lida", getApplicationContext());
                             imgBtnAvisoNovaMsg.setVisibility(View.VISIBLE);
                         }
                     }
@@ -426,8 +443,15 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     }
 
     private void configOptionsSemFiltro(boolean update) {
-        Query queryRecuperaMensagem = firebaseRef.child("conversas").child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario());
+        Query queryRecuperaMensagem = null;
+
+        if (isGrupo()) {
+            queryRecuperaMensagem = firebaseRef.child("conversas").child(retornarIdDestinatario());
+        } else {
+            queryRecuperaMensagem = firebaseRef.child("conversas")
+                    .child(idUsuario)
+                    .child(retornarIdDestinatario());
+        }
 
         options =
                 new FirebaseRecyclerOptions.Builder<Mensagem>()
@@ -447,10 +471,19 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     }
 
     private void configOptionsComFiltro(String dadoDigitado) {
-        Query queryRecuperaMensagemFiltrada = firebaseRef.child("conversas").child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario()).orderByChild("conteudoMensagemPesquisa")
-                .startAt(dadoDigitado)
-                .endAt(dadoDigitado + "\uf8ff");
+        Query queryRecuperaMensagemFiltrada = null;
+
+        if (isGrupo()) {
+            queryRecuperaMensagemFiltrada = firebaseRef.child("conversas")
+                    .child(retornarIdDestinatario()).orderByChild("conteudoMensagemPesquisa")
+                    .startAt(dadoDigitado)
+                    .endAt(dadoDigitado + "\uf8ff");
+        } else {
+            queryRecuperaMensagemFiltrada = firebaseRef.child("conversas").child(idUsuario)
+                    .child(retornarIdDestinatario()).orderByChild("conteudoMensagemPesquisa")
+                    .startAt(dadoDigitado)
+                    .endAt(dadoDigitado + "\uf8ff");
+        }
 
         options =
                 new FirebaseRecyclerOptions.Builder<Mensagem>()
@@ -466,7 +499,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         recyclerMensagensChat.setLayoutManager(linearLayoutManager);
         if (adapterMensagem != null) {
         } else {
-            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversationActivity.this, false, null, progressDialog);
+            adapterMensagem = new AdapterMensagem(getApplicationContext(), options, ConversationActivity.this, grupo, null, progressDialog);
         }
         recyclerMensagensChat.setAdapter(adapterMensagem);
 
@@ -501,33 +534,69 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         }
 
         DatabaseReference salvarViewEmConversaRef = firebaseRef.child("viewConversa")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                .child(idUsuario).child(retornarIdDestinatario())
                 .child("viewConversa");
+
         salvarViewEmConversaRef.setValue(true);
     }
 
     private void preencherDadosDestinatario() {
-        if (usuarioDestinatario.getMinhaFoto() == null || usuarioDestinatario.getMinhaFoto().isEmpty()) {
-            UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFotoDestinatario, UsuarioUtils.FIELD_PHOTO, true);
-        } else {
-            GlideCustomizado.loadUrlComListener(getApplicationContext(), usuarioDestinatario.getMinhaFoto(), imgViewFotoDestinatario,
-                    android.R.color.transparent, GlideCustomizado.CIRCLE_CROP, false, usuarioDestinatario.isStatusEpilepsia(), new GlideCustomizado.ListenerLoadUrlCallback() {
-                        @Override
-                        public void onCarregado() {
-                        }
+        UsuarioUtils.verificaEpilepsia(idUsuario, new UsuarioUtils.VerificaEpilepsiaCallback() {
+            @Override
+            public void onConcluido(boolean epilepsia) {
+                String foto = null;
+                String nome = null;
+                if (isGrupo()) {
+                    if (grupoDestinatario.getFotoGrupo() != null && !grupoDestinatario.getFotoGrupo().isEmpty()) {
+                        foto = grupoDestinatario.getFotoGrupo();
+                    }
+                    if (grupoDestinatario.getNomeGrupo() != null && !grupoDestinatario.getNomeGrupo().isEmpty()) {
+                        nome = UsuarioUtils.recuperarNomeConfiguradoGrupo(grupoDestinatario);
+                    }
+                } else {
+                    if (usuarioDestinatario.getMinhaFoto() != null && !usuarioDestinatario.getMinhaFoto().isEmpty()) {
+                        foto = usuarioDestinatario.getMinhaFoto();
+                    }
+                    if (usuarioDestinatario.getNomeUsuario() != null && !usuarioDestinatario.getNomeUsuario().isEmpty()) {
+                        nome = UsuarioUtils.recuperarNomeConfigurado(usuarioDestinatario);
+                    }
+                }
 
-                        @Override
-                        public void onError(String message) {
-                        }
-                    });
-        }
-        String nomeConfigurado = UsuarioUtils.recuperarNomeConfigurado(usuarioDestinatario);
-        nomeConfigurado = FormatarContadorUtils.abreviarTexto(nomeConfigurado, UsuarioUtils.MAX_NAME_LENGHT);
-        txtViewNomeDestinatario.setText(nomeConfigurado);
+                if (foto == null || foto.isEmpty()) {
+                    UsuarioUtils.exibirFotoPadrao(getApplicationContext(), imgViewFotoDestinatario, UsuarioUtils.FIELD_PHOTO, true);
+                } else {
+                    GlideCustomizado.loadUrlComListener(getApplicationContext(), foto, imgViewFotoDestinatario,
+                            android.R.color.transparent, GlideCustomizado.CIRCLE_CROP, false, epilepsia, new GlideCustomizado.ListenerLoadUrlCallback() {
+                                @Override
+                                public void onCarregado() {
+                                }
+
+                                @Override
+                                public void onError(String message) {
+                                }
+                            });
+                }
+
+                if (nome != null && !nome.isEmpty()) {
+                    String nomeConfigurado = FormatarContadorUtils.abreviarTexto(nome, UsuarioUtils.MAX_NAME_LENGHT);
+                    txtViewNomeDestinatario.setText(nomeConfigurado);
+                }
+            }
+
+            @Override
+            public void onSemDado() {
+
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
     }
 
     private void buscarWallpaperLocal() {
-        String idDestinatarioWallpaper = usuarioDestinatario.getIdUsuario();
+        String idDestinatarioWallpaper = retornarIdDestinatario();
 
         sharedWallpaper = getSharedPreferences("WallpaperPrivado" + idDestinatarioWallpaper, Context.MODE_PRIVATE);
 
@@ -540,7 +609,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
             wallpaperShared.setUrlWallpaper(urlWallpaperLocal);
             verificaWallpaperLocal("privado", wallpaperShared);
         } else {
-            ToastCustomizado.toastCustomizadoCurto("2", getApplicationContext());
             //Não existe wallpaper para essa conversa, então recuperar o wallpaper global caso ele exista.
             sharedWallpaper = getSharedPreferences("WallpaperGlobal", Context.MODE_PRIVATE);
 
@@ -568,7 +636,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
         if (wallpaperLocal.exists()) {
             File file = new File(wallpaperLocal, nomeWallpaper);
-            //ToastCustomizado.toastCustomizadoCurto("Existe",getApplicationContext());
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
             Drawable drawable = new BitmapDrawable(getResources(), bitmap);
             GlideCustomizado.loadDrawableImageWallpaper(getApplicationContext(), drawable, imgViewWallpaper, android.R.color.transparent);
@@ -589,7 +656,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     private void buscarWallpaperServidor() {
 
         DatabaseReference wallpaperPrivadoRef = firebaseRef.child("chatWallpaper")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario());
+                .child(idUsuario).child(retornarIdDestinatario());
 
         DatabaseReference wallpaperGlobalRef = firebaseRef.child("chatGlobalWallpaper")
                 .child(idUsuario);
@@ -665,6 +732,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
             popupMenuConfig.setForceShowIcon(true);
         }
 
+        if (!isGrupo()) {
+            popupMenuConfig.getMenu().getItem(1).setVisible(false);
+        }
+
         imgBtnConfigsChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -682,7 +753,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                         break;
                     case R.id.apagarConversa:
                         //Apaga toda conversa + mídias locais ou somente a conversa.
-                        configBottomSheetApagarConversa();
+                        if (!isGrupo()) {
+                            configBottomSheetApagarConversa();
+                        }
                         break;
                 }
                 return false;
@@ -696,12 +769,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
         if (fileToDelete.exists()) {
             if (fileToDelete.delete()) {
-                ToastCustomizado.toastCustomizadoCurto("AudioTemp excluído com sucesso", getApplicationContext());
+                //ToastCustomizado.toastCustomizadoCurto("AudioTemp excluído com sucesso", getApplicationContext());
             } else {
-                ToastCustomizado.toastCustomizado("Falha ao excluir o arquivo " + fileToDelete.getAbsolutePath(), getApplicationContext());
+                //ToastCustomizado.toastCustomizado("Falha ao excluir o arquivo " + fileToDelete.getAbsolutePath(), getApplicationContext());
             }
         } else {
-            ToastCustomizado.toastCustomizadoCurto("Arquivo não encontrado", getApplicationContext());
+            //ToastCustomizado.toastCustomizadoCurto("Arquivo não encontrado", getApplicationContext());
         }
     }
 
@@ -721,7 +794,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 intent.putExtra("wallpaperPlace", "onlyChat");
-                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                if (isGrupo()) {
+                    intent.putExtra("grupoDestinatario", grupoDestinatario);
+                }else{
+                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                }
                 startActivity(intent);
             }
         });
@@ -733,7 +810,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 bottomSheetDialogWallpaper.cancel();
                 Intent intent = new Intent(getApplicationContext(), MudarWallpaperActivity.class);
                 intent.putExtra("wallpaperPlace", "allChats");
-                intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                if (isGrupo()) {
+                    intent.putExtra("grupoDestinatario", grupoDestinatario);
+                }else{
+                    intent.putExtra("usuarioDestinatario", usuarioDestinatario);
+                }
                 startActivity(intent);
             }
         });
@@ -829,6 +910,29 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 popupMenuMidias.show();
             }
         });
+        if (isGrupo()) {
+            imgViewFotoDestinatario.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getApplicationContext(), GroupDetailsActivity.class);
+                    intent.putExtra("idGrupo", grupoDestinatario.getIdGrupo());
+                    intent.putExtra("chatComunidade", false);
+                    startActivity(intent);
+                    finish();
+                }
+            });
+
+            txtViewNomeDestinatario.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getApplicationContext(), GroupDetailsActivity.class);
+                    intent.putExtra("idGrupo", grupoDestinatario.getIdGrupo());
+                    intent.putExtra("chatComunidade", false);
+                    startActivity(intent);
+                    finish();
+                }
+            });
+        }
     }
 
     private void atualizarStatusOnline() {
@@ -1130,7 +1234,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
     private void configurarDiretorioWallpaper(String tipoWallpaper) {
         if (tipoWallpaper.equals("privado")) {
-            caminhoWallpaper = getFilesDir() + File.separator + "wallpaperPrivado" + File.separator + usuarioDestinatario.getIdUsuario();
+            caminhoWallpaper = getFilesDir() + File.separator + "wallpaperPrivado" + File.separator + retornarIdDestinatario();
         } else if (tipoWallpaper.equals("global")) {
             caminhoWallpaper = getFilesDir() + File.separator + "wallpaperGlobal";
         }
@@ -1138,7 +1242,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
     private void atualizarStatusViewConversa() {
         DatabaseReference salvarViewEmConversaRef = firebaseRef.child("viewConversa")
-                .child(idUsuario).child(usuarioDestinatario.getIdUsuario())
+                .child(idUsuario).child(retornarIdDestinatario())
                 .child("viewConversa");
         salvarViewEmConversaRef.onDisconnect().setValue(false);
         salvarViewEmConversaRef.setValue(false);
@@ -1158,32 +1262,26 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                     case R.id.anexoCamera:
                         tipoMidiaPermissao = MidiaUtils.CAMERA;
                         checkPermissions();
-                        ToastCustomizado.toastCustomizado("Camera", getApplicationContext());
                         return true;
                     case R.id.anexoGaleria:
                         tipoMidiaPermissao = MidiaUtils.GALLERY;
                         checkPermissions();
-                        ToastCustomizado.toastCustomizado("Galeria", getApplicationContext());
                         return true;
                     case R.id.anexoMusica:
                         tipoMidiaPermissao = MidiaUtils.MUSIC;
                         checkPermissions();
-                        ToastCustomizado.toastCustomizado("Musica", getApplicationContext());
                         return true;
                     case R.id.anexoDocumento:
                         tipoMidiaPermissao = MidiaUtils.DOCUMENT;
                         checkPermissions();
-                        ToastCustomizado.toastCustomizado("Documento", getApplicationContext());
                         return true;
                     case R.id.anexoVideo:
                         tipoMidiaPermissao = MidiaUtils.VIDEO;
                         checkPermissions();
-                        ToastCustomizado.toastCustomizado("Video", getApplicationContext());
                         return true;
                     case R.id.anexoGif:
                         tipoMidiaPermissao = MidiaUtils.GIF;
                         selecionadoGif();
-                        ToastCustomizado.toastCustomizado("Gif", getApplicationContext());
                         return true;
                 }
                 return false;
@@ -1193,7 +1291,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
 
     private void limparMensagensPerdidas() {
         HashMap<String, Object> hashMapMsgsPerdidas = new HashMap<>();
-        String caminhoContador = "/detalhesChat/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/";
+        String caminhoContador = null;
+        if (isGrupo()) {
+            caminhoContador = "/detalhesChatGrupo/" + idUsuario + "/" + retornarIdDestinatario() + "/";
+        } else {
+            caminhoContador = "/detalhesChat/" + idUsuario + "/" + retornarIdDestinatario() + "/";
+        }
         hashMapMsgsPerdidas.put(caminhoContador + "totalMsgNaoLida", 0);
         firebaseRef.updateChildren(hashMapMsgsPerdidas, new DatabaseReference.CompletionListener() {
             @Override
@@ -1229,56 +1332,104 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 if (tipoMidia.equals(MidiaUtils.TEXT)) {
                     edtTextMensagemChat.setText("");
                 }
-
-                String idBaseAtual = retornarIdConversa("atual");
-                String idBaseDestinatario = retornarIdConversa("destinatario");
-                String idConversa = generateChatId(idBaseAtual, idBaseDestinatario);
+                String idConversa = null;
+                if (isGrupo()) {
+                    String idConversaGrupo = retornarIdConversaGrupo();
+                    String idRandomico = UUID.randomUUID().toString();
+                    idConversa = generateChatId(idConversaGrupo, idRandomico);
+                }else{
+                    String idBaseAtual = retornarIdConversa("atual");
+                    String idBaseDestinatario = retornarIdConversa("destinatario");
+                    idConversa = generateChatId(idBaseAtual, idBaseDestinatario);
+                }
 
                 //-> CaminhoDetalhes
-                String caminhoDetalhesAtual = "/detalhesChat/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/";
-                String caminhoDetalhesDestinatario = "/detalhesChat/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/";
-                configurarHashMapDetalhes(dadosMsg, caminhoDetalhesAtual, "atual", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem, tipoMidia);
-                configurarHashMapDetalhes(dadosMsg, caminhoDetalhesDestinatario, "destinatario", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem, tipoMidia);
-
-                if (statusViewConversa) {
-                    dadosMsg.put(caminhoDetalhesDestinatario + "totalMsgNaoLida", 0);
+                String caminhoDetalhesAtual = null;
+                if (isGrupo()) {
+                    caminhoDetalhesAtual = "/detalhesChatGrupo/" + idUsuario + "/" + retornarIdDestinatario() + "/";
                 } else {
-                    dadosMsg.put(caminhoDetalhesDestinatario + "totalMsgNaoLida", ServerValue.increment(1));
+                    caminhoDetalhesAtual = "/detalhesChat/" + idUsuario + "/" + retornarIdDestinatario() + "/";
+                    String caminhoDetalhesDestinatario = "/detalhesChat/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/";
+                    configurarHashMapDetalhes(dadosMsg, caminhoDetalhesDestinatario, "destinatario", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem, tipoMidia);
+                    if (statusViewConversa) {
+                        dadosMsg.put(caminhoDetalhesDestinatario + "totalMsgNaoLida", 0);
+                    } else {
+                        dadosMsg.put(caminhoDetalhesDestinatario + "totalMsgNaoLida", ServerValue.increment(1));
+                    }
                 }
-
+                configurarHashMapDetalhes(dadosMsg, caminhoDetalhesAtual, "atual", idConversa, timestampNegativo, dataMsg, statusViewConversa, conteudoMensagem, tipoMidia);
                 //-> Conversas
-                String caminhoConversaUserAtual = "/conversas/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/" + idConversa + "/";
-                String caminhoConversaUserDestinatario = "/conversas/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/" + idConversa + "/";
+                String caminhoConversaUserAtual = null;
+                if (isGrupo()) {
+                    caminhoConversaUserAtual = "/conversas/" + retornarIdDestinatario() + "/" + idConversa + "/";
+                } else {
+                    caminhoConversaUserAtual = "/conversas/" + idUsuario + "/" + retornarIdDestinatario() + "/" + idConversa + "/";
+                    String caminhoConversaUserDestinatario = "/conversas/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/" + idConversa + "/";
+                    configurarHashMapConversa(dadosMsg, caminhoConversaUserDestinatario, "destinatario", idConversa, conteudoMensagem, timestampNegativo, dataMsg, tipoMidia, nomeDocumento, mediaFileDoc);
+                }
                 configurarHashMapConversa(dadosMsg, caminhoConversaUserAtual, "atual", idConversa, conteudoMensagem, timestampNegativo, dataMsg, tipoMidia, nomeDocumento, mediaFileDoc);
-                configurarHashMapConversa(dadosMsg, caminhoConversaUserDestinatario, "destinatario", idConversa, conteudoMensagem, timestampNegativo, dataMsg, tipoMidia, nomeDocumento, mediaFileDoc);
 
                 //-> ContadorTotalMsg
-                String caminhoTotalMsgAtual = "/contadorMensagens/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/";
-                String caminhoTotalMsgDestinatario = "/contadorMensagens/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/";
-
-                configurarHashMapTotalMsg(dadosMsg, caminhoTotalMsgAtual, statusViewConversa);
-                configurarHashMapTotalMsg(dadosMsg, caminhoTotalMsgDestinatario, statusViewConversa);
-
-                if (statusViewConversa) {
-                    dadosMsg.put(caminhoTotalMsgDestinatario + "mensagensPerdidas", 0);
+                String caminhoTotalMsgAtual = null;
+                if (isGrupo()) {
+                    caminhoTotalMsgAtual = "/contadorMensagens/" + retornarIdDestinatario() + "/";
                 } else {
-                    dadosMsg.put(caminhoTotalMsgDestinatario + "mensagensPerdidas", ServerValue.increment(1));
+                    caminhoTotalMsgAtual = "/contadorMensagens/" + idUsuario + "/" + usuarioDestinatario.getIdUsuario() + "/";
+                    String caminhoTotalMsgDestinatario = "/contadorMensagens/" + usuarioDestinatario.getIdUsuario() + "/" + idUsuario + "/";
+                    configurarHashMapTotalMsg(dadosMsg, caminhoTotalMsgDestinatario, statusViewConversa);
+                    if (statusViewConversa) {
+                        dadosMsg.put(caminhoTotalMsgDestinatario + "mensagensPerdidas", 0);
+                    } else {
+                        dadosMsg.put(caminhoTotalMsgDestinatario + "mensagensPerdidas", ServerValue.increment(1));
+                    }
                 }
 
-                firebaseRef.updateChildren(dadosMsg, new DatabaseReference.CompletionListener() {
+                if (!isGrupo()) {
+                    configurarHashMapTotalMsg(dadosMsg, caminhoTotalMsgAtual, statusViewConversa);
+                }
+
+                recuperarTotalMsgGrupo(new RecuperaTotalMsgGrupoCallback() {
                     @Override
-                    public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
-                        if (statusViewConversa) {
-                            if (tipoMidia.equals(MidiaUtils.DOCUMENT) || tipoMidia.equals(MidiaUtils.MUSIC) || tipoMidia.equals(MidiaUtils.AUDIO)) {
-                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                        timestampPositivo, tipoMidia, "Você possui novas mensagens");
-                            } else {
-                                enviarNotificacao("mensagem", usuarioDestinatario.getIdUsuario(),
-                                        timestampPositivo, tipoMidia, conteudoMensagem);
+                    public void onRecuperado(long totalMsg) {
+                        if (isGrupo()) {
+                            String caminhoDetalhesAtual = "/detalhesChatGrupo/" + idUsuario + "/" + retornarIdDestinatario() + "/";
+                            String caminhoTotalMsgAtual = "/contadorMensagens/" + retornarIdDestinatario() + "/";
+                            String contadorMsgGrupo = "/contadorMensagensGrupo/" + retornarIdDestinatario() + "/";
+                            if (totalMsg != -1) {
+                                dadosMsg.put(caminhoDetalhesAtual + "totalMsg", totalMsg);
+                                dadosMsg.put(caminhoTotalMsgAtual + "totalMensagens", totalMsg);
+                            }else{
+                                dadosMsg.put(caminhoDetalhesAtual + "totalMsg", ServerValue.increment(1));
+                                dadosMsg.put(caminhoTotalMsgAtual + "totalMensagens", ServerValue.increment(1));
                             }
-                        } else {
-                            limparUriEOcultarProgress();
+                            dadosMsg.put(contadorMsgGrupo + "totalMsg", ServerValue.increment(1));
                         }
+                        firebaseRef.updateChildren(dadosMsg, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(@Nullable DatabaseError databaseError, @NonNull DatabaseReference databaseReference) {
+                                if (!isGrupo()) {
+                                    if (statusViewConversa) {
+                                        String body = "";
+                                        if (tipoMidia.equals(MidiaUtils.DOCUMENT) || tipoMidia.equals(MidiaUtils.MUSIC) || tipoMidia.equals(MidiaUtils.AUDIO)) {
+                                            body = "Você possui novas mensagens";
+                                        } else {
+                                            body = conteudoMensagem;
+                                        }
+                                        enviarNotificacao("mensagem", retornarIdDestinatario(),
+                                                timestampPositivo, tipoMidia, body);
+                                    } else {
+                                        limparUriEOcultarProgress();
+                                    }
+                                }else{
+                                    limparUriEOcultarProgress();
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        limparUriEOcultarProgress();
                     }
                 });
             }
@@ -1291,13 +1442,21 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         dadosMsg.put(caminhoAlvo + "timestampLastMsg", timestampNegativo);
         dadosMsg.put(caminhoAlvo + "idUsuario", idUsuarioDetalhes(tipoUsuario));
         dadosMsg.put(caminhoAlvo + "tipoMidiaLastMsg", tipoMidia);
-        dadosMsg.put(caminhoAlvo + "totalMsg", ServerValue.increment(1));
+        if (!isGrupo()) {
+            dadosMsg.put(caminhoAlvo + "totalMsg", ServerValue.increment(1));
+        }
         dadosMsg.put(caminhoAlvo + "dateLastMsg", dataMsg);
     }
 
     private String idUsuarioDetalhes(String tipoUsuario) {
-        if (tipoUsuario.equals("atual")) {
-            return usuarioDestinatario.getIdUsuario();
+        if (isGrupo()) {
+            if (tipoUsuario.equals("atual")) {
+                return grupoDestinatario.getIdGrupo();
+            }
+        }else{
+            if (tipoUsuario.equals("atual")) {
+                return usuarioDestinatario.getIdUsuario();
+            }
         }
         return idUsuario;
     }
@@ -1306,7 +1465,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         dadosMsg.put(caminhoAlvo + "idConversa", idConversa);
         dadosMsg.put(caminhoAlvo + "tipoMensagem", tipoMidia);
         dadosMsg.put(caminhoAlvo + "idRemetente", idUsuario);
-        dadosMsg.put(caminhoAlvo + "idDestinatario", usuarioDestinatario.getIdUsuario());
+        dadosMsg.put(caminhoAlvo + "idDestinatario", retornarIdDestinatario());
         dadosMsg.put(caminhoAlvo + "conteudoMensagem", conteudoMensagem);
         if (tipoMidia.equals(MidiaUtils.TEXT)) {
             dadosMsg.put(caminhoAlvo + "conteudoMensagemPesquisa", conteudoMensagem.toUpperCase(Locale.ROOT));
@@ -1354,6 +1513,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         return conversaPushRefDestinatario.push().getKey();
     }
 
+    private String retornarIdConversaGrupo() {
+        DatabaseReference conversaPushRefAtual = firebaseRef.child("conversas")
+                .child(grupoDestinatario.getIdGrupo());
+        return conversaPushRefAtual.push().getKey();
+    }
+
     private String getFormattedDateForLocale(LocalDateTime dateTime, Locale locale) {
         DateTimeFormatter formatter;
         Locale brazilLocale = new Locale("pt", "BR");
@@ -1370,6 +1535,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     }
 
     private void verificaViewConversa(VerificaViewConversaCallback callback) {
+        if (isGrupo()) {
+            //Não é necessário essa lógica para chat em grupo.
+            callback.onStatus(false);
+            return;
+        }
         DatabaseReference viewEmConversaRef = firebaseRef.child("viewConversa")
                 .child(usuarioDestinatario.getIdUsuario()).child(idUsuario)
                 .child("viewConversa");
@@ -1404,7 +1574,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                             @Override
                             public void onEnviado() {
                                 limparUriEOcultarProgress();
-                                ToastCustomizado.toastCustomizadoCurto("Enviado", getApplicationContext());
                             }
 
                             @Override
@@ -1508,12 +1677,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                     StorageReference mensagemRef = storageRef.child("mensagens")
                             .child("videos")
                             .child(idUsuario)
-                            .child(usuarioDestinatario.getIdUsuario())
+                            .child(retornarIdDestinatario())
                             .child(nomeArquivo);
                     midiaUtils.uparFotoNoStorage(mensagemRef, uriRecuperada, new MidiaUtils.UparNoStorageCallback() {
                         @Override
                         public void onConcluido(String urlUpada) {
-                            ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
                             configPadraoMensagem(MidiaUtils.VIDEO, urlUpada, nomeArquivo, null);
                         }
 
@@ -1617,13 +1785,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                     StorageReference mensagemRef = storageRef.child("mensagens")
                             .child("fotos")
                             .child(idUsuario)
-                            .child(usuarioDestinatario.getIdUsuario())
+                            .child(retornarIdDestinatario())
                             .child(nomeArquivo);
 
                     midiaUtils.uparFotoNoStorage(mensagemRef, uriRecuperada, new MidiaUtils.UparNoStorageCallback() {
                         @Override
                         public void onConcluido(String urlUpada) {
-                            ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
                             configPadraoMensagem(MidiaUtils.IMAGE, urlUpada, nomeArquivo, null);
                         }
 
@@ -1657,12 +1824,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 StorageReference mensagemRef = storageRef.child("mensagens")
                         .child("documentos")
                         .child(idUsuario)
-                        .child(usuarioDestinatario.getIdUsuario())
+                        .child(retornarIdDestinatario())
                         .child(nomeDoc);
                 midiaUtils.uparFotoNoStorage(mensagemRef, mediaFileDoc.getUri(), new MidiaUtils.UparNoStorageCallback() {
                     @Override
                     public void onConcluido(String urlUpada) {
-                        ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
                         enviarMsgDoc(mediaFileDoc, urlUpada);
                     }
 
@@ -1700,12 +1866,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 StorageReference mensagemRef = storageRef.child("mensagens")
                         .child("musicas")
                         .child(idUsuario)
-                        .child(usuarioDestinatario.getIdUsuario())
+                        .child(retornarIdDestinatario())
                         .child(nomeMusic);
                 midiaUtils.uparFotoNoStorage(mensagemRef, mediaFileMusic.getUri(), new MidiaUtils.UparNoStorageCallback() {
                     @Override
                     public void onConcluido(String urlUpada) {
-                        ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
                         enviarMsgMusica(mediaFileMusic, urlUpada);
                     }
 
@@ -1770,7 +1935,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
         StorageReference mensagemRef = storageRef.child("mensagens")
                 .child("audios")
                 .child(idUsuario)
-                .child(usuarioDestinatario.getIdUsuario())
+                .child(retornarIdDestinatario())
                 .child(nomeArquivo);
         File customDirectory = new File(getFilesDir(), "Download");
         File internalFile = new File(customDirectory, FILE_NAME);
@@ -1779,7 +1944,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
             @Override
             public void onConcluido(String urlUpada) {
                 excluirAudioTemp();
-                ToastCustomizado.toastCustomizado("Upada: " + urlUpada, getApplicationContext());
                 configPadraoMensagem(MidiaUtils.AUDIO, urlUpada, nomeArquivo, null);
             }
 
@@ -1833,6 +1997,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
     }
 
     private void apagarConversa(boolean apagarMidia) {
+        if (isGrupo()) {
+            return;
+        }
         //Verifica se a conversa existe
         verificaExistenciaConversa(new VerificaExistenciaConversaCallback() {
             HashMap<String, Object> apagarConversa = new HashMap<>();
@@ -1893,33 +2060,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 apagarMidiaTeste(apagarConversa);
             }
         });
-    }
-
-    private void deleteRecursive(File fileAlvo) {
-        if (fileAlvo == null) {
-            return;
-        }
-
-        // Verificar se o alvo é um diretório
-        if (fileAlvo.isDirectory()) {
-            // Listar os arquivos e subdiretórios
-            File[] children = fileAlvo.listFiles();
-            if (children != null) {
-                // Excluir recursivamente cada item
-                for (File child : children) {
-                    deleteRecursive(child);
-                }
-            }
-        }
-
-        // Tentar excluir o arquivo ou diretório
-        boolean deleted = fileAlvo.delete();
-        if (!deleted) {
-            // Log de erro ou tratamento de falha
-            ToastCustomizado.toastCustomizadoCurto("Failed to delete: " + fileAlvo.getAbsolutePath(), getApplicationContext());
-        } else {
-            ToastCustomizado.toastCustomizadoCurto("Deleted: " + fileAlvo.getAbsolutePath(), getApplicationContext());
-        }
     }
 
     private void verificaExistenciaConversa(VerificaExistenciaConversaCallback callback) {
@@ -2020,7 +2160,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                     for (DataSnapshot snapshotChildren : snapshot.getChildren()) {
                         Mensagem mensagemMidia = snapshotChildren.getValue(Mensagem.class);
                         String textoTeste = String.format("%s %s%s%s", "Progresso", progressoExclusao, "/", totalParaExclusao);
-                        //ToastCustomizado.toastCustomizadoCurto("Progresso: " + textoTeste, getApplicationContext());
                         if (!mensagemMidia.getTipoMensagem().equals(MidiaUtils.TEXT) && arquivoExiste(getApplicationContext(), mensagemMidia)) {
                             progressoExclusao++;
                             ToastCustomizado.toastCustomizadoCurto("Apagar: " + mensagemMidia.getNomeDocumento(), getApplicationContext());
@@ -2172,6 +2311,39 @@ public class ConversationActivity extends AppCompatActivity implements View.OnFo
                 return MediaStore.Files.FileColumns._ID;
         }
         return null;
+    }
+
+    private String retornarIdDestinatario() {
+        if (isGrupo()) {
+            return grupoDestinatario.getIdGrupo();
+        }
+        return usuarioDestinatario.getIdUsuario();
+    }
+
+    private void recuperarTotalMsgGrupo(RecuperaTotalMsgGrupoCallback callback){
+        if (!isGrupo()) {
+            callback.onRecuperado(-1);
+            return;
+        }
+        DatabaseReference contadorGrupoRef = firebaseRef.child("contadorMensagensGrupo")
+                .child(grupoDestinatario.getIdGrupo()).child("totalMsg");
+        contadorGrupoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.getValue() != null) {
+                    long totalMsg = snapshot.getValue(Long.class);
+                    totalMsg++;
+                    callback.onRecuperado(totalMsg);
+                }else{
+                    callback.onRecuperado(-1);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                  callback.onError(databaseError.getMessage());
+            }
+        });
     }
 
     private void inicializarComponentes() {

@@ -19,17 +19,13 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ogima.R;
-import com.example.ogima.activity.ConversaActivity;
 import com.example.ogima.activity.ConversationActivity;
-import com.example.ogima.activity.PersonProfileActivity;
 import com.example.ogima.helper.ChatDiffCallback;
 import com.example.ogima.helper.FormatarContadorUtils;
 import com.example.ogima.helper.GlideCustomizado;
 import com.example.ogima.helper.MidiaUtils;
 import com.example.ogima.helper.TimestampUtils;
-import com.example.ogima.helper.ToastCustomizado;
 import com.example.ogima.helper.UsuarioUtils;
-import com.example.ogima.helper.VisitarPerfilSelecionado;
 import com.example.ogima.model.Chat;
 import com.example.ogima.model.Usuario;
 import com.github.ybq.android.spinkit.SpinKitView;
@@ -293,14 +289,6 @@ public class AdapterChatList extends RecyclerView.Adapter<RecyclerView.ViewHolde
         recuperaPosicaoAnteriorListener.onPosicaoAnterior(posicao);
         intentNew(usuarioAlvo);
         animacaoIntentListener.onExecutarAnimacao();
-    }
-
-    private void intentOld(Usuario usuarioAlvo){
-        Intent intent = new Intent(context, ConversaActivity.class);
-        intent.putExtra("usuario", usuarioAlvo);
-        intent.putExtra("onBack", "ChatInteractionsActivity");
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
     }
 
     private void intentNew(Usuario usuarioAlvo){

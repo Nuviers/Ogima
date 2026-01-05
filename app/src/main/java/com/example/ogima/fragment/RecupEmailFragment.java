@@ -192,11 +192,22 @@ public class RecupEmailFragment extends Fragment {
         countDownTimer = new CountDownTimer(50000, 1000) {
 
             public void onTick(long millisUntilFinished) {
-                txtViewMsgRecup.setText(String.format("%s %d %s", getString(R.string.wait), millisUntilFinished/1000, getString(R.string.seconds_sending_email)));
+                if (!isAdded() || getContext() == null) {
+                    return;
+                }
+
+                txtViewMsgRecup.setText(String.format("%s %d %s",
+                        getString(R.string.wait),
+                        millisUntilFinished / 1000,
+                        getString(R.string.seconds_sending_email)));
+
                 btnRecupConta.setEnabled(false);
             }
 
             public void onFinish() {
+                if (!isAdded() || getContext() == null) {
+                    return;
+                }
 
                 try {
                     btnRecupConta.setClickable(true);
@@ -206,9 +217,6 @@ public class RecupEmailFragment extends Fragment {
                     e.printStackTrace();
                 }
 
-                if (countDownTimer != null) {
-                    countDownTimer.cancel();
-                }
             }
         }.start();
     }
@@ -354,6 +362,15 @@ public class RecupEmailFragment extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Cancela o timer se o usuário sair da tela antes de terminar
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
     }
 
     private void inicializandoComponentes(View view) {

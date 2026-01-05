@@ -22,8 +22,7 @@
         android:background="@drawable/circle"
         android:clickable="true"
         android:padding="@dimen/_2sdp"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/aihoshino" />
+        android:scaleType="centerCrop" />
 
     <ImageView
         android:id="@+id/imgViewEndLobbyUserD"
@@ -39,8 +38,7 @@
         android:background="@drawable/circle"
         android:clickable="true"
         android:padding="@dimen/_2sdp"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/animeprofileopera" />
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/txtViewTitleInteresses"

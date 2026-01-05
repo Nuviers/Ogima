@@ -36,7 +36,7 @@
             android:layout_alignParentTop="true"
             android:layout_margin="@dimen/_8sdp"
             android:scaleType="centerCrop"
-            android:src="@drawable/aihoshino" />
+            android:src="@drawable/backgroundlobby" />
 
         <TextView
             android:id="@+id/txtViewNomeUserNotifLocal"
@@ -73,6 +73,6 @@
             android:layout_alignParentTop="true"
             android:layout_toStartOf="@+id/txtViewTimeNotifLocal"
             android:scaleType="centerCrop"
-            android:src="@drawable/waifufive"/>
+            android:src="@drawable/background_car"/>
     </RelativeLayout>
 </RelativeLayout>

@@ -601,7 +601,7 @@ public class CreateGroupActivity extends AppCompatActivity implements View.OnCli
             return;
         }
         if (descricao.length() < CommunityUtils.MIN_LENGHT_DESCRIPTION) {
-            String msgLimiteMinimoDescricao = getString(R.string.warning_minimum_character_limit_name, CommunityUtils.MIN_LENGHT_DESCRIPTION);
+            String msgLimiteMinimoDescricao = getString(R.string.warning_minimum_character_limit_description, CommunityUtils.MIN_LENGHT_DESCRIPTION);
             ToastCustomizado.toastCustomizadoCurto(msgLimiteMinimoDescricao, getApplicationContext());
             return;
         }

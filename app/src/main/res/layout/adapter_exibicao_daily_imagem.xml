@@ -10,6 +10,5 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_width="@dimen/_250sdp"
-        android:layout_height="@dimen/_320sdp"
-        app:srcCompat="@drawable/animegirl_seria_58" />
+        android:layout_height="@dimen/_320sdp" />
 </RelativeLayout>

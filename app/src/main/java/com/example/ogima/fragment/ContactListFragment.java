@@ -197,27 +197,7 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
         inicializarComponentes(view);
-        ToastCustomizado.toastCustomizadoCurto("CREATE", requireContext());
         configInicial();
-
-        txtViewTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean verificacao = listaContatos.get(0).getTimestampContato() > lastTimestamp;
-                //ToastCustomizado.toastCustomizadoCurto("TIME: " + lastTimestamp, requireContext());
-                //ToastCustomizado.toastCustomizadoCurto("Id: " + listaContatos.get(0).getIdUsuario() + " Time: " + listaContatos.get(0).getTimestampLastMsg(), requireContext());
-                //ToastCustomizado.toastCustomizadoCurto("Maior: " + verificacao, requireContext());
-                for(Contatos contatos : listaContatos){
-                    ToastCustomizado.toastCustomizadoCurto("Nome contato: " + contatos.getNomeContato(), requireContext());
-                }
-
-                if (idUltimoElemento != null && !idUltimoElemento.isEmpty()) {
-                    ToastCustomizado.toastCustomizadoCurto("Ultimo: " + idUltimoElemento, requireContext());
-                }else{
-                    ToastCustomizado.toastCustomizadoCurto("NÃO TEM", requireContext());
-                }
-            }
-        });
         return view;
     }
 
@@ -408,7 +388,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
         ultimoElemento(new RecuperaUltimoElemento() {
             @Override
             public void onRecuperado() {
-                //*ToastCustomizado.toastCustomizado("INICIO CHAMADO " + idUltimoElemento, requireContext());
                 childListenerInicio = queryInicial.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -422,13 +401,11 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                                     lastTimestamp = contato.getTimestampContato();
                                     adicionarContatos(contato, false);
                                 } else {
-                                    ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), requireContext());
                                     //Dado mais recente que o anterior
                                     if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                             && listenerHashMapNEWDATA.containsKey(contato.getIdContato())) {
                                         return;
                                     }
-                                    ToastCustomizado.toastCustomizadoCurto("Novo dado pelo inicio " + contato.getIdContato(), requireContext());
                                     anexarNovoDado(contato);
                                 }
                             }
@@ -446,7 +423,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                                     && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Contatos.class).getIdContato())) {
                                 return;
                             }
-                            ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO INICIO", requireContext());
                             logicaAtualizacao(snapshot, false);
                         }
                     }
@@ -460,8 +436,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                                 //O próprio listenernewdata vai cuidar da remoção desse dado.
                                 return;
                             }
-
-                            ToastCustomizado.toastCustomizado("DELETE INICIO", requireContext());
                             logicaRemocao(contatoRemovido, true, true);
 
                             verificaExistencia(contatoRemovido.getIdContato(), new VerificaExistenciaCallback() {
@@ -471,7 +445,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                                 && listenerHashMapNEWDATA.containsKey(contatoRemovido.getIdContato())) {
                                         } else {
-                                            ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do inicio " + contatoRemovido.getIdContato(), requireContext());
                                             anexarNovoDado(contatoAtualizado);
                                         }
                                     }
@@ -502,7 +475,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
     }
 
     private void dadoInicialFiltragem(String nome, int counter) {
-        //*ToastCustomizado.toastCustomizadoCurto("Busca: " + nome, requireContext());
 
         exibirProgress();
         queryInicialFind = firebaseRef.child("contatos_by_name")
@@ -516,7 +488,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 if (counter != searchCounter) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return counter != searchCounter", requireContext());
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -525,7 +496,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 if (listaFiltrada != null && listaFiltrada.size() >= 1) {
                     ocultarProgress();
                     setLoading(false);
-                    ToastCustomizado.toastCustomizadoCurto("Return listaFiltrada != null && listaFiltrada.size() >= 1", requireContext());
                     firebaseUtils.removerQueryChildListener(queryInicialFiltro, childListenerInicioFiltro);
                     firebaseUtils.removerQueryChildListener(queryLoadMoreFiltro, childListenerMoreFiltro);
                     return;
@@ -541,8 +511,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                             recuperaDadosUser(usuarioPesquisa.getIdUsuario(), new RecuperaUser() {
                                 @Override
                                 public void onRecuperado(Usuario usuarioAtual) {
-
-                                    //*ToastCustomizado.toastCustomizadoCurto("INICIO: " + usuarioAtual.getNomeUsuario(), requireContext());
                                     UsuarioUtils.checkBlockingStatus(requireContext(), usuarioAtual.getIdUsuario(), new UsuarioUtils.CheckLockCallback() {
                                         @Override
                                         public void onBlocked(boolean status) {
@@ -619,7 +587,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                         if (travar != 0) {
                             if (areFirstThreeItemsVisible(recyclerView)) {
                                 int newPosition = 0; // A posição para a qual você deseja rolar
-                                //*ToastCustomizado.toastCustomizadoCurto("SCROLL", requireContext());
                                 recyclerView.scrollToPosition(newPosition);
                             }
                         }
@@ -706,7 +673,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                         && idsAIgnorarListeners.contains(snapshot.getValue(Contatos.class).getIdContato())) {
-                    ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Contatos.class).getIdContato(), requireContext());
                     return;
                 }
                 if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -718,8 +684,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                         && listenerHashMap.containsKey(snapshot.getValue(Contatos.class).getIdContato())) {
                     return;
                 }
-
-                ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH INICIO", requireContext());
                 logicaAtualizacao(snapshot, false);
             }
 
@@ -745,17 +709,12 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
     private void carregarMaisDadosFiltrados(String dadoAnterior, RecuperarIdsFiltroCallback callback) {
         if (isPesquisaAtivada() && listaFiltrada != null) {
 
-            ToastCustomizado.toastCustomizadoCurto("PAGINACAO - LOAD:  " + isLoading, requireContext());
-
             if (listaFiltrada.size() > 1
                     && idUltimoElementoFiltro != null && !idUltimoElementoFiltro.isEmpty()
                     && idUltimoElementoFiltro.equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdContato())) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA ONE " + idUltimoElementoFiltro, requireContext());
                 return;
             }
-
-            //**ToastCustomizado.toastCustomizadoCurto("Last Name: " + lastName, requireContext());
             if (listaFiltrada != null && !listaFiltrada.isEmpty()
                     && lastName != null && !lastName.isEmpty()) {
 
@@ -776,7 +735,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
 
                                     if (listenerFiltroHashMap != null && !listenerFiltroHashMap.isEmpty()
                                             && listenerFiltroHashMap.containsKey(usuarioPesquisa.getIdUsuario())) {
-                                        ToastCustomizado.toastCustomizadoCurto("RETORNO PESQUISA IF " + usuarioPesquisa.getIdUsuario(), requireContext());
                                         ocultarProgress();
                                         setLoading(false);
                                     } else {
@@ -809,14 +767,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                     && idUltimoElemento != null && !idUltimoElemento.isEmpty()
                     && idUltimoElemento.equals(listaContatos.get(listaContatos.size() - 1).getIdContato())) {
                 ocultarProgress();
-                ToastCustomizado.toastCustomizadoCurto("RETORNO ANTI DUPLICATA CHAT " + idUltimoElemento, requireContext());
-                //NO LUGAR DE COMPARAR COM O ÚLTIMO ITEM ADICIONADO NA LISTA
-                //O CORRETO É TER UM MÉTODO SEPARADO QUE PEGA O ÚLTIMO ELEMENTO
-                //NO SERVIDOR COM O LISTENER ATIVO SEMPRE ASSIM EU COMPARO COM O ID
-                //DESSE DADO, ASSIM EU TENHO COMO SABER QUANDO A PAGINAÇÃO NÃO DEVE CONTINUAR
-                //JÁ QUE SABERIA QUE A LISTA JÁ PEGOU TODOS OS DADOS POSSÍVEIS DO SERVIDOR
-                //E NÃO TERIA MAIS DADOS ALÉM DELE, POSSO COLOCAR ESSA LÓGICA NO SCROLLISTENER
-                //E RETIRAR ESSE CÓDIGO ANTERIOR DO MÉTODO CARREGARMAISDADOS.
                 return;
             }
 
@@ -846,13 +796,11 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
 
                             if (listaContatos != null && listaContatos.size() > 1
                                     && contatoMore.getTimestampContato() < listaContatos.get(0).getTimestampContato()) {
-                                ToastCustomizado.toastCustomizadoCurto("TIME IGNORADO", requireContext());
                                 ocultarProgress();
                                 setLoading(false);
                                 return;
                             }
 
-                            //*ToastCustomizado.toastCustomizadoCurto("ADICIONADO " + contatoMore.getIdUsuario(), requireContext());
                             List<Contatos> newContatos = new ArrayList<>();
                             long key = contatoMore.getTimestampContato();
                             if (lastTimestamp != -1 && key != -1) {
@@ -860,7 +808,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                                         !contatoMore.getIdContato()
                                                 .equals(listaContatos.get(listaContatos.size() - 1).getIdContato())) {
                                     newContatos.add(contatoMore);
-                                    //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
                                     lastTimestamp = key;
                                 }
                             }
@@ -909,14 +856,12 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                     if (snapshot.getValue() != null) {
                         if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                                 && idsAIgnorarListeners.contains(snapshot.getValue(Contatos.class).getIdContato())) {
-                            ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Contatos.class).getIdContato(), requireContext());
                             return;
                         }
                         if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
                                 && listenerHashMapNEWDATA.containsKey(snapshot.getValue(Contatos.class).getIdContato())) {
                             return;
                         }
-                        ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO CARREGAR + DADOS", requireContext());
                         logicaAtualizacao(snapshot, false);
                     }
                 }
@@ -940,14 +885,11 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                             @Override
                             public void onExistencia(boolean status, Contatos contatoAtualizado) {
 
-                                ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + contatoRemovido.getIdContato(), requireContext());
-
                                 logicaRemocao(contatoRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = contatoAtualizado.getTimestampContato() <= listaContatos.get(0).getTimestampContato();
                                     if (!menorque) {
-                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + contatoRemovido.getIdContato(), requireContext());
                                         anexarNovoDado(contatoAtualizado);
                                     }
                                 }
@@ -1124,8 +1066,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             return;
         }
 
-        ToastCustomizado.toastCustomizadoCurto("Listener add: " + idUser, requireContext());
-
         referenceFiltroHashMap.put(idUser, queryAlvo);
         listenerFiltroHashMap.put(idUser, childEventListenerAlvo);
     }
@@ -1211,7 +1151,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                             Bundle bundleUpdate = idsParaAtualizar.get(idUpdate);
                             if (index != -1) {
                                 adapterContactList.notifyItemChanged(index, bundleUpdate);
-                                ToastCustomizado.toastCustomizadoCurto("CODE NOTIFY", requireContext());
                             }
                         }
                         if (contadorUpdate >= idsParaAtualizar.size()) {
@@ -1231,13 +1170,11 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 ChildEventListener listener = listenerHashMap.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
-                    //**ToastCustomizado.toastCustomizadoCurto("Clear", requireContext());
                 }
                 contadorRemocaoListener++;
                 if (contadorRemocaoListener == referenceHashMap.size()) {
                     referenceHashMap.clear();
                     listenerHashMap.clear();
-                    ToastCustomizado.toastCustomizadoCurto("LIMPO", requireContext());
                 }
             }
         }
@@ -1251,13 +1188,11 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 ChildEventListener listener = listenerHashMapNEWDATA.get(userId);
                 if (userRef != null && listener != null) {
                     userRef.removeEventListener(listener);
-                    //**ToastCustomizado.toastCustomizadoCurto("Clear", requireContext());
                 }
                 contadorRemocaoListenerNEWDATA++;
                 if (contadorRemocaoListenerNEWDATA == referenceHashMapNEWDATA.size()) {
                     referenceHashMapNEWDATA.clear();
                     listenerHashMapNEWDATA.clear();
-                    ToastCustomizado.toastCustomizadoCurto("LIMPO NEW DATA", requireContext());
                 }
             }
         }
@@ -1271,7 +1206,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                 Query userRef = referenceFiltroHashMap.get(userId);
                 ChildEventListener listener = listenerFiltroHashMap.get(userId);
                 if (userRef != null && listener != null) {
-                    ToastCustomizado.toastCustomizado("ListenerRemovido: " + userId, requireContext());
                     userRef.removeEventListener(listener);
                 }
 
@@ -1331,73 +1265,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
         if (contatoRemovido == null) {
             return;
         }
-
-
-        /*
-        if (idsFiltrados != null && idsFiltrados.size() > 0
-                && idsFiltrados.contains(contatoRemovido.getIdUsuario())) {
-            if (referenceFiltroHashMap != null && referenceFiltroHashMap.size() > 0
-                    && listenerFiltroHashMap != null && listenerFiltroHashMap.size() > 0) {
-                referenceFiltroHashMap.remove(contatoRemovido.getIdUsuario());
-                listenerFiltroHashMap.remove(contatoRemovido.getIdUsuario());
-                if (idsListeners != null && idsListeners.size() > 0) {
-                    idsListeners.remove(contatoRemovido.getIdUsuario());
-                }
-            }
-        }
-
-         */
-
-        if (idsUsuarios != null && idsUsuarios.size() > 0
-                && idsUsuarios.contains(contatoRemovido.getIdContato())) {
-            /*
-            if (listenerHashMap != null && referenceHashMap != null) {
-                Query userRef = referenceHashMap.get(contatoRemovido.getIdUsuario());
-                ChildEventListener listener = listenerHashMap.get(contatoRemovido.getIdUsuario());
-                if (userRef != null && listener != null) {
-                    ToastCustomizado.toastCustomizado("LISTENER REMOVIDO + DADOS " + contatoRemovido.getIdUsuario(), requireContext());
-                    userRef.removeEventListener(listener);
-                }
-            }
-
-
-                 if (referenceHashMap != null && referenceHashMap.size() > 0
-                    && listenerHashMap != null && listenerHashMap.size() > 0) {
-                referenceHashMap.remove(contatoRemovido.getIdUsuario());
-                listenerHashMap.remove(contatoRemovido.getIdUsuario());
-                if (idsListeners != null && idsListeners.size() > 0) {
-                    idsListeners.remove(contatoRemovido.getIdUsuario());
-                }
-            }
-
-             */
-
-
-        }
-
-     /*
-        if (listenerHashMapNEWDATA != null && referenceHashMapNEWDATA != null) {
-            if (idsListenersNEWDATA != null && idsListenersNEWDATA.size() > 0) {
-                idsListenersNEWDATA.remove(contatoRemovido.getIdUsuario());
-            }
-            Query userRef = referenceHashMapNEWDATA.get(contatoRemovido.getIdUsuario());
-            ChildEventListener listener = listenerHashMapNEWDATA.get(contatoRemovido.getIdUsuario());
-            if (userRef != null && listener != null) {
-                ToastCustomizado.toastCustomizado("LISTENER REMOVIDO NEW DATA", requireContext());
-                userRef.removeEventListener(listener);
-            }
-        }
-
-
-        if (referenceHashMapNEWDATA != null && referenceHashMapNEWDATA.size() > 0
-                && listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0) {
-            referenceHashMapNEWDATA.remove(contatoRemovido.getIdUsuario());
-            listenerHashMapNEWDATA.remove(contatoRemovido.getIdUsuario());
-            if (idsListenersNEWDATA != null && idsListenersNEWDATA.size() > 0) {
-                idsListenersNEWDATA.remove(contatoRemovido.getIdUsuario());
-            }
-        }
-         */
 
         DatabaseReference verificaExistenciaRef = firebaseRef.child("contatos")
                 .child(idUsuario).child(contatoRemovido.getIdContato());
@@ -1464,8 +1331,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
         if (snapshot.getValue() != null) {
             Contatos contatoAtualizado = snapshot.getValue(Contatos.class);
 
-            ToastCustomizado.toastCustomizadoCurto("BORA ATUALIZAR", requireContext());
-
             if (contatoAtualizado == null || contatoAtualizado.getIdContato() == null) {
                 return;
             }
@@ -1495,7 +1360,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                     //Somente existe um listener desse contato na listagem filtrada.
                     contatoAnterior = listaFiltrada.get(posicaoChanged);
                 }
-                ToastCustomizado.toastCustomizadoCurto("Alterado: " + contatoAnterior.getIdContato(), requireContext());
 
                 if (contatoAnterior.getTotalMensagens() != contatoAtualizado.getTotalMensagens()) {
                     atualizarPorPayload(contatoAtualizado, "totalMensagens");
@@ -1530,15 +1394,12 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                         }
                     });
                 }
-            } else {
-                ToastCustomizado.toastCustomizadoCurto("Hello code -1", requireContext());
             }
             posicaoChanged = -1;
         }
     }
 
     private void atualizarPorPayload(Contatos contatoAtualizado, String tipoPayload) {
-        ToastCustomizado.toastCustomizadoCurto(tipoPayload, requireContext());
 
         int index = posicaoChanged;
 
@@ -1547,7 +1408,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             if (isPesquisaAtivada() && referenceFiltroHashMap != null
                     && !referenceFiltroHashMap.isEmpty()
                     && referenceFiltroHashMap.containsKey(contatoAtualizado.getIdContato())) {
-                ToastCustomizado.toastCustomizadoCurto("CODE NOOOO", requireContext());
                 contactDAOFiltrado.atualizarContatoPorPayload(contatoAtualizado, tipoPayload, new ContactDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1557,7 +1417,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             }
             if (idsUsuarios != null && idsUsuarios.size() > 0
                     && idsUsuarios.contains(contatoAtualizado.getIdContato())) {
-                ToastCustomizado.toastCustomizadoCurto("CODE OK", requireContext());
                 contactDiffDAO.atualizarContatoPorPayload(contatoAtualizado, tipoPayload, new ContactDiffDAO.RetornaBundleCallback() {
                     @Override
                     public void onBundleRecuperado(int index, Bundle bundleRecup) {
@@ -1662,7 +1521,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 if (snapshot.getValue() != null) {
-                    ToastCustomizado.toastCustomizadoCurto("Alterado pelo newdata", requireContext());
                     logicaAtualizacao(snapshot, true);
                 }
             }
@@ -1671,7 +1529,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                 if (snapshot.getValue() != null) {
                     Contatos contatoRemovido = snapshot.getValue(Contatos.class);
-                    ToastCustomizado.toastCustomizado("DELETE PELO NEW DATA", requireContext());
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(contatoRemovido.getIdContato())) {
                         idsAIgnorarListeners.remove(contatoRemovido.getIdContato());
@@ -1706,9 +1563,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
             queryLoadMoreFiltro = firebaseRef.child("contatos")
                     .child(idUsuario).orderByChild("idContato").equalTo(usuarioPesquisa.getIdUsuario()).limitToFirst(1);
 
-            //ToastCustomizado.toastCustomizadoCurto("AOS FILTROS: " + usuarioPesquisa.getIdUsuario(), requireContext());
-            //ToastCustomizado.toastCustomizadoCurto("NR FILTROS: " + aosFiltros, requireContext());
-
             ChildEventListener childListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -1717,13 +1571,11 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                             && contatoMore.getIdContato() != null
                             && !contatoMore.getIdContato().isEmpty()) {
 
-                        //**ToastCustomizado.toastCustomizadoCurto("NEW PESQUISA: " + contatoMore.getIdUsuario(), requireContext());
                         Log.d(TAG, "Timestamp key: " + lastTimestamp);
                         Log.d(TAG, "id: " + contatoMore.getIdContato() + " time: " + contatoMore.getTimestampContato());
                         if (listaFiltrada != null && listaFiltrada.size() > 1 && idsFiltrados != null && idsFiltrados.size() > 0
                                 && idsFiltrados.contains(contatoMore.getIdContato())) {
                             Log.d(TAG, "Id já existia: " + contatoMore.getIdContato());
-                            ToastCustomizado.toastCustomizadoCurto("ID JÁ EXISTIA " + contatoMore.getIdContato(), requireContext());
                             ocultarProgress();
                             setLoading(false);
                             return;
@@ -1737,7 +1589,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                                     !contatoMore.getIdContato()
                                             .equals(listaFiltrada.get(listaFiltrada.size() - 1).getIdContato())) {
                                 newContatos.add(contatoMore);
-                                //ToastCustomizado.toastCustomizado("TIMESTAMP MAIS DADOS: " + lastTimestamp, requireContext());
                                 lastName = key;
                             }
                         }
@@ -1767,7 +1618,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
 
                     if (idsAIgnorarListeners != null && idsAIgnorarListeners.size() > 0
                             && idsAIgnorarListeners.contains(snapshot.getValue(Contatos.class).getIdContato())) {
-                        ToastCustomizado.toastCustomizadoCurto("IGNORAR CHANGED" + snapshot.getValue(Contatos.class).getIdContato(), requireContext());
                         return;
                     }
                     if (listenerHashMapNEWDATA != null && listenerHashMapNEWDATA.size() > 0
@@ -1784,8 +1634,6 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                             && contatoUpdate.getIdContato().equals(listaFiltrada.get(0).getIdContato())) {
                         return;
                     }
-
-                    ToastCustomizado.toastCustomizadoCurto("ATUALIZAR PELO SEARCH + DADOS " + contatoUpdate.getIdContato(), requireContext());
                     logicaAtualizacao(snapshot, false);
                 }
 
@@ -1808,14 +1656,11 @@ public class ContactListFragment extends Fragment implements AdapterContactList.
                             @Override
                             public void onExistencia(boolean status, Contatos contatoAtualizado) {
 
-                                ToastCustomizado.toastCustomizado("DELETE ++ DADOS " + contatoRemovido.getIdContato(), requireContext());
-
                                 logicaRemocao(contatoRemovido, true, true);
 
                                 if (status) {
                                     boolean menorque = contatoAtualizado.getTimestampContato() <= listaContatos.get(0).getTimestampContato();
                                     if (!menorque) {
-                                        ToastCustomizado.toastCustomizadoCurto("Novo dado pela remocao do + dados " + contatoRemovido.getIdContato(), requireContext());
                                         anexarNovoDado(contatoAtualizado);
                                     }
                                 }

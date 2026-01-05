@@ -25,7 +25,7 @@ public class Postagem implements Serializable {
     @Exclude
     public static final int MAX_LENGTH_DESCRIPTION = 2000;
     @Exclude
-    public static final int MIN_LENGTH_DESCRIPTION = 100;
+    public static final int MIN_LENGTH_DESCRIPTION = 1;
 
     private int totalCurtidasPostagem;
     private int totalComentarios;

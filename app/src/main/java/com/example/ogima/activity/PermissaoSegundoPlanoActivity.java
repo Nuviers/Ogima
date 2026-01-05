@@ -32,8 +32,8 @@ public class PermissaoSegundoPlanoActivity extends AppCompatActivity {
             imgBtnInfoPularEtapa;
     private AutoStartHelper autoStartHelper;
 
-    private final String INFO_PERMISSAO = getString(R.string.permission_information);
-    private final String INFO_IGNORAR = getString(R.string.information_when_ignoring);
+    private String INFO_PERMISSAO = "";
+    private String INFO_IGNORAR = "";
 
     @Override
     protected void onStart() {
@@ -54,6 +54,8 @@ public class PermissaoSegundoPlanoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permissao_segundo_plano);
+        INFO_PERMISSAO = getString(R.string.permission_information);
+        INFO_IGNORAR = getString(R.string.information_when_ignoring);
         inicializandoComponentes();
         clickListeners();
         //TooltipCompat.setTooltipText(imgBtnInfoInicioAutomatico, INFO_INICIO_AUTOMATICO);

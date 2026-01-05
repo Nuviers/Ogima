@@ -131,44 +131,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="@dimen/_10sdp"
-            android:paddingTop="@dimen/_10sdp"
-            android:paddingRight="@dimen/_10sdp">
-
-            <Switch
-                android:id="@+id/switchExibirNome"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginEnd="@dimen/_2sdp"
-                android:layout_marginRight="@dimen/_2sdp"
-                android:layout_weight="1"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:paddingLeft="@dimen/_10sdp"
-                android:text="Exibir nome no perfil"
-                android:textSize="@dimen/_15ssp" />
-
-            <Switch
-                android:id="@+id/switchExibirApelido"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/_2sdp"
-                android:layout_marginLeft="@dimen/_2sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_weight="1"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:paddingLeft="@dimen/_10sdp"
-                android:text="Exibir apelido no perfil"
-                android:textSize="@dimen/_15ssp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:paddingTop="@dimen/_10sdp">
 
             <View
@@ -231,67 +193,6 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <View
-                android:id="@+id/view3"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/_2sdp"
-                android:background="@drawable/background_caixa_texto" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/_8sdp"
-            android:paddingTop="@dimen/_10sdp">
-
-            <TextView
-                android:id="@+id/textViewApelidoExibir"
-                android:layout_width="@dimen/_70sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:text="Apelido"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view5"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:id="@+id/textViewApelidoAtual"
-                android:layout_width="@dimen/_150sdp"
-                android:layout_height="@dimen/_50sdp"
-                android:layout_weight="0.5"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:scrollbars="horizontal"
-                android:text="Apelido usuario"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view10"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.1" />
-
-            <ImageButton
-                android:id="@+id/imageButtonAlterarApelido"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_48sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_alterar_dado"
-                tools:ignore="SpeakableTextPresentCheck" />
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -367,56 +268,7 @@
                 android:background="@drawable/background_caixa_texto" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="@dimen/_8sdp"
-            android:paddingTop="@dimen/_10sdp">
 
-            <TextView
-                android:id="@+id/textViewNumeroExibir"
-                android:layout_width="@dimen/_70sdp"
-                android:layout_height="@dimen/_40sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:text="Meu link"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view15"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent" />
-
-            <TextView
-                android:id="@+id/textViewLinkAtual"
-                android:layout_width="@dimen/_150sdp"
-                android:layout_height="@dimen/_45sdp"
-                android:layout_weight="0.5"
-                android:background="@drawable/background_caixa_texto"
-                android:gravity="center"
-                android:scrollbars="horizontal"
-                android:text="Link usuario"
-                android:textSize="@dimen/_14ssp" />
-
-            <View
-                android:id="@+id/view16"
-                android:layout_width="@dimen/_10sdp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.1" />
-
-            <ImageButton
-                android:id="@+id/imageButtonAlterarLink"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_48sdp"
-                android:layout_weight="0.1"
-                android:background="@drawable/background_caixa_texto"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_alterar_dado"
-                tools:ignore="SpeakableTextPresentCheck" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -439,7 +291,7 @@
             android:paddingTop="@dimen/_10sdp">
 
             <TextView
-                android:id="@+id/textViewIdadeExibir"
+                android:id="@+id/textViewNumeroExibir"
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/_40sdp"
                 android:layout_weight="0.1"

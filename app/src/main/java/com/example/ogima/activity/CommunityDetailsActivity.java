@@ -162,7 +162,6 @@ public class CommunityDetailsActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        ToastCustomizado.toastCustomizadoCurto("DESTROY", getApplicationContext());
         firebaseUtils.removerQueryChildListener(comunidadeRef, childListenerComunidade);
         firebaseUtils.removerValueListener(verificaBlockRef, listenerBlock);
         firebaseUtils.removerValueListener(verificaDenunciaRef, listenerDenuncia);

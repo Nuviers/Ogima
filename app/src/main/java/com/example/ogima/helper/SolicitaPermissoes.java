@@ -2,13 +2,10 @@ package com.example.ogima.helper;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.example.ogima.activity.ConversaActivity;
 
 import java.util.ArrayList;
 import java.util.List;
